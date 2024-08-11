@@ -1,0 +1,17 @@
+{
+    "Brand1": {
+        "Product1": { "price": "100 TL", "discount": "10%" },
+        "Product2": { "price": "150 TL", "discount": "5%" },
+        "Product3": { "price": "200 TL", "discount": "20%" }
+    },
+    "Brand2": {
+        "Product1": { "price": "300 TL", "discount": "15%" },
+        "Product2": { "price": "350 TL", "discount": "10%" },
+        "Product3": { "price": "400 TL", "discount": "25%" }
+    },
+    "Brand3": {
+        "Product1": { "price": "500 TL", "discount": "5%" },
+        "Product2": { "price": "550 TL", "discount": "20%" },
+        "Product3": { "price": "600 TL", "discount": "30%" }
+    }
+}

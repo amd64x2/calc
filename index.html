@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+
+    <div>
+        <button class="tablinks" onclick="openTab(event, 'Brand1')">SEIKO</button>
+        <button class="tablinks" onclick="openTab(event, 'Brand2')">HOYA</button>
+        <button class="tablinks" onclick="openTab(event, 'Brand3')">ESSILOR</button>
+    </div>
+
+    <div id="Brand1" class="tab"> 
+        <H5></H5>       
+        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px; height: 100px;">
+        <h2></h2>
+        <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+        <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+        <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+        <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+    </div>
+    
+    <div id="Brand2" class="tab">  
+        <H5></H5>       
+        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px;height: 100px;">
+        <h2></h2>
+        <button class="product-button" data-brand="Brand2" data-product="Product1">Product 1</button>
+        <button class="product-button" data-brand="Brand2" data-product="Product2">Product 2</button>
+        <button class="product-button" data-brand="Brand2" data-product="Product3">Product 3</button>
+    </div>
+    
+    <div id="Brand3" class="tab">  
+        <H5></H5>      
+        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px;height: 100px;">
+        <h2></h2>
+        <button class="product-button" data-brand="Brand3" data-product="Product1">Product 1</button>
+        <button class="product-button" data-brand="Brand3" data-product="Product2">Product 2</button>
+        <button class="product-button" data-brand="Brand3" data-product="Product3">Product 3</button>
+    </div>
+
+    
+
+    <div id="pricing-panel">
+        <h3>Product Information</h3>
+        
+            <span class="label">İskonto Oranı:</span>
+            <input type="number" id="discount-input" step="5" max="50" min="0" placeholder="0">
+        
+        
+        <p><span class="label">Ürün Adı:</span> <span id="product-name-value" class="value">Product1</span></p>
+        <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">300 TL</span></p>
+        <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">15%</span></p>
+        <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">15</span></p>
+        <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">255.00 TL</span></p>
+    </div>
+    
+
+    <script src="script.js"></script>
+</body>
+</html>
