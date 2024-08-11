@@ -7,7 +7,7 @@
     <title>Pricing Calculator</title>
    
     <style>
-        .tab {
+   .tab {
   overflow: hidden;
   border: 1px solid #ccc;
   background-color: #ffffff;
@@ -31,6 +31,44 @@
     background-color: #45a049;
     color: #ffffff;
 } 
+
+
+
+
+
+button#decrease-discount, button#increase-discount {
+    background-color: #007bff; /* Mavi arka plan */
+    color: white; /* Beyaz yazı rengi */
+    border: none; /* Kenarlık yok */
+    padding: 10px 20px; /* Butonun iç boşluğu */
+    font-size: 16px; /* Yazı boyutu */
+    cursor: pointer; /* Fare imlecini değiştir */
+    border-radius: 5px; /* Köşeleri yuvarla */
+    margin: 0 5px; /* Butonlar arası mesafe */
+}
+
+button#decrease-discount:hover, button#increase-discount:hover {
+    background-color: #0056b3; /* Hover durumunda koyu mavi arka plan */
+}
+
+button#decrease-discount:active, button#increase-discount:active {
+    background-color: #004494; /* Tıklama durumunda daha koyu arka plan */
+}
+
+button#decrease-discount:disabled, button#increase-discount:disabled {
+    background-color: #cccccc; /* Disabled durumunda gri arka plan */
+    cursor: not-allowed; /* İmleci değiştir */
+}
+
+
+
+
+
+
+
+
+
+
 
 /* Ürün Butonları */
 .product-button {
@@ -119,6 +157,7 @@
     color: #333; /* Etiket rengi */
     font-size: 18px;
 }
+
     </style>
 </head>
 <body>
@@ -159,19 +198,20 @@
 
     
 
-    <div id="pricing-panel">
-        <h3>Product Information</h3>
-        
-            <span class="label">İskonto Oranı:</span>
-            <input type="number" id="discount-input" step="5" max="50" min="0" placeholder="0">
-        
-        
-        <p><span class="label">Ürün Adı:</span> <span id="product-name-value" class="value">Product1</span></p>
-        <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">300 TL</span></p>
-        <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">15%</span></p>
-        <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">15</span></p>
-        <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">255.00 TL</span></p>
-    </div>
+   <div id="pricing-panel">
+    <h3>Product Information</h3>
+    
+    <span class="label">İskonto Oranı:</span>
+    <button id="decrease-discount" type="button">-</button>
+    <input type="number" id="discount-input" step="5" max="50" min="0" placeholder="0">
+    <button id="increase-discount" type="button">+</button>
+    
+    <p><span class="label">Ürün Adı:</span> <span id="product-name-value" class="value">Product1</span></p>
+    <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">300 TL</span></p>
+    <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">15%</span></p>
+    <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">15</span></p>
+    <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">255.00 TL</span></p>
+</div>
     
 
     <script src="script.js"></script>
