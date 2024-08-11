@@ -1,43 +1,112 @@
-/* styles.css */
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  padding: 20px; 
 }
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+.tab.active {
+    display: block;
 }
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
+.tablinks {
+    /*markalar PASİF*/
     cursor: pointer;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #f9f9f9;
+    font-size: 20px;
+    border-radius: 5px;
+    color: #292c29;
+
+}
+.tablinks.active {
+    background-color: #45a049;
+    color: #ffffff;
+} 
+
+/* Ürün Butonları */
+.product-button {
+    background-color: #4CAF50; /* Yeşil arka plan rengi */
+    color: white; /* Beyaz metin rengi */
+    border: none; /* Kenar yok */
+    padding: 15px 25px; /* Buton içi boşluk */
+    text-align: center; /* Metni ortala */
+    text-decoration: none; /* Alt çizgi yok */
+    display: inline-block; /* Yan yana görünüm */
+    font-size: 16px; /* Metin boyutu */
+    margin: 10px; /* Butonlar arasında boşluk */
+    border-radius: 5px; /* Köşeleri yuvarla */
+    transition: background-color 0.3s, transform 0.2s; /* Geçiş efektleri */
 }
 
-/* QR Code Reader */
-#qr-reader {
-    width: 100%;
-    height: 100%;
+.product-button:hover {
+    background-color: #45a049; /* Üzerine gelindiğinde daha koyu yeşil */
+    transform: scale(1.05); /* Butonun biraz büyümesi */
+}
+
+.product-button:active {
+    background-color: #388e3c; /* Tıklanıldığında daha koyu yeşil */
+    transform: scale(0.95); /* Butonun biraz küçülmesi */
+}
+
+
+
+/* Fiyat Paneli */
+#pricing-panel {
+    border: 1px solid #ddd;
+    padding: 20px;
+    background-color: #fafafa;
+    margin-top: 20px;
+    border-radius: 8px; /* Köşeleri yuvarla */
+}
+
+/* Fiyat Panelindeki Başlıklar */
+#pricing-panel h3 {
+    margin-top: 0;
+    font-size: 20px; /* Başlık boyutu */
+    color: #333; /* Başlık rengi */
+}
+
+/* Fiyat Panelindeki Paragraflar */
+#pricing-panel p {
+    font-size: 18px; /* Metin boyutu */
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px; /* Köşeleri yuvarla */
+    background-color: #e8f5e9; /* Arka plan rengi */
+}
+
+/* Özel Renkler ve Font */
+#pricing-panel .label {
+    font-weight: bold; /* Etiketlerin kalın olması */
+    color: #333; /* Etiket rengi */
+}
+
+#pricing-panel .value {
+    color: #39913c; /* Fiyatların ve değerlerin rengi */
+}
+
+/* İskonto Oranı Girişi */
+#discount-input {
+    padding: 10px;
+    font-size: 18px; /* Font boyutu */
+    width: 100px;
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Köşeleri yuvarla */
+    background-color: #e8f5e9; /* Arka plan rengi */
+}
+
+/* İskonto Paneli */
+#pricing-panel .discounted-price {
+    font-size: 22px; /* İskontolu fiyat boyutu */
+    font-weight: bold; /* Kalın yazı */
+    color: #d32f2f; /* İskontolu fiyat rengi */
+    background-color: #fce4ec; /* Arka plan rengi */
+    padding: 10px;
+    border-radius: 5px; /* Köşeleri yuvarla */
+}
+
+.label{
+    font-weight: bold; /* Etiketlerin kalın olması */
+    color: #333; /* Etiket rengi */
+    font-size: 18px;
 }
