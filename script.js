@@ -35,6 +35,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+//----------------
+const discountInput = document.getElementById('discount-input');
+    const decreaseButton = document.getElementById('decrease-discount');
+    const increaseButton = document.getElementById('increase-discount');
+
+    decreaseButton.addEventListener('click', () => {
+        let currentValue = parseInt(discountInput.value) || 0;
+        if (currentValue > 0) {
+            discountInput.value = Math.max(currentValue - 5, 0);
+        }
+        applyCustomDiscount(); // İndirim uygulandıktan sonra paneli g
+    });
+
+    increaseButton.addEventListener('click', () => {
+        let currentValue = parseInt(discountInput.value) || 0;
+        if (currentValue < 50) {
+            discountInput.value = Math.min(currentValue + 5, 50);
+        }
+        applyCustomDiscount(); // İndirim uygulandıktan sonra paneli güncelle
+    });
+//----------------
 
 
 
