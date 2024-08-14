@@ -1,30 +1,107 @@
 // JSON verisi
 const data = {
+    
     "Brand1": {
-        "1.57 SCC": { "price": "100 TL", "discount": "10%" },
-        "Product2": { "price": "150 TL", "discount": "5%" },
-        "Product3": { "price": "200 TL", "discount": "20%" },
-        "Product4": { "price": "200 TL", "discount": "20%" },
+        "1.57 SCC": { 
+            "price": "100 TL", 
+            "discount": "10%",
+            "color": "Beyaz",
+            "index": "1.56",
+            "focus": "Tek"
+        },
+        "Product2": { 
+            "price": "150 TL", 
+            "discount": "5%",
+            "color": "Color",
+            "index": "1.60",
+            "focus": "Tek"
+        },
+        "Product3": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.67",
+            "focus": "Cok"
+        },
+        "Product4": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.74",
+            "focus": "Tek"
+        },
         "logo": "logo/brand1-logo.png"
     },
     "Brand2": {
-        "Product1": { "price": "300 TL", "discount": "15%" },
-        "Product2": { "price": "350 TL", "discount": "10%" },
-        "Product3": { "price": "400 TL", "discount": "25%" },
+        "1.57 SCC": { 
+            "price": "100 TL", 
+            "discount": "10%",
+            "color": "Beyaz",
+            "index": "1.56",
+            "focus": "Tek"
+        },
+        "Product2": { 
+            "price": "150 TL", 
+            "discount": "5%",
+            "color": "Color",
+            "index": "1.60",
+            "focus": "Tek"
+        },
+        "Product3": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.67",
+            "focus": "Cok"
+        },
+        "Product4": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.74",
+            "focus": "Tek"
+        },
         "logo": "logo/brand2-logo.png"
     },
     "Brand3": {
-        "Product1": { "price": "500 TL", "discount": "5%" },
-        "Product2": { "price": "550 TL", "discount": "20%" },
-        "Product3": { "price": "600 TL", "discount": "30%" },
+        "1.57 SCC": { 
+            "price": "100 TL", 
+            "discount": "10%",
+            "color": "Beyaz",
+            "index": "1.56",
+            "focus": "Tek"
+        },
+        "Product2": { 
+            "price": "150 TL", 
+            "discount": "5%",
+            "color": "Color",
+            "index": "1.60",
+            "focus": "Tek"
+        },
+        "Product3": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.67",
+            "focus": "Cok"
+        },
+        "Product4": { 
+            "price": "200 TL", 
+            "discount": "20%",
+            "color": "Beyaz",
+            "index": "1.74",
+            "focus": "Tek"
+        },
         "logo": "logo/brand3-logo.png"
     }
+
+
 };
 
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         // İlk olarak Brand1 tabını aktif hale getirin
-        const defaultTab = document.querySelector('.tablinks[onclick="openTab(event, \'Brand3\')"]');
+        const defaultTab = document.querySelector('.tablinks[onclick="openTab(event, \'Brand5\')"]');
         console.log('Seçilen Tab Linki:', defaultTab); // Hata ayıklama
         if (defaultTab) {
             defaultTab.click();
