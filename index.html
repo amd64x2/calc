@@ -7,32 +7,32 @@
     <title>Pricing Calculator</title>
    
     <style>
-   .tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #ffffff;
-  padding: 20px; 
+       .container {
+            display: flex;
+        }
+        .left {
+            width: 150px;
+        }
+        .right {
+            flex-grow: 1;
+}
+
+
+.tab {
+    display: none;
 }
 .tab.active {
     display: block;
 }
 .tablinks {
-    /*markalar PASİF*/
     cursor: pointer;
     padding: 10px;
-    background-color: #f8f8f8;
-    border: 1px solid #f9f9f9;
-    font-size: 20px;
-    border-radius: 5px;
-    color: #292c29;
-
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
 }
 .tablinks.active {
-    background-color: #45a049;
-    color: #ffffff;
+    background-color: #ccc;
 } 
-
-
 
 
 
@@ -136,7 +136,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
 #discount-input {
     padding: 10px;
     font-size: 18px; /* Font boyutu */
-    width: 100px;
+    width: 40px;
     border: 1px solid #ddd;
     border-radius: 5px; /* Köşeleri yuvarla */
     background-color: #e8f5e9; /* Arka plan rengi */
@@ -158,6 +158,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     font-size: 18px;
 }
 
+
     </style>
 </head>
 <body>
@@ -166,39 +167,71 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
         <button class="tablinks" onclick="openTab(event, 'Brand1')">SEIKO</button>
         <button class="tablinks" onclick="openTab(event, 'Brand2')">HOYA</button>
         <button class="tablinks" onclick="openTab(event, 'Brand3')">ESSILOR</button>
+       <button class="tablinks" onclick="openTab(event, 'Brand4')">STOK</button>
     </div>
 
     <div id="Brand1" class="tab"> 
-        <H5></H5>       
-        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px; height: 100px;">
-        <h2></h2>
-        <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
-        <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
-        <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
-        <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+       <div class="container">
+            <div class="left"> 
+                <H5></H5>           
+                <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
+                <h2></h2> 
+            </div>
+
+            <div class="right">
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                
+            </div>
+        </div>      
+    </div>
+
+    
+    <div id="Brand2" class="tab"> 
+       <div class="container">
+            <div class="left">            
+                <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
+                <h2></h2> 
+            </div>
+
+            <div class="right">
+                <button class="product-button" data-brand="Brand2" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand2" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand2" data-product="Product4">Product 4</button>
+                
+            </div>
+        </div>      
     </div>
     
-    <div id="Brand2" class="tab">  
-        <H5></H5>       
-        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px;height: 100px;">
-        <h2></h2>
-        <button class="product-button" data-brand="Brand2" data-product="Product1">Product 1</button>
-        <button class="product-button" data-brand="Brand2" data-product="Product2">Product 2</button>
-        <button class="product-button" data-brand="Brand2" data-product="Product3">Product 3</button>
+
+    <div id="Brand3" class="tab"> 
+       <div class="container">
+            <div class="left">            
+                <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
+                <h2></h2> 
+            </div>
+
+            <div class="right">
+                <button class="product-button" data-brand="Brand3" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand3" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand3" data-product="Product4">Product 4</button>
+                
+            </div>
+        </div>      
     </div>
-    
-    <div id="Brand3" class="tab">  
+
+    <div id="Brand4" class="tab">  
         <H5></H5>      
-        <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 200px;height: 100px;">
+        <p>Toplu liste buraya</p>
         <h2></h2>
-        <button class="product-button" data-brand="Brand3" data-product="Product1">Product 1</button>
-        <button class="product-button" data-brand="Brand3" data-product="Product2">Product 2</button>
-        <button class="product-button" data-brand="Brand3" data-product="Product3">Product 3</button>
+        
     </div>
-
+    
     
 
-   <div id="pricing-panel">
+    <div id="pricing-panel">
     <h3>Product Information</h3>
     
     <span class="label">İskonto Oranı:</span>
@@ -207,10 +240,10 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     <button id="increase-discount" type="button">+</button>
     
     <p><span class="label">Ürün Adı:</span> <span id="product-name-value" class="value">Product1</span></p>
-    <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">300 TL</span></p>
-    <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">15%</span></p>
-    <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">15</span></p>
-    <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">255.00 TL</span></p>
+    <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">0 TL</span></p>
+    <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">0%</span></p>
+    <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">0</span></p>
+    <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">0 TL</span></p>
 </div>
     
 
