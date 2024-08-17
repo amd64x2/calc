@@ -4,14 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing Calculator</title>
-   
+    <title>Pricing Calculator</title>   
     <style>
        .container {
             display: flex;
+            background-color: #3f4257;
         }
         .left {
             width: 150px;
+            flex-shrink: 0; /* Genişliğin daralmasını engeller */
         }
         .right {
             flex-grow: 1;
@@ -27,17 +28,26 @@
 .tablinks {
     cursor: pointer;
     padding: 10px;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
+    background-color: #3d3f47;
+    border: 1px solid rgb(48, 46, 46);
+    color: rgb(255, 248, 248);
+    font-size: 16px;
+    border-radius: 5px;
 }
 .tablinks.active {
-    background-color: #ccc;
+    background-color: #aa3434;
 } 
 
 
+body {
+    background-color: #383a4f; /* Arka plan rengini değiştir */
+    /*color: #333333; */
+}
 
-button#decrease-discount, button#increase-discount {
-    background-color: #007bff; /* Mavi arka plan */
+
+
+button#qrreader-button {
+    background-color: #f14747; /* Mavi arka plan */
     color: white; /* Beyaz yazı rengi */
     border: none; /* Kenarlık yok */
     padding: 10px 20px; /* Butonun iç boşluğu */
@@ -45,6 +55,19 @@ button#decrease-discount, button#increase-discount {
     cursor: pointer; /* Fare imlecini değiştir */
     border-radius: 5px; /* Köşeleri yuvarla */
     margin: 0 5px; /* Butonlar arası mesafe */
+    width: 150px;
+}
+
+button#decrease-discount, button#increase-discount {
+    background-color: #f14747; /* Mavi arka plan */
+    color: white; /* Beyaz yazı rengi */
+    border: none; /* Kenarlık yok */
+    padding: 10px 20px; /* Butonun iç boşluğu */
+    font-size: 16px; /* Yazı boyutu */
+    cursor: pointer; /* Fare imlecini değiştir */
+    border-radius: 5px; /* Köşeleri yuvarla */
+    margin: 0 5px; /* Butonlar arası mesafe */
+    width: 50px;
 }
 
 button#decrease-discount:hover, button#increase-discount:hover {
@@ -75,7 +98,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     background-color: #4CAF50; /* Yeşil arka plan rengi */
     color: white; /* Beyaz metin rengi */
     border: none; /* Kenar yok */
-    padding: 15px 25px; /* Buton içi boşluk */
+    padding: 10px 20px; /* Buton içi boşluk */
     text-align: center; /* Metni ortala */
     text-decoration: none; /* Alt çizgi yok */
     display: inline-block; /* Yan yana görünüm */
@@ -101,7 +124,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
 #pricing-panel {
     border: 1px solid #ddd;
     padding: 20px;
-    background-color: #fafafa;
+    background-color: #3f4257;
     margin-top: 20px;
     border-radius: 8px; /* Köşeleri yuvarla */
 }
@@ -110,7 +133,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
 #pricing-panel h3 {
     margin-top: 0;
     font-size: 20px; /* Başlık boyutu */
-    color: #333; /* Başlık rengi */
+    color: rgb(141, 135, 135); /* Başlık rengi */
 }
 
 /* Fiyat Panelindeki Paragraflar */
@@ -119,17 +142,20 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     margin: 10px 0;
     padding: 10px;
     border-radius: 5px; /* Köşeleri yuvarla */
-    background-color: #e8f5e9; /* Arka plan rengi */
+    background-color: #a7a7af; /* Arka plan rengi */
 }
 
 /* Özel Renkler ve Font */
 #pricing-panel .label {
     font-weight: bold; /* Etiketlerin kalın olması */
-    color: #333; /* Etiket rengi */
+    color: rgb(194, 189, 189); /* Etiket rengi */
 }
 
 #pricing-panel .value {
-    color: #39913c; /* Fiyatların ve değerlerin rengi */
+    color: #e7e8ec; /* Fiyatların ve değerlerin rengi */
+    font-size: 20px;
+    font-weight: bold;
+    
 }
 
 /* İskonto Oranı Girişi */
@@ -159,94 +185,204 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
 }
 
 
+#pricing-panel {
+    width: 100%; /* Tablo genişliği: %100 oranında genişler */
+    height: auto; /* Yükseklik: İçeriğe göre otomatik ayarlanır */
+    max-width: 2000px; /* Maksimum genişlik: 600px */
+    border-collapse: collapse; /* Kenarlıklar birleştirilir */
+    
+}
+
+#pricing-panel td {
+    padding: 10px; /* Hücreler arasındaki boşluk */
+    text-align: left; /* Metin hizalaması */
+    border: 1px solid rgb(91, 92, 110); /* Hücre kenarlıkları */
+    border-radius: 5px; /* Köşeleri yuvarla */
+}
+
+
+
+#pricing-panel td:first-child {
+    width: 25%; /* İlk sütunun genişliğini %30 olarak ayarlayın */
+}
+
+#discount-input-cer{
+    padding: 10px;
+    font-size: 18px; /* Font boyutu */
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Köşeleri yuvarla */
+    background-color: #e8f5e9; /* Arka plan rengi */
+}
+
     </style>
 </head>
 <body>
-
+    <script src="html5-qrcode.min.js"></script>
     <div>
         <button class="tablinks" onclick="openTab(event, 'Brand1')">SEIKO</button>
         <button class="tablinks" onclick="openTab(event, 'Brand2')">HOYA</button>
         <button class="tablinks" onclick="openTab(event, 'Brand3')">ESSILOR</button>
-       <button class="tablinks" onclick="openTab(event, 'Brand4')">STOK</button>
+        <button class="tablinks" onclick="openTab(event, 'Brand4')">STOK</button>
     </div>
 
-    <div id="Brand1" class="tab"> 
-       <div class="container">
-            <div class="left"> 
-                <H5></H5>           
+    <div id="Brand1" class="tab">
+        <div class="container">
+            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+                <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
-                <h2></h2> 
+                <h3></h3>
             </div>
-
+    
             <div class="right">
                 <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
                 <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
                 <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
                 <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
-                
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="Brand1" data-product="Product4">Product 4</button>
             </div>
-        </div>      
+        </div>
     </div>
-
     
-    <div id="Brand2" class="tab"> 
-       <div class="container">
-            <div class="left">            
+
+
+    <div id="Brand2" class="tab">
+        <div class="container">
+            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+                <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
-                <h2></h2> 
+                <h3></h3>
             </div>
 
             <div class="right">
                 <button class="product-button" data-brand="Brand2" data-product="Product2">Product 2</button>
                 <button class="product-button" data-brand="Brand2" data-product="Product3">Product 3</button>
                 <button class="product-button" data-brand="Brand2" data-product="Product4">Product 4</button>
-                
-            </div>
-        </div>      
-    </div>
-    
 
-    <div id="Brand3" class="tab"> 
-       <div class="container">
-            <div class="left">            
+            </div>
+        </div>
+    </div>
+
+
+    <div id="Brand3" class="tab">
+        <div class="container">
+            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+                <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
-                <h2></h2> 
+                <h3></h3>
             </div>
 
             <div class="right">
                 <button class="product-button" data-brand="Brand3" data-product="Product2">Product 2</button>
                 <button class="product-button" data-brand="Brand3" data-product="Product3">Product 3</button>
                 <button class="product-button" data-brand="Brand3" data-product="Product4">Product 4</button>
-                
+
             </div>
-        </div>      
+        </div>
     </div>
 
-    <div id="Brand4" class="tab">  
-        <H5></H5>      
+    <div id="Brand4" class="tab">
+        <H5></H5>
         <p>Toplu liste buraya</p>
         <h2></h2>
-        
+
     </div>
-    
+
+
+
+    <table id="pricing-panel" border="1">
+        <tr>
+            <td><span class="label">T.E. Kampanya Oranı:</span></td>
+            <td>
+                <button id="decrease-discount" type="button">-</button>
+                <input type="number" id="discount-input" step="5" max="50" min="0" placeholder="0" readonly>
+
+                <button id="increase-discount" type="button">+</button>
+            </td>
+        </tr>
+        <tr>
+            <td><span class="label">Ürün Adı:</span></td>
+            <td><span id="product-name-value" class="value">Product1</span></td>
+        </tr>
+        <tr>
+            <td><span class="label">Cam Fiyatı:</span></td>
+            <td><span id="product-price-value" class="value">0 TL</span></td>
+        </tr>
+        <tr>
+            <td><span class="label">İndirim Oranı:</span></td>
+            <td><span id="product-discount-value" class="value">0%</span></td>
+        </tr>
+        <tr>
+            <td><span class="label">İndirim Tutarı:</span></td>
+            <td><span id="discount-input-value" class="value">0</span></td>
+        </tr>
+        <tr>
+            <td><span class="label">Kampanyalı Fiyat:</span></td>
+            <td><span id="final-price-value" class="value">0 TL</span></td>
+        </tr>
+        <tr>
+            <td><span class="label">Çerçeve Fiyatı</span></td>
+            <td>
+                <input type="text" id="discount-input-cer">
+                <button id="qrreader-button" type="button">Qr</button>
+            </td>
+        </tr>
+    </table>
     
 
-    <div id="pricing-panel">
-    <h3>Product Information</h3>
-    
-    <span class="label">İskonto Oranı:</span>
-    <button id="decrease-discount" type="button">-</button>
-    <input type="number" id="discount-input" step="5" max="50" min="0" placeholder="0">
-    <button id="increase-discount" type="button">+</button>
-    
-    <p><span class="label">Ürün Adı:</span> <span id="product-name-value" class="value">Product1</span></p>
-    <p><span class="label">Fiyatı:</span> <span id="product-price-value" class="value">0 TL</span></p>
-    <p><span class="label">İskonto Oranı:</span> <span id="product-discount-value" class="value">0%</span></p>
-    <p><span class="label">İndirim Tutarı:</span> <span id="discount-input-value" class="value">0</span></p>
-    <p class="discounted-price"><span class="label">İndirimli Fiyat:</span> <span id="final-price-value" class="value">0 TL</span></p>
-</div>
-    
+
+    <div id="reader" style="display: none;"></div>
+
+    <script>
+        document.getElementById('qrreader-button').addEventListener('click', function () {
+            const readerElement = document.getElementById('reader');
+            readerElement.style.display = 'block'; // Reader'ı görünür yapar
+
+            const scanner = new Html5QrcodeScanner('reader', {
+                qrbox: { width: 250, height: 250 },
+                fps: 20,
+            });
+
+            scanner.render(success, error);
+
+            function success(result) {
+                document.getElementById('discount-input-cer').value = result;
+                scanner.clear();
+                readerElement.style.display = 'none'; // Reader'ı tekrar gizler
+            }
+
+            function error(err) {
+                console.error(err);
+            }
+        });
+    </script>
+
+
 
     <script src="script.js"></script>
 </body>
+
 </html>
