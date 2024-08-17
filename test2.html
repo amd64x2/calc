@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <style>
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #reader {
+            display: none; /* Initially hide the scanner */
+            width: 300px;
+            height: 300px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        #scanButton {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <button id="scanButton">Start Scanning</button>
+        <div id="reader"></div>
+        <input type="text" id="result" readonly>
+    </main>
+
+    <script src="html5-qrcode.min.js"></script>
+    <script>
+        const scanButton = document.getElementById('scanButton');
+        const reader = document.getElementById('reader');
+        const resultInput = document.getElementById('result');
+        let scanner;
+
+        scanButton.addEventListener('click', () => {
+            if (!scanner) {
+                scanner = new Html5Qrcode("reader");
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: 250 },
+                    (decodedText, decodedResult) => {
+                        resultInput.value = decodedText;
+                        scanner.stop().then(() => {
+                            reader.style.display = 'none'; // Hide the scanner
+                        }).catch(err => {
+                            console.error(err);
+                        });
+                    },
+                    (errorMessage) => {
+                        // Handle error
+                    }
+                ).catch(err => {
+                    console.error(err);
+                });
+            } else {
+                scanner.start();
+            }
+            reader.style.display = 'block'; // Show the scanner
+        });
+    </script>
+</body>
+</html>
