@@ -3,29 +3,29 @@ const data = {
     
     "Brand1": {
         "1.57 SCC": { 
-            "price": "100 TL", 
-            "discount": "10%",
+            "price": "4200 TL", 
+            "discount": "40%",
             "color": "Beyaz",
             "index": "1.56",
             "focus": "Tek"
         },
         "Product2": { 
             "price": "150 TL", 
-            "discount": "5%",
+            "discount": "40%",
             "color": "Color",
             "index": "1.60",
             "focus": "Tek"
         },
         "Product3": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "40%",
             "color": "Beyaz",
             "index": "1.67",
             "focus": "Cok"
         },
         "Product4": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "40%",
             "color": "Beyaz",
             "index": "1.74",
             "focus": "Tek"
@@ -35,28 +35,28 @@ const data = {
     "Brand2": {
         "1.57 SCC": { 
             "price": "100 TL", 
-            "discount": "10%",
+            "discount": "45%",
             "color": "Beyaz",
             "index": "1.56",
             "focus": "Tek"
         },
         "Product2": { 
             "price": "150 TL", 
-            "discount": "5%",
+            "discount": "45%",
             "color": "Color",
             "index": "1.60",
             "focus": "Tek"
         },
         "Product3": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "45%",
             "color": "Beyaz",
             "index": "1.67",
             "focus": "Cok"
         },
         "Product4": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "45%",
             "color": "Beyaz",
             "index": "1.74",
             "focus": "Tek"
@@ -66,28 +66,28 @@ const data = {
     "Brand3": {
         "1.57 SCC": { 
             "price": "100 TL", 
-            "discount": "10%",
+            "discount": "50%",
             "color": "Beyaz",
             "index": "1.56",
             "focus": "Tek"
         },
         "Product2": { 
             "price": "150 TL", 
-            "discount": "5%",
+            "discount": "50%",
             "color": "Color",
             "index": "1.60",
             "focus": "Tek"
         },
         "Product3": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "50%",
             "color": "Beyaz",
             "index": "1.67",
             "focus": "Cok"
         },
         "Product4": { 
             "price": "200 TL", 
-            "discount": "20%",
+            "discount": "50%",
             "color": "Beyaz",
             "index": "1.74",
             "focus": "Tek"
@@ -187,7 +187,9 @@ function clearPricingPanel() {
     document.getElementById('product-name-value').innerText = '-';
     document.getElementById('product-price-value').innerText = '-';
     document.getElementById('product-discount-value').innerText = '-';
-    document.getElementById('final-price-value').innerText = '-';
+    document.getElementById('discount-input-value').innerText = '-';
+    document.getElementById('final-price-value').innerText = '-';  
+    document.getElementById('discount-input').value = 0; // İskonto alanını sıfırla 
     currentProductPrice = 0; // Fiyatı sıfırla
 }
 
@@ -225,9 +227,12 @@ function applyCustomDiscount() {
     const discountedPrice = currentProductPrice * (1 - (customDiscount / 100));
     
     // Hesaplanan fiyatı doğru formatta göster
+   
+    //document.getElementById('product-price-value').innerText = productPrice.toFixed(2) + ' TL';
+
     document.getElementById('final-price-value').innerText = discountedPrice.toFixed(2) + ' TL';
     
-    document.getElementById('product-discount-value').innerText =customDiscount;
+    document.getElementById('product-discount-value').innerText ='%' +customDiscount;
 
     document.getElementById('discount-input-value').innerText =(currentProductPrice - discountedPrice).toFixed(2) + ' TL';
    
