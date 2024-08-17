@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing Calculator</title>   
     <style>
-       .container {
+     .container {
             display: flex;
             background-color: #3f4257;
         }
@@ -46,17 +46,7 @@ body {
 
 
 
-button#qrreader-button {
-    background-color: #f14747; /* Mavi arka plan */
-    color: white; /* Beyaz yazı rengi */
-    border: none; /* Kenarlık yok */
-    padding: 10px 20px; /* Butonun iç boşluğu */
-    font-size: 16px; /* Yazı boyutu */
-    cursor: pointer; /* Fare imlecini değiştir */
-    border-radius: 5px; /* Köşeleri yuvarla */
-    margin: 0 5px; /* Butonlar arası mesafe */
-    width: 150px;
-}
+
 
 button#decrease-discount, button#increase-discount {
     background-color: #f14747; /* Mavi arka plan */
@@ -206,6 +196,18 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     width: 25%; /* İlk sütunun genişliğini %30 olarak ayarlayın */
 }
 
+button#qrreader-button {
+    background-color: #f14747; /* Mavi arka plan */
+    color: white; /* Beyaz yazı rengi */
+    border: none; /* Kenarlık yok */
+    padding: 10px 20px; /* Butonun iç boşluğu */
+    font-size: 16px; /* Yazı boyutu */
+    cursor: pointer; /* Fare imlecini değiştir */
+    border-radius: 5px; /* Köşeleri yuvarla */
+    margin: 0 5px; /* Butonlar arası mesafe */
+    width: 150px;
+}
+
 #discount-input-cer{
     padding: 10px;
     font-size: 18px; /* Font boyutu */
@@ -323,7 +325,7 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
             <td><span class="label">Çerçeve Fiyatı</span></td>
             <td>
                 <input type="text" id="discount-input-cer">
-                <button id="qrreader-button" type="button">Qr</button>
+                <button id="qrreader-button" type="button">Qr Code</button>
             </td>
         </tr>
     </table>
