@@ -1,30 +1,39 @@
 <!DOCTYPE html>
 <html lang="tr">
-    
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing Calculator</title>   
+    <title>Pricing Calculator</title>
     <style>
-     .container {
-            display: flex;
-            background-color: #3f4257;
-        }
-        .left {
-            width: 150px;
-            flex-shrink: 0; /* Genişliğin daralmasını engeller */
-        }
-        .right {
-            flex-grow: 1;
+        .container {
+    display: flex;
+    background-color: #3f4257;
 }
 
+.left {
+    width: 150px;
+    flex-shrink: 0;
+    /* Genişliğin daralmasını engeller */
+}
+
+.right {
+    flex-grow: 1;
+}
+
+.tabcontent {
+    display: none;
+    /* Tüm tab içeriklerini başlangıçta gizle */
+}
 
 .tab {
     display: none;
 }
+
 .tab.active {
     display: block;
 }
+
 .tablinks {
     cursor: pointer;
     padding: 10px;
@@ -34,13 +43,16 @@
     font-size: 16px;
     border-radius: 5px;
 }
+
 .tablinks.active {
     background-color: #aa3434;
-} 
+}
 
 
 body {
-    background-color: #383a4f; /* Arka plan rengini değiştir */
+    background-color: #383a4f;
+    /* Arka plan rengini değiştir */
+    font-family: Arial, sans-serif;
     /*color: #333333; */
 }
 
@@ -48,29 +60,53 @@ body {
 
 
 
-button#decrease-discount, button#increase-discount {
-    background-color: #f14747; /* Mavi arka plan */
-    color: white; /* Beyaz yazı rengi */
-    border: none; /* Kenarlık yok */
-    padding: 10px 20px; /* Butonun iç boşluğu */
-    font-size: 16px; /* Yazı boyutu */
-    cursor: pointer; /* Fare imlecini değiştir */
-    border-radius: 5px; /* Köşeleri yuvarla */
-    margin: 0 5px; /* Butonlar arası mesafe */
+button#decrease-discount,
+button#increase-discount,
+button#user-decrease-discount,
+button#user-increase-discount {
+    background-color: #aa3434;
+    /* Mavi arka plan */
+    color: white;
+    /* Beyaz yazı rengi */
+    border: none;
+    /* Kenarlık yok */
+    padding: 10px 20px;
+    /* Butonun iç boşluğu */
+    font-size: 16px;
+    /* Yazı boyutu */
+    cursor: pointer;
+    /* Fare imlecini değiştir */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    margin: 0 5px;
+    /* Butonlar arası mesafe */
     width: 50px;
 }
 
-button#decrease-discount:hover, button#increase-discount:hover {
-    background-color: #0056b3; /* Hover durumunda koyu mavi arka plan */
+button#decrease-discount:hover,
+button#increase-discount:hover,
+button#user-decrease-discount:hover,
+button#user-increase-discount:hover {
+    background-color: #0056b3;
+    /* Hover durumunda koyu mavi arka plan */
 }
 
-button#decrease-discount:active, button#increase-discount:active {
-    background-color: #004494; /* Tıklama durumunda daha koyu arka plan */
+button#decrease-discount:hover,
+button#increase-discount:hover,
+button#user-decrease-discount:hover,
+button#user-increase-discount:hover {
+    background-color: #004494;
+    /* Tıklama durumunda daha koyu arka plan */
 }
 
-button#decrease-discount:disabled, button#increase-discount:disabled {
-    background-color: #cccccc; /* Disabled durumunda gri arka plan */
-    cursor: not-allowed; /* İmleci değiştir */
+button#decrease-discount:disabled,
+button#increase-discount:disabled,
+button#user-decrease-discount:disabled,
+button#user-increase-discount:disabled {
+    background-color: #cccccc;
+    /* Disabled durumunda gri arka plan */
+    cursor: not-allowed;
+    /* İmleci değiştir */
 }
 
 
@@ -85,27 +121,42 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
 
 /* Ürün Butonları */
 .product-button {
-    background-color: #4CAF50; /* Yeşil arka plan rengi */
-    color: white; /* Beyaz metin rengi */
-    border: none; /* Kenar yok */
-    padding: 10px 20px; /* Buton içi boşluk */
-    text-align: center; /* Metni ortala */
-    text-decoration: none; /* Alt çizgi yok */
-    display: inline-block; /* Yan yana görünüm */
-    font-size: 16px; /* Metin boyutu */
-    margin: 10px; /* Butonlar arasında boşluk */
-    border-radius: 5px; /* Köşeleri yuvarla */
-    transition: background-color 0.3s, transform 0.2s; /* Geçiş efektleri */
+    background-color: #4CAF50;
+    /* Yeşil arka plan rengi */
+    color: white;
+    /* Beyaz metin rengi */
+    border: none;
+    /* Kenar yok */
+    padding: 10px 20px;
+    /* Buton içi boşluk */
+    text-align: center;
+    /* Metni ortala */
+    text-decoration: none;
+    /* Alt çizgi yok */
+    display: inline-block;
+    /* Yan yana görünüm */
+    font-size: 16px;
+    /* Metin boyutu */
+    margin: 10px;
+    /* Butonlar arasında boşluk */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    transition: background-color 0.3s, transform 0.2s;
+    /* Geçiş efektleri */
 }
 
 .product-button:hover {
-    background-color: #45a049; /* Üzerine gelindiğinde daha koyu yeşil */
-    transform: scale(1.05); /* Butonun biraz büyümesi */
+    background-color: #45a049;
+    /* Üzerine gelindiğinde daha koyu yeşil */
+    transform: scale(1.05);
+    /* Butonun biraz büyümesi */
 }
 
 .product-button:active {
-    background-color: #388e3c; /* Tıklanıldığında daha koyu yeşil */
-    transform: scale(0.95); /* Butonun biraz küçülmesi */
+    background-color: #388e3c;
+    /* Tıklanıldığında daha koyu yeşil */
+    transform: scale(0.95);
+    /* Butonun biraz küçülmesi */
 }
 
 
@@ -116,149 +167,364 @@ button#decrease-discount:disabled, button#increase-discount:disabled {
     padding: 20px;
     background-color: #3f4257;
     margin-top: 20px;
-    border-radius: 8px; /* Köşeleri yuvarla */
+    border-radius: 8px;
+    /* Köşeleri yuvarla */
 }
 
 /* Fiyat Panelindeki Başlıklar */
 #pricing-panel h3 {
     margin-top: 0;
-    font-size: 20px; /* Başlık boyutu */
-    color: rgb(141, 135, 135); /* Başlık rengi */
+    font-size: 20px;
+    /* Başlık boyutu */
+    color: rgb(141, 135, 135);
+    /* Başlık rengi */
 }
 
 /* Fiyat Panelindeki Paragraflar */
 #pricing-panel p {
-    font-size: 18px; /* Metin boyutu */
+    font-size: 18px;
+    /* Metin boyutu */
     margin: 10px 0;
     padding: 10px;
-    border-radius: 5px; /* Köşeleri yuvarla */
-    background-color: #a7a7af; /* Arka plan rengi */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    background-color: #a7a7af;
+    /* Arka plan rengi */
 }
 
 /* Özel Renkler ve Font */
 #pricing-panel .label {
-    font-weight: bold; /* Etiketlerin kalın olması */
-    color: rgb(194, 189, 189); /* Etiket rengi */
+    font-weight: bold;
+    /* Etiketlerin kalın olması */
+    color: rgb(194, 189, 189);
+    /* Etiket rengi */
 }
 
 #pricing-panel .value {
-    color: #e7e8ec; /* Fiyatların ve değerlerin rengi */
+    color: #e7e8ec;
+    /* Fiyatların ve değerlerin rengi */
     font-size: 20px;
     font-weight: bold;
-    
+
 }
 
 /* İskonto Oranı Girişi */
-#discount-input {
+#discount-input,
+#user-discount-input {
     padding: 10px;
-    font-size: 18px; /* Font boyutu */
+    font-size: 18px;
+    /* Font boyutu */
     width: 40px;
     border: 1px solid #ddd;
-    border-radius: 5px; /* Köşeleri yuvarla */
-    background-color: #e8f5e9; /* Arka plan rengi */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    background-color: #e8f5e9;
+    /* Arka plan rengi */
 }
 
 /* İskonto Paneli */
 #pricing-panel .discounted-price {
-    font-size: 22px; /* İskontolu fiyat boyutu */
-    font-weight: bold; /* Kalın yazı */
-    color: #d32f2f; /* İskontolu fiyat rengi */
-    background-color: #fce4ec; /* Arka plan rengi */
+    font-size: 22px;
+    /* İskontolu fiyat boyutu */
+    font-weight: bold;
+    /* Kalın yazı */
+    color: #aa3434;
+    /* İskontolu fiyat rengi */
+    background-color: #fce4ec;
+    /* Arka plan rengi */
     padding: 10px;
-    border-radius: 5px; /* Köşeleri yuvarla */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
 }
 
-.label{
-    font-weight: bold; /* Etiketlerin kalın olması */
-    color: #333; /* Etiket rengi */
+.label {
+    font-weight: bold;
+    /* Etiketlerin kalın olması */
+    color: #333;
+    /* Etiket rengi */
     font-size: 18px;
 }
 
 
 #pricing-panel {
-    width: 100%; /* Tablo genişliği: %100 oranında genişler */
-    height: auto; /* Yükseklik: İçeriğe göre otomatik ayarlanır */
-    max-width: 2000px; /* Maksimum genişlik: 600px */
-    border-collapse: collapse; /* Kenarlıklar birleştirilir */
-    
+    width: 100%;
+    /* Tablo genişliği: %100 oranında genişler */
+    height: auto;
+    /* Yükseklik: İçeriğe göre otomatik ayarlanır */
+    max-width: 2000px;
+    /* Maksimum genişlik: 600px */
+    border-collapse: collapse;
+    /* Kenarlıklar birleştirilir */
+
 }
 
 #pricing-panel td {
-    padding: 10px; /* Hücreler arasındaki boşluk */
-    text-align: left; /* Metin hizalaması */
-    border: 1px solid rgb(91, 92, 110); /* Hücre kenarlıkları */
-    border-radius: 5px; /* Köşeleri yuvarla */
+    padding: 10px;
+    /* Hücreler arasındaki boşluk */
+    text-align: left;
+    /* Metin hizalaması */
+    border: 1px solid rgb(91, 92, 110);
+    /* Hücre kenarlıkları */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
 }
 
 
 
 #pricing-panel td:first-child {
-    width: 25%; /* İlk sütunun genişliğini %30 olarak ayarlayın */
+    width: 25%;
+    /* İlk sütunun genişliğini %30 olarak ayarlayın */
 }
 
 button#qrreader-button {
-    background-color: #f14747; /* Mavi arka plan */
-    color: white; /* Beyaz yazı rengi */
-    border: none; /* Kenarlık yok */
-    padding: 10px 20px; /* Butonun iç boşluğu */
-    font-size: 16px; /* Yazı boyutu */
-    cursor: pointer; /* Fare imlecini değiştir */
-    border-radius: 5px; /* Köşeleri yuvarla */
-    margin: 0 5px; /* Butonlar arası mesafe */
+    background-color: #aa3434;
+    /* Mavi arka plan */
+    color: white;
+    /* Beyaz yazı rengi */
+    border: none;
+    /* Kenarlık yok */
+    padding: 10px 20px;
+    /* Butonun iç boşluğu */
+    font-size: 16px;
+    /* Yazı boyutu */
+    cursor: pointer;
+    /* Fare imlecini değiştir */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    margin: 0 5px;
+    /* Butonlar arası mesafe */
     width: 150px;
 }
 
-#discount-input-cer{
+#discount-input-cer {
     padding: 10px;
-    font-size: 18px; /* Font boyutu */
+    font-size: 18px;
+    /* Font boyutu */
     width: 150px;
     border: 1px solid #ddd;
-    border-radius: 5px; /* Köşeleri yuvarla */
-    background-color: #e8f5e9; /* Arka plan rengi */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    background-color: #e8f5e9;
+    /* Arka plan rengi */
 }
 
+
+
+
+
+
+
+
+
+
+
+/* tablo*/
+.filter-section {
+    display: flex;
+    /* Çocuk div'leri yatay olarak hizalar */
+    justify-content: space-between;
+    /* Div'ler arasındaki boşluğu ayarlar */
+    gap: 20px;
+    /* Div'ler arasındaki boşluk miktarını ayarlar */
+}
+
+.filter-section>div:first-child {
+    width: 20%;
+    /* İlk div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(2) {
+    width: 30%;
+    /* İkinci div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(3) {
+    width: 40%;
+    /* Üçüncü div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div {
+    padding: 10px;
+    /* Div'lerin içindeki boşluk miktarını ayarlar */
+    background-color: #3f4257;
+    /* Div'lerin arka plan rengini ayarlar */
+    border-radius: 5px;
+    /* Div'lerin köşelerini yuvarlatır */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Div'lere hafif bir gölge efekti ekler */
+}
+
+.filter-section h4 {
+    margin-top: 0;
+    /* Başlıkların üst boşluğunu kaldırır */
+    color: rgb(224, 216, 216);
+    /* Başlıkların metin rengini ayarlar */
+}
+
+.filter-section>div label {
+    display: inline-flex;
+    /* Checkbox ve etiketleri yatay olarak hizalar */
+    align-items: center;
+    /* Checkbox ve etiket metnini dikeyde ortalar */
+    margin-right: 10px;
+    /* Checkbox'lar arasındaki boşluğu ayarlar */
+}
+
+.filter-checkbox {
+    margin-right: 5px;
+    /* Checkbox ve etiket metni arasındaki boşluğu ayarlar */
+}
+
+
+
+.filter-checkbox {
+    width: 20px;
+    /* Onay kutusunun genişliği */
+    height: 20px;
+    /* Onay kutusunun yüksekliği */
+    cursor: pointer;
+    /* İmlecin üzerine geldiğinde el şeklini alması */
+    accent-color: rgb(38, 80, 158);
+    /* Onay kutusunun işaretlendiğinde alacağı renk */
+    vertical-align: bottom;
+    /* Kutu ile etiketi aynı hizaya getirmek için */
+    margin-right: 5px;
+    /* Etiket ile kutu arasındaki boşluk */
+}
+
+label {
+    vertical-align: middle;
+    /* Etiketi de aynı hizaya getirmek için */
+    font-size: 18px;
+    margin-right: 15px;
+    color: #e7e7eb;
+}
+
+
+
+
+/* Table Styles */
+#product-list {
+    padding: 20px;
+    border: 1px solid rgb(54, 4, 7);
+    /*tablo en dış çerçeve rengi*/
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #4d4d4e;
+    /*tablo çizgi rengi*/
+    padding: 8px;
+    text-align: left;
+    color: #e2e4e3;
+    /*hücre değer rengi*/
+}
+
+/* Header Styles */
+th {
+    background-color: #f2f2f2;
+    color: #004494;
+}
+
+/* Column Widths */
+#product-list th:nth-child(1) {
+    width: 10%;
+}
+
+/* MARKA column */
+#product-list th:nth-child(2) {
+    width: 30%;
+}
+
+/* ÜRÜN ADI column */
+#product-list th:nth-child(3) {
+    width: 10%;
+}
+
+/* FİYATI column */
+#product-list th:nth-child(4) {
+    width: 5%;
+}
+
+/* KAMPANYA column */
+#product-list th:nth-child(5) {
+    width: 5%;
+}
+
+/* FİRMA column */
+#product-list th:nth-child(6) {
+    width: 10%;
+}
+
+/* CAM column */
+#product-list th:nth-child(7) {
+    width: 5%;
+}
+
+/* İNDEX column */
+#product-list th:nth-child(8) {
+    width: 10%;
+}
+
+/* ODAK column */
+#product-list th:nth-child(9) {
+    width: 15%;
+}
+
+/* SON FİYAT column */
     </style>
+
 </head>
+
 <body>
     <script src="html5-qrcode.min.js"></script>
     <div>
-        <button class="tablinks" onclick="openTab(event, 'Brand1')">SEIKO</button>
-        <button class="tablinks" onclick="openTab(event, 'Brand2')">HOYA</button>
+        <button class="tablinks" onclick="openTab(event, 'SEIKO')">SEIKO</button>
+        <button class="tablinks" onclick="openTab(event, 'HOYA')">HOYA</button>
         <button class="tablinks" onclick="openTab(event, 'Brand3')">ESSILOR</button>
         <button class="tablinks" onclick="openTab(event, 'Brand4')">STOK</button>
     </div>
-
-    <div id="Brand1" class="tab">
+    <h3></h3>
+    <div id="SEIKO" class="tab">
         <div class="container">
-            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+            <div class="left"
+                style="background-color: white; display: flex; flex-direction: column; align-items: center;">
                 <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
                 <h3></h3>
             </div>
-    
+
             <div class="right">
-                <button class="product-button" data-brand="Brand1" data-product="1.57 SCC">1.57 SCC</button>
-                <button class="product-button" data-brand="Brand1" data-product="Product2">Product 2</button>
-                <button class="product-button" data-brand="Brand1" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="SEIKO" data-product="1.57 SCC">1.57 SCC</button>
+                <button class="product-button" data-brand="SEIKO" data-product="Product2">Product 2</button>
+                <button class="product-button" data-brand="SEIKO" data-product="Product3">Product 3</button>
+                <button class="product-button" data-brand="SEIKO" data-product="Product4">Product 4</button>
                 
             </div>
         </div>
     </div>
-    
 
 
-    <div id="Brand2" class="tab">
+
+    <div id="HOYA" class="tab">
         <div class="container">
-            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+            <div class="left"
+                style="background-color: white; display: flex; flex-direction: column; align-items: center;">
                 <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
                 <h3></h3>
             </div>
 
             <div class="right">
-                <button class="product-button" data-brand="Brand2" data-product="Product2">Product 2</button>
-                <button class="product-button" data-brand="Brand2" data-product="Product3">Product 3</button>
-                <button class="product-button" data-brand="Brand2" data-product="Product4">Product 4</button>
+                <button class="product-button" data-brand="HOYA" data-product="1.60 EYNOA">1.60 EYNOA</button>
+                <button class="product-button" data-brand="HOYA" data-product="HOYA2">HOYA2</button>
+                <button class="product-button" data-brand="HOYA" data-product="HOYA3">HOYA3</button>
 
             </div>
         </div>
@@ -267,7 +533,8 @@ button#qrreader-button {
 
     <div id="Brand3" class="tab">
         <div class="container">
-            <div class="left" style="background-color: white; display: flex; flex-direction: column; align-items: center;">
+            <div class="left"
+                style="background-color: white; display: flex; flex-direction: column; align-items: center;">
                 <h3></h3>
                 <img id="brand-logo" src="" alt="Brand Logo" style="display:none; width: 100px; height: 50px;">
                 <h3></h3>
@@ -282,10 +549,64 @@ button#qrreader-button {
         </div>
     </div>
 
+
+
     <div id="Brand4" class="tab">
-        <H5></H5>
-        <p>Toplu liste buraya</p>
-        <h2></h2>
+
+
+        <div class="filter-section">
+
+            <div>
+                <h4>Color</h4>
+                <label><input type="checkbox" class="filter-checkbox" value="Beyaz"> Beyaz</label>
+                <label><input type="checkbox" class="filter-checkbox" value="Color"> Color</label>
+            </div>
+            <div>
+                <h4>Focus</h4>
+                <label><input type="checkbox" class="filter-checkbox" value="Tek"> Tek</label>
+                <label><input type="checkbox" class="filter-checkbox" value="Cok"> Çok</label>
+            </div>
+            <div>
+                <h4>Index</h4>
+                <label><input type="checkbox" class="filter-checkbox" value="1.50"> 1.50</label>
+                <label><input type="checkbox" class="filter-checkbox" value="1.56"> 1.56</label>
+                <label><input type="checkbox" class="filter-checkbox" value="1.60"> 1.60</label>
+                <label><input type="checkbox" class="filter-checkbox" value="1.67"> 1.67</label>
+                <label><input type="checkbox" class="filter-checkbox" value="1.74"> 1.74</label>
+            </div>
+        </div>
+
+        <div id="product-table">
+            <div class="discount-input">
+                <label for="user-discount" style="color: azure;">Yönetici İskontosu (%) :</label>
+
+                <button id="user-decrease-discount" type="button">-</button>
+                <input type="number" id="user-discount-input" step="5" max="50" min="40" readonly>
+                <button id="user-increase-discount" type="button">+</button>
+
+                <h3></h3>
+            </div>
+
+            <table id="product-list">
+                <thead>
+                    <tr>
+                        <th>MARKA</th>
+                        <th>ÜRÜN ADI</th>
+                        <th>FİYATI</th>
+                        <th>K.%</th> <!-- Existing discount column -->
+                        <th>F.%</th> <!-- New column -->
+                        <th>CAM</th>
+                        <th>İNDEX</th>
+                        <th>ODAK</th>
+                        <th>SON FİYAT</th> <!-- New column for total price -->
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <!-- Dynamic rows will be added here -->
+                </tbody>
+            </table>
+        </div>
 
     </div>
 
@@ -324,12 +645,14 @@ button#qrreader-button {
         <tr>
             <td><span class="label">Çerçeve Fiyatı</span></td>
             <td>
-                <input type="text" id="discount-input-cer">
-                <button id="qrreader-button" type="button">Qr Code</button>
+                <input type="number" id="discount-input-cer">
+                <button id="qrreader-button" type="button">Qr</button>
             </td>
         </tr>
     </table>
-    
+
+
+
 
 
     <div id="reader" style="display: none;"></div>
