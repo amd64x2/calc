@@ -13,7 +13,7 @@ s<!DOCTYPE html>
             }
             
             var xhr = new XMLHttpRequest();
-            var url = 'http://192.168.1.10/PHPProjeler/DenemeRAM/get_price.php?qr_code=' + encodeURIComponent(qrCode);
+            var url = 'http://localhost/phpAPI/get_price.php?qr_code=' + encodeURIComponent(qrCode);
             console.log('API URL:', url);  // URL'yi konsolda kontrol edin
             xhr.open('GET', url, true);
             xhr.onreadystatechange = function() {
