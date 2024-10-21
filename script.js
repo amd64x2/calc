@@ -690,16 +690,6 @@ function getColumnIndex(column) {
 // <th data-column="discountedPrice">SON FİYAT</th>
 //----------------------
 
-
-
-
-
-
-
-
-
-
-
 // Sayfa yüklendiğinde filtreleri uygulayıp tabloyu başlat
 window.onload = applyFilters;
 
