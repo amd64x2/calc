@@ -5,7 +5,471 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing Calculator</title>
-    <link rel="stylesheet" href="calc/styles.css">   
+    <style>
+        :root {
+    --body-bg-color: #3f4257;
+
+    --product-container-bg-color: #3f4257;
+
+    --tabbutton-color: #fff8f8;
+    --tabbutton-bg-color: #3d3f47;
+    --tabbutton-border-color: #302e2e;
+    --tabbutton-active-color: #aa3434;
+
+    --logo-bg-color: #d6d9ee;
+            
+}
+
+body {
+    background-color: var(--body-bg-color); 
+    font-family: Arial, sans-serif;   
+}
+
+/* SEKME ------------------------------------------------------------------- */
+.tab.active {
+    display: block;
+}
+
+.tab-button {
+    cursor: pointer;
+    padding: 10px;
+    background-color: var(--tabbutton-bg-color);
+    border: 1px solid var(--tabbutton-border-color);
+    color: var(--tabbutton-color);
+    font-size: 16px;
+    border-radius: 5px;
+
+    flex-grow: 1; /* Tüm butonların eşit genişlikte olmasını sağlar */
+    border: none; /* Çevresinde sınır olmaması için */
+    
+    text-align: center; /* Metni ortalar */
+    transition: background-color 0.3s ease; /* Yumuşak arka plan rengi geçişi */
+}
+
+.tab-button.active {
+    background-color: var(--tabbutton-active-color);
+    /*background-color: #38538e; /* iherit Tab barının arka plan rengi ile aynı yapar */
+}
+
+.tab-container { 
+    /*js de kullanıldığı için .product-container bunun içinde olmalı iptal edilemez*/
+    display: none;  
+}
+
+
+
+
+
+
+
+/* ÜRÜNLER ------------------------------------------------------------------- */
+.product-container {
+    display: flex;
+    background-color: var(--product-container-bg-color);
+}
+
+#brand-logo {
+    display: none; /*<img id="brand-logo" src="logo/seiko-logo.png">*/
+    width: 100px;
+    height: 50px;
+}
+
+.product-logo {
+    width: 150px;
+    min-height: 150px;
+    flex-shrink: 0; /* Genişliğin daralmasını engeller */
+    background-color: var(--logo-bg-color);
+    border-radius: 10px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* İçerikleri yatay olarak ortalar */
+    justify-content: center; /* İçerikleri dikey olarak ortalar */
+    text-align: center; /* Metni ortalar */
+}
+
+.product-area {
+    flex-grow: 1;
+}
+
+
+/* ORTAK ÜRÜN BUTONLARI ----------------------------------------------------------*/
+.product-button {
+    background-color: #4CAF50; 
+    width: 200px;
+    color: white; /* Beyaz metin rengi */
+    border: none; /* Kenar yok */
+    padding: 10px 20px; /* Buton içi boşluk */
+    text-align: center; /* Metni ortala */
+    text-decoration: none; /* Alt çizgi yok */
+    display: inline-block; /* Yan yana görünüm */
+    font-size: 16px; /* Metin boyutu */
+    margin: 10px; /* Butonlar arasında boşluk */
+    border-radius: 5px; /* Köşeleri yuvarla */
+    transition: background-color 0.3s, transform 0.2s; /* Geçiş efektleri */
+}
+
+.product-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.product-button:active {
+    background-color: #388e3c; /* Tıklanıldığında daha koyu yeşil */    
+    transform: scale(0.95);  /* Butonun biraz küçülmesi */
+}
+
+
+.product-buttonuy {
+    background-color: #2196F3; /* Arka plan rengi */
+}
+
+.product-buttonuy:hover {
+    background-color: #1e88e5; /* Üzerine gelindiğinde daha koyu */
+}
+
+.product-buttonuy:active {
+    background-color: #1565c0; /* Tıklanıldığında daha koyu */
+}
+
+
+/* Ürün Butonu Uy için Kahveden Füme Gradyan */
+.product-buttonc {
+    background: linear-gradient(90deg, #885b51 40%, #b6b0b0 100%); /* İlk renk %50, ikinci renk %100 alan kaplar */
+}
+
+.product-buttonc:hover {
+    background: linear-gradient(90deg, #6f473e 40%, #9c9999 100%); /* Üzerine gelindiğinde koyulaşan tonlar */
+}
+
+.product-buttonc:active {
+    background: linear-gradient(90deg, #59372f 40%, #7f7c7c 100%); /* Tıklanıldığında en koyu tonlar */
+}
+
+
+/* Ürün Butonu uyc için Renkler */
+.product-buttonuyc {
+    background-color: #9C27B0; /* Arka plan rengi */
+}
+
+.product-buttonuyc:hover {
+    background-color: #8e24aa; /* Üzerine gelindiğinde daha koyu */
+}
+
+.product-buttonuyc:active {
+    background-color: #7b1fa2; /* Tıklanıldığında daha koyu*/
+}
+
+
+/* İSKONTO BUTONLARI------------------------------------------------------------- */
+button#decrease-discount,
+button#increase-discount,
+button#user-decrease-discount,
+button#user-increase-discount {
+    background-color: #aa3434;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 0 5px;
+    width: 50px;
+}
+
+button#decrease-discount:hover,
+button#increase-discount:hover,
+button#user-decrease-discount:hover,
+button#user-increase-discount:hover {
+    background-color: #0056b3;
+}
+
+button#decrease-discount:active,
+button#increase-discount:active,
+button#user-decrease-discount:active,
+button#user-increase-discount:active {
+    background-color: #004494;
+    /* Tıklama durumunda daha koyu arka plan */
+}
+
+button#decrease-discount:disabled,
+button#increase-discount:disabled,
+button#user-decrease-discount:disabled,
+button#user-increase-discount:disabled {
+    background-color: #cccccc;
+    /* Disabled durumunda gri arka plan */
+    cursor: not-allowed;
+    /* İmleci değiştir */
+}
+
+
+/* FİYAT PANELİ -----------------------------------------------------------------------*/
+#pricing-panel {
+    background-color: #3f4257;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 1px;
+    color: rgb(141, 135, 135);
+    font-size: 20px;
+    /*font-weight: bold;*/
+    width: 100%;
+    /* Tablo genişliği: %100 oranında genişler */
+    height: auto;
+    /* Yükseklik: İçeriğe göre otomatik ayarlanır */
+    max-width: 2000px;
+    /* Maksimum genişlik: 2000px */
+    border-collapse: collapse;
+    /* Kenarlıklar birleştirilir */
+}
+
+
+/* İskonto Oranı Girişi */
+#discount-input,
+#user-discount-input {
+    padding: 10px;
+    font-size: 18px;
+    width: 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #e8f5e9;
+}
+
+#pricing-panel td {
+    padding: 10px;    
+    text-align: left;    
+    border: 1px solid rgb(91, 92, 110); /*tablo çizgi rengi*/
+}
+
+#pricing-panel td:first-child {
+    width: 25%;
+    /* tablo İlk sütunun genişliğini %25 olarak ayarlayın */
+}
+
+button#qrreader-button {
+    background-color: #aa3434;
+    /* Mavi arka plan */
+    color: white;
+    /* Beyaz yazı rengi */
+    border: none;
+    /* Kenarlık yok */
+    padding: 10px 20px;
+    /* Butonun iç boşluğu */
+    font-size: 16px;
+    /* Yazı boyutu */
+    cursor: pointer;
+    /* Fare imlecini değiştir */
+    border-radius: 5px;
+    /* Köşeleri yuvarla */
+    margin: 0 5px;
+    /* Butonlar arası mesafe */
+    width: 150px;
+}
+
+#discount-input-cer {
+    padding: 10px;
+    font-size: 18px;
+    width: 150px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #e8f5e9;
+}
+
+
+/* tablo*/
+.filter-section {
+    display: flex;
+    /* Çocuk div'leri yatay olarak hizalar */
+    justify-content: space-between;
+    /* Div'ler arasındaki boşluğu ayarlar */
+    gap: 20px;
+    /* Div'ler arasındaki boşluk miktarını ayarlar */
+}
+
+.filter-section>div:first-child {
+    width: 10%;
+    /* İlk div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(2) {
+    width: 12%;
+    /* İkinci div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(3) {
+    width: 8%;
+    /* Üçüncü div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(4) {
+    width: 30%;
+    /* İkinci div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div:nth-child(5) {
+    width: 30%;
+    /* Üçüncü div'in genişliğini yüzde olarak ayarlar */
+}
+
+.filter-section>div {
+    padding: 10px;
+    /* Div'lerin içindeki boşluk miktarını ayarlar */
+    background-color: #3f4257;
+    /* Div'lerin arka plan rengini ayarlar */
+    border-radius: 5px;
+    /* Div'lerin köşelerini yuvarlatır */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Div'lere hafif bir gölge efekti ekler */
+}
+
+.filter-section h4 {
+    margin-top: 0;
+    /* Başlıkların üst boşluğunu kaldırır */
+    color: rgb(224, 216, 216);
+    /* Başlıkların metin rengini ayarlar */
+}
+
+.filter-section>div label {
+    display: inline-flex;
+    /* Checkbox ve etiketleri yatay olarak hizalar */
+    align-items: center;
+    /* Checkbox ve etiket metnini dikeyde ortalar */
+    margin-right: 10px;
+    /* Checkbox'lar arasındaki boşluğu ayarlar */
+}
+
+.filter-checkbox {
+    margin-right: 5px;
+    width: 20px;
+    /* Onay kutusunun genişliği */
+    height: 20px;
+    /* Onay kutusunun yüksekliği */
+    cursor: pointer;
+    /* İmlecin üzerine geldiğinde el şeklini alması */
+    accent-color: rgb(60, 216, 86);
+    /* Onay kutusunun işaretlendiğinde alacağı renk */
+    vertical-align: bottom;
+    /* Kutu ile etiketi aynı hizaya getirmek için */
+    margin-right: 5px;
+    /* Etiket ile kutu arasındaki boşluk */
+}
+
+label {
+    vertical-align: middle;
+    /* Etiketi de aynı hizaya getirmek için */
+    font-size: 18px;
+    margin-right: 15px;
+    color: #e7e7eb;
+}
+
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Ortak Stil: Hem th hem de td için geçerlidir */
+th,
+td {
+    border: 1px solid #4d4d4e; /* Hücre kenar çizgisi */
+    padding: 8px;              /* Hücre iç boşluk */
+    text-align: left;          /* Metin hizalaması */
+    color: #e2e4e3;            /* Metin rengi */
+    user-select: none;
+}
+
+/* Başlık Hücreleri İçin Özel Stil */
+th {
+    background-color: #f2f2f2; /* Başlık hücrelerinin arka plan rengi */
+    color: #004494;            /* Başlık metninin rengi */
+    cursor: pointer;           /* Tıklanabilir olduğunu göstermek için imleç */
+}
+
+/* Sıralama için yukarı ve aşağı ok simgeleri */
+th.sort-asc::after {
+    content: " ▲"; /* Yukarı ok */
+}
+
+th.sort-desc::after {
+    content: " ▼"; /* Aşağı ok */
+}
+
+/* Zebra Şeridi Stili */
+tr:nth-child(even) {
+    background-color: #2c2c2c; /* Alternatif arka plan rengi (daha koyu gri) */
+}
+
+tr:nth-child(odd) {
+    background-color: #1c1c1c; /* Alternatif arka plan rengi (daha açık gri) */
+}
+
+
+/* Table Styles */
+#product-list {
+    padding: 20px;
+    border: 1px solid rgb(54, 4, 7);
+    /*tablo en dış çerçeve rengi*/
+    margin-top: 20px;
+}
+
+
+/* Column Widths */
+#product-list th:nth-child(1) {
+    width: 10%;
+}
+
+/* MARKA column */
+#product-list th:nth-child(2) {
+    width: 30%;
+}
+
+/* ÜRÜN ADI column */
+#product-list th:nth-child(3) {
+    width: 10%;
+}
+
+/* FİYATI column */
+#product-list th:nth-child(4) {
+    width: 5%;
+   
+}
+
+/* KAMPANYA column */
+#product-list th:nth-child(5) {
+    width: 5%;
+}
+
+/* FİRMA column */
+#product-list th:nth-child(6) {
+    width: 10%;
+}
+
+/* CAM column */
+#product-list th:nth-child(7) {
+    width: 5%;
+}
+
+
+/* ????? column başlık hücresini ortala */
+#product-list th:nth-child(8) {
+    width: 10%;
+    text-align: center; /* Başlık hücresindeki metni ortalar */
+}
+
+/* ????? column veri hücrelerini ortala */
+#product-list td:nth-child(8) {
+    text-align: center; /* Veri hücrelerindeki metni ortalar */
+}
+
+
+/* ODAK column */
+#product-list th:nth-child(9) {
+    width: 15%;
+}
+
+/* SON FİYAT column */
+    </style>
+    
 
 </head>
 
