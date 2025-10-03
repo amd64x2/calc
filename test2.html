@@ -5,49 +5,312 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Matrix Okuyucu</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    video {
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+    
+    .video-container {
+      position: relative;
       width: 100%;
       max-width: 400px;
-      border: 2px solid #000;
-      border-radius: 8px;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
     }
+    
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .scanner-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 60%;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.3);
+    }
+    
     #result {
-      margin-top: 15px;
-      font-size: 1.2em;
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1em;
       color: #333;
       word-wrap: break-word;
+      margin-bottom: 15px;
+    }
+    
+    #result.success {
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+    }
+    
+    #result.error {
+      background: #f44336;
+      color: white;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn-start {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-stop {
+      background: #f44336;
+      color: white;
+    }
+    
+    .btn-switch {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .status {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h2 {
+        font-size: 1.2em;
+      }
+      
+      button {
+        padding: 10px 20px;
+        font-size: 0.9em;
+      }
     }
   </style>
-  <script type="module">
-    import { BrowserMultiFormatReader, NotFoundException } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
-
-    window.addEventListener('load', () => {
-      const reader = new BrowserMultiFormatReader();
-      const videoElem = document.getElementById('video');
-      const resultElem = document.getElementById('result');
-
-      // Kamerayı aç ve barkod taramayı başlat
-      reader.decodeFromVideoDevice(null, videoElem, (result, err) => {
-        if (result) {
-          resultElem.textContent = "Kod: " + result.getText();
-          // Burada kendi API'nize sorgu atabilirsiniz
-          // fetch('/api/fiyat?kod=' + encodeURIComponent(result.getText()))...
-        } else if (err && !(err instanceof NotFoundException)) {
-          console.error(err);
-          resultElem.textContent = "Hata: " + err.message;
-        }
-      });
-    });
-  </script>
 </head>
 <body>
-  <h2>📷 Data Matrix & QR Okuyucu</h2>
-  <video id="video" autoplay playsinline></video>
-  <p id="result">Kod bekleniyor...</p>
+  <div class="container">
+    <h2>📷 Data Matrix & QR Okuyucu</h2>
+    
+    <div class="video-container" id="videoContainer" style="display: none;">
+      <video id="video" autoplay playsinline></video>
+      <div class="scanner-overlay"></div>
+    </div>
+    
+    <div id="result">Kamerayı başlatmak için butona basın...</div>
+    
+    <div class="controls">
+      <button class="btn-start" id="startBtn">Kamerayı Başlat</button>
+      <button class="btn-stop" id="stopBtn" style="display: none;">Durdur</button>
+      <button class="btn-switch" id="switchBtn" style="display: none;">Kamera Değiştir</button>
+    </div>
+    
+    <div class="status" id="status"></div>
+  </div>
+
+  <script type="module">
+    import { BrowserMultiFormatReader } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
+    
+    let reader = null;
+    let currentStream = null;
+    let isScanning = false;
+    let useFrontCamera = false;
+    
+    const videoElem = document.getElementById('video');
+    const videoContainer = document.getElementById('videoContainer');
+    const resultElem = document.getElementById('result');
+    const statusElem = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const switchBtn = document.getElementById('switchBtn');
+    
+    function updateStatus(message, isError = false) {
+      statusElem.textContent = message;
+      statusElem.style.color = isError ? '#f44336' : '#666';
+    }
+    
+    function showResult(text, isSuccess = true) {
+      resultElem.textContent = text;
+      resultElem.className = isSuccess ? 'success' : 'error';
+      
+      // Başarılı okumada titreşim (destekleniyorsa)
+      if (isSuccess && 'vibrate' in navigator) {
+        navigator.vibrate(200);
+      }
+    }
+    
+    async function startScanner() {
+      try {
+        if (!reader) {
+          reader = new BrowserMultiFormatReader();
+        }
+        
+        // Kamera seçenekleri
+        const constraints = {
+          video: {
+            facingMode: useFrontCamera ? 'user' : 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        };
+        
+        updateStatus('Kamera açılıyor...');
+        videoContainer.style.display = 'block';
+        
+        // Kamerayı başlat
+        await reader.decodeFromConstraints(
+          constraints,
+          videoElem,
+          (result, err) => {
+            if (result) {
+              showResult(`✓ Kod: ${result.getText()}`, true);
+              updateStatus('Kod başarıyla okundu! Devam etmek için kamerayı açık tutun.');
+              
+              // Burada API çağrısı yapabilirsiniz:
+              // fetch('/api/fiyat?kod=' + encodeURIComponent(result.getText()))
+              //   .then(res => res.json())
+              //   .then(data => console.log(data));
+              
+            } else if (err) {
+              // Sürekli "bulunamadı" hatalarını gösterme
+              if (err.name !== 'NotFoundException') {
+                console.error(err);
+                showResult(`Hata: ${err.message}`, false);
+              }
+            }
+          }
+        );
+        
+        isScanning = true;
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        switchBtn.style.display = 'inline-block';
+        updateStatus('Tarama aktif - Bir kodu kameraya gösterin');
+        
+      } catch (error) {
+        console.error('Kamera hatası:', error);
+        let errorMessage = 'Kamera erişim hatası: ';
+        
+        if (error.name === 'NotAllowedError') {
+          errorMessage += 'Kamera izni verilmedi. Lütfen tarayıcı ayarlarından izin verin.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage += 'Kamera bulunamadı. Cihazınızda kamera olduğundan emin olun.';
+        } else {
+          errorMessage += error.message;
+        }
+        
+        showResult(errorMessage, false);
+        updateStatus('', true);
+        videoContainer.style.display = 'none';
+      }
+    }
+    
+    function stopScanner() {
+      if (reader) {
+        reader.reset();
+      }
+      
+      // Video stream'i durdur
+      if (videoElem.srcObject) {
+        videoElem.srcObject.getTracks().forEach(track => track.stop());
+        videoElem.srcObject = null;
+      }
+      
+      isScanning = false;
+      videoContainer.style.display = 'none';
+      startBtn.style.display = 'inline-block';
+      stopBtn.style.display = 'none';
+      switchBtn.style.display = 'none';
+      showResult('Kamera durduruldu', false);
+      updateStatus('');
+    }
+    
+    function switchCamera() {
+      useFrontCamera = !useFrontCamera;
+      stopScanner();
+      setTimeout(() => startScanner(), 100);
+    }
+    
+    // Event listener'lar
+    startBtn.addEventListener('click', startScanner);
+    stopBtn.addEventListener('click', stopScanner);
+    switchBtn.addEventListener('click', switchCamera);
+    
+    // Sayfa kapatılırken kamerayı kapat
+    window.addEventListener('beforeunload', () => {
+      if (isScanning) {
+        stopScanner();
+      }
+    });
+    
+    // Sayfa görünürlüğü değiştiğinde
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && isScanning) {
+        stopScanner();
+      }
+    });
+  </script>
 </body>
 </html>
