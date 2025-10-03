@@ -2,28 +2,52 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Matrix Okuyucu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    video {
+      width: 100%;
+      max-width: 400px;
+      border: 2px solid #000;
+      border-radius: 8px;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 1.2em;
+      color: #333;
+      word-wrap: break-word;
+    }
+  </style>
   <script type="module">
-    import { BrowserMultiFormatReader } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
+    import { BrowserMultiFormatReader, NotFoundException } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
 
     window.addEventListener('load', () => {
       const reader = new BrowserMultiFormatReader();
       const videoElem = document.getElementById('video');
       const resultElem = document.getElementById('result');
 
+      // Kamerayı aç ve barkod taramayı başlat
       reader.decodeFromVideoDevice(null, videoElem, (result, err) => {
         if (result) {
           resultElem.textContent = "Kod: " + result.getText();
-          // Burada kodu alıp fiyat bilgisi için API sorgusu yapabilirsin
+          // Burada kendi API'nize sorgu atabilirsiniz
+          // fetch('/api/fiyat?kod=' + encodeURIComponent(result.getText()))...
+        } else if (err && !(err instanceof NotFoundException)) {
+          console.error(err);
+          resultElem.textContent = "Hata: " + err.message;
         }
       });
     });
   </script>
 </head>
 <body>
-  <h2>📷 Data Matrix Okuyucu</h2>
- <video id="video" autoplay playsinline style="width:100%;max-width:400px;border:1px solid #000"></video>
-
+  <h2>📷 Data Matrix & QR Okuyucu</h2>
+  <video id="video" autoplay playsinline></video>
   <p id="result">Kod bekleniyor...</p>
 </body>
 </html>
