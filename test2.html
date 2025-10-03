@@ -174,9 +174,9 @@
     import { BrowserMultiFormatReader } from "https://cdn.jsdelivr.net/npm/@zxing/browser@latest/+esm";
     
     let reader = null;
-    let currentStream = null;
     let isScanning = false;
     let useFrontCamera = false;
+    let scanningControls = null;
     
     const videoElem = document.getElementById('video');
     const videoContainer = document.getElementById('videoContainer');
@@ -195,7 +195,6 @@
       resultElem.textContent = text;
       resultElem.className = isSuccess ? 'success' : 'error';
       
-      // Başarılı okumada titreşim (destekleniyorsa)
       if (isSuccess && 'vibrate' in navigator) {
         navigator.vibrate(200);
       }
@@ -207,38 +206,55 @@
           reader = new BrowserMultiFormatReader();
         }
         
-        // Kamera seçenekleri
-        const constraints = {
-          video: {
-            facingMode: useFrontCamera ? 'user' : 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        };
-        
         updateStatus('Kamera açılıyor...');
         videoContainer.style.display = 'block';
         
-        // Kamerayı başlat
-        await reader.decodeFromConstraints(
-          constraints,
+        // Kamera cihazlarını listele
+        const videoDevices = await navigator.mediaDevices.enumerateDevices()
+          .then(devices => devices.filter(device => device.kind === 'videoinput'));
+        
+        let selectedDeviceId = null;
+        
+        // Kamera seçimi (arka/ön)
+        if (videoDevices.length > 0) {
+          if (useFrontCamera) {
+            // Ön kamera ara
+            const frontCamera = videoDevices.find(device => 
+              device.label.toLowerCase().includes('front') || 
+              device.label.toLowerCase().includes('user')
+            );
+            selectedDeviceId = frontCamera ? frontCamera.deviceId : videoDevices[0].deviceId;
+          } else {
+            // Arka kamera ara
+            const backCamera = videoDevices.find(device => 
+              device.label.toLowerCase().includes('back') || 
+              device.label.toLowerCase().includes('rear') ||
+              device.label.toLowerCase().includes('environment')
+            );
+            selectedDeviceId = backCamera ? backCamera.deviceId : videoDevices[videoDevices.length - 1].deviceId;
+          }
+        }
+        
+        // Taramayı başlat
+        scanningControls = await reader.decodeFromVideoDevice(
+          selectedDeviceId,
           videoElem,
-          (result, err) => {
+          (result, error) => {
             if (result) {
-              showResult(`✓ Kod: ${result.getText()}`, true);
-              updateStatus('Kod başarıyla okundu! Devam etmek için kamerayı açık tutun.');
+              const code = result.getText();
+              showResult(`✓ Kod: ${code}`, true);
+              updateStatus('Kod başarıyla okundu!');
+              console.log('Okunan kod:', code);
               
-              // Burada API çağrısı yapabilirsiniz:
-              // fetch('/api/fiyat?kod=' + encodeURIComponent(result.getText()))
+              // API çağrısı örneği:
+              // fetch('/api/fiyat?kod=' + encodeURIComponent(code))
               //   .then(res => res.json())
-              //   .then(data => console.log(data));
-              
-            } else if (err) {
-              // Sürekli "bulunamadı" hatalarını gösterme
-              if (err.name !== 'NotFoundException') {
-                console.error(err);
-                showResult(`Hata: ${err.message}`, false);
-              }
+              //   .then(data => console.log(data))
+              //   .catch(err => console.error('API hatası:', err));
+            }
+            
+            if (error && error.name !== 'NotFoundException') {
+              console.error('Okuma hatası:', error);
             }
           }
         );
@@ -246,33 +262,42 @@
         isScanning = true;
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
-        switchBtn.style.display = 'inline-block';
-        updateStatus('Tarama aktif - Bir kodu kameraya gösterin');
+        switchBtn.style.display = videoDevices.length > 1 ? 'inline-block' : 'none';
+        updateStatus('Tarama aktif - Kodu kameraya gösterin');
         
       } catch (error) {
         console.error('Kamera hatası:', error);
-        let errorMessage = 'Kamera erişim hatası: ';
+        let errorMessage = 'Kamera hatası: ';
         
         if (error.name === 'NotAllowedError') {
-          errorMessage += 'Kamera izni verilmedi. Lütfen tarayıcı ayarlarından izin verin.';
+          errorMessage += 'Kamera izni verilmedi. Lütfen izin verin.';
         } else if (error.name === 'NotFoundError') {
-          errorMessage += 'Kamera bulunamadı. Cihazınızda kamera olduğundan emin olun.';
+          errorMessage += 'Kamera bulunamadı.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage += 'Kamera başka bir uygulama tarafından kullanılıyor.';
         } else {
-          errorMessage += error.message;
+          errorMessage += error.message || 'Bilinmeyen hata';
         }
         
         showResult(errorMessage, false);
         updateStatus('', true);
         videoContainer.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
+        switchBtn.style.display = 'none';
       }
     }
     
     function stopScanner() {
+      if (scanningControls) {
+        scanningControls.stop();
+        scanningControls = null;
+      }
+      
       if (reader) {
         reader.reset();
       }
       
-      // Video stream'i durdur
       if (videoElem.srcObject) {
         videoElem.srcObject.getTracks().forEach(track => track.stop());
         videoElem.srcObject = null;
@@ -290,22 +315,17 @@
     function switchCamera() {
       useFrontCamera = !useFrontCamera;
       stopScanner();
-      setTimeout(() => startScanner(), 100);
+      setTimeout(() => startScanner(), 300);
     }
     
-    // Event listener'lar
     startBtn.addEventListener('click', startScanner);
     stopBtn.addEventListener('click', stopScanner);
     switchBtn.addEventListener('click', switchCamera);
     
-    // Sayfa kapatılırken kamerayı kapat
     window.addEventListener('beforeunload', () => {
-      if (isScanning) {
-        stopScanner();
-      }
+      if (isScanning) stopScanner();
     });
     
-    // Sayfa görünürlüğü değiştiğinde
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && isScanning) {
         stopScanner();
