@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Döviz & Altın Fiyatları</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg,#1a2a6c,#c49b9b,#b8b1a3); color:#333; min-height:100vh; }
+
+        .price-bar { position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.9); color:#fff; padding:12px 0;
+            display:flex; justify-content:space-around; flex-wrap:wrap; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:1000; }
+        .price-item { display:flex; flex-direction:column; align-items:center; padding:5px 15px; min-width:120px; }
+        .price-label { font-size:14px; opacity:0.9; margin-bottom:5px; }
+        .price-value { font-weight:600; font-size:18px; }
+        .price-change { font-size:13px; margin-top:3px; }
+        .change-up { color:#4caf50; } .change-down { color:#f44336; }
+
+        .sidebar-toggle { position:fixed; bottom:20px; right:20px; background:#283593; color:#fff; border:none; border-radius:50%;
+            width:60px; height:60px; font-size:24px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); z-index:1001;
+            display:flex; align-items:center; justify-content:center; }
+        .sidebar { position:fixed; top:0; right:-400px; width:380px; height:100vh; background:#fff; box-shadow:-5px 0 15px rgba(0,0,0,0.2);
+            padding:20px; padding-top:20px; overflow-y:auto; transition:right .3s ease; z-index:1002; }
+        .sidebar.open { right:0; }
+        .sidebar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; padding-bottom:15px; border-bottom:2px solid #eee; }
+        .sidebar-title { font-size:1.8rem; color:#283593; }
+        .close-sidebar { background:none; border:none; font-size:24px; cursor:pointer; color:#666; }
+        .input-group { margin-bottom:20px; }
+        .input-group label { display:block; margin-bottom:8px; font-weight:600; color:#333; font-size:1.05rem; }
+        .input-group input { width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:15px; }
+        .update-btn { background:#283593; color:#fff; border:none; padding:12px; border-radius:8px; font-size:16px; cursor:pointer; width:100%; font-weight:600; }
+        .last-update { text-align:center; color:#fff; font-size:1rem; margin-top:30px; padding:15px; background:rgba(0,0,0,0.3); border-radius:10px; }
+
+        .urunler { margin:30px auto; max-width:900px; background:rgba(255,255,255,0.92); padding:18px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.18); margin-top:20px; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:12px; border-bottom:1px solid #e6e6e6; text-align:center; }
+        th { background:#283593; color:#fff; }
+        input[type="number"] { width:90px; padding:6px; border:1px solid #aaa; border-radius:6px; text-align:center; }
+        .genel-toplam { font-size:1.25rem; font-weight:700; margin-top:12px; text-align:right; }
+        
+        @media (max-width:768px){ 
+            .price-bar { padding:8px 5px; }
+            .price-item{ flex:0 0 50%; margin-bottom:10px; padding:5px 8px; min-width:auto; } 
+            .price-label { font-size:11px; }
+            .price-value { font-size:15px; }
+            .price-change { font-size:11px; }
+            .sidebar{ width:100%; right:-100%; } 
+            .sidebar.open { right:0; }
+            .sidebar-toggle { bottom:15px; right:15px; width:50px; height:50px; font-size:20px; }
+            .urunler { padding:12px; margin-top:20px; }
+            table { font-size:14px; }
+            th, td { padding:8px 4px; }
+            input[type="number"] { width:70px; padding:4px; font-size:14px; }
+            .genel-toplam { font-size:1rem; }
+            .last-update { font-size:0.9rem; padding:10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="price-bar">
+        <div class="price-item"><span class="price-label">GRAM ALTIN</span><span class="price-value" id="top-gram">2.345,67</span><span class="price-change change-up" id="top-gram-change">+0,45%</span></div>
+        <div class="price-item"><span class="price-label">ÇEYREK ALTIN</span><span class="price-value" id="top-ceyrek">1.845,23</span><span class="price-change change-up" id="top-ceyrek-change">+0,32%</span></div>
+        <div class="price-item"><span class="price-label">YARIM ALTIN</span><span class="price-value" id="top-yarim">3.725,89</span><span class="price-change change-down" id="top-yarim-change">-0,18%</span></div>
+        <div class="price-item"><span class="price-label">TAM ALTIN</span><span class="price-value" id="top-tam">7.425,16</span><span class="price-change change-up" id="top-tam-change">+0,27%</span></div>
+        <div class="price-item"><span class="price-label">ATA ALTIN</span><span class="price-value" id="top-ata">15.250,42</span><span class="price-change change-up" id="top-ata-change">+0,38%</span></div>
+        <div class="price-item"><span class="price-label">DOLAR</span><span class="price-value" id="top-dolar">32,45</span><span class="price-change change-up" id="top-dolar-change">+0,12%</span></div>
+        <div class="price-item"><span class="price-label">EURO</span><span class="price-value" id="top-euro">35,28</span><span class="price-change change-down" id="top-euro-change">-0,24%</span></div>
+    </div>
+
+    <div class="urunler">
+        <table>
+            <thead>
+                <tr><th>Ürün</th><th>Birim</th><th>Toplam (TL)</th></tr>
+            </thead>
+            <tbody id="urun-tablo">
+                <tr><td>Gram Altın</td><td><input type="number" id="birim-gram" min="0" step="any"></td><td id="toplam-gram">0,00</td></tr>
+                <tr><td>Çeyrek Altın</td><td><input type="number" id="birim-ceyrek" min="0" step="any"></td><td id="toplam-ceyrek">0,00</td></tr>
+                <tr><td>Yarım Altın</td><td><input type="number" id="birim-yarim" min="0" step="any"></td><td id="toplam-yarim">0,00</td></tr>
+                <tr><td>Tam Altın</td><td><input type="number" id="birim-tam" min="0" step="any"></td><td id="toplam-tam">0,00</td></tr>
+                <tr><td>Ata Altın</td><td><input type="number" id="birim-ata" min="0" step="any"></td><td id="toplam-ata">0,00</td></tr>
+                <tr><td>Dolar</td><td><input type="number" id="birim-dolar" min="0" step="any"></td><td id="toplam-dolar">0,00</td></tr>
+                <tr><td>Euro</td><td><input type="number" id="birim-euro" min="0" step="any"></td><td id="toplam-euro">0,00</td></tr>
+            </tbody>
+        </table>
+        <div class="genel-toplam">Genel Toplam: <span id="genel-toplam">0,00</span> TL</div>
+    </div>
+
+    <div class="last-update" id="last-update">Son güncelleme: 27 Mayıs 2023 - 14:30</div>
+
+    <button class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-edit"></i></button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Fiyat Güncelleme</h2>
+            <button class="close-sidebar" id="close-sidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group"><label for="gram-input">Gram Altın (TL)</label><input type="text" id="gram-input" placeholder="örn. 2345,67"></div>
+        <div class="input-group"><label for="ceyrek-input">Çeyrek Altın (TL)</label><input type="text" id="ceyrek-input" placeholder="örn. 1845,23"></div>
+        <div class="input-group"><label for="yarim-input">Yarım Altın (TL)</label><input type="text" id="yarim-input" placeholder="örn. 3725,89"></div>
+        <div class="input-group"><label for="tam-input">Tam Altın (TL)</label><input type="text" id="tam-input" placeholder="örn. 7425,16"></div>
+        <div class="input-group"><label for="ata-input">Ata Altın (TL)</label><input type="text" id="ata-input" placeholder="örn. 15250,42"></div>
+        <div class="input-group"><label for="dolar-input">Dolar (TL)</label><input type="text" id="dolar-input" placeholder="örn. 32,45"></div>
+        <div class="input-group"><label for="euro-input">Euro (TL)</label><input type="text" id="euro-input" placeholder="örn. 35,28"></div>
+        <button class="update-btn" id="update-btn">Fiyatları Güncelle</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const closeSidebar = document.getElementById('close-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const updateBtn = document.getElementById('update-btn');
+            const lastUpdateElement = document.getElementById('last-update');
+            const genelToplamEl = document.getElementById('genel-toplam');
+            const priceBar = document.querySelector('.price-bar');
+
+            // Price-bar yüksekliğine göre body padding ayarla
+            function adjustBodyPadding() {
+                const priceBarHeight = priceBar.offsetHeight;
+                document.body.style.paddingTop = (priceBarHeight + 20) + 'px';
+            }
+
+            // Sayfa yüklendiğinde ve pencere boyutu değiştiğinde çalıştır
+            adjustBodyPadding();
+            window.addEventListener('resize', adjustBodyPadding);
+
+            // Yardımcı: yerel biçimli sayıyı parse eder (binlik ayırıcı . ve ondalık , destekli)
+            function parseLocaleNumber(str) {
+                if (str === null || str === undefined) return NaN;
+                const cleaned = String(str).trim().replace(/\s/g,'').replace(/\./g,'').replace(',', '.');
+                return cleaned === '' ? NaN : parseFloat(cleaned);
+            }
+            function formatPriceNumber(num) {
+                if (!isFinite(num)) return '0,00';
+                return Number(num).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Varsayılan fiyatlar (gerekirse localStorage ile override edilir)
+            let prices = {
+                gram: { value: '2.345,67', change: '+0,45%', direction: 'up' },
+                ceyrek: { value: '1.845,23', change: '+0,32%', direction: 'up' },
+                yarim: { value: '3.725,89', change: '-0,18%', direction: 'down' },
+                tam: { value: '7.425,16', change: '+0,27%', direction: 'up' },
+                ata: { value: '15.250,42', change: '+0,38%', direction: 'up' },
+                dolar: { value: '32,45', change: '+0,12%', direction: 'up' },
+                euro: { value: '35,28', change: '-0,24%', direction: 'down' }
+            };
+
+            // Birimler (adet/gram/kur vb.)
+            let birimler = { gram:0, ceyrek:0, yarim:0, tam:0, ata:0, dolar:0, euro:0 };
+
+            // localStorage'tan yükle (varsa)
+            const storedPrices = localStorage.getItem('prices');
+            if (storedPrices) {
+                try { prices = JSON.parse(storedPrices); } catch(e) { /* ignore */ }
+            }
+            const storedBirimler = localStorage.getItem('birimler');
+            if (storedBirimler) {
+                try { birimler = JSON.parse(storedBirimler); } catch(e) { /* ignore */ }
+            }
+            const storedLast = localStorage.getItem('lastUpdate');
+            if (storedLast) {
+                lastUpdateElement.textContent = 'Son güncelleme: ' + storedLast;
+            }
+
+            // Sidebar toggle: artık aç/kapat (toggle)
+            sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+            closeSidebar.addEventListener('click', () => sidebar.classList.remove('open'));
+
+            function applyPricesToUI() {
+                for (let key in prices) {
+                    const lab = document.getElementById('top-' + key);
+                    const ch = document.getElementById('top-' + key + '-change');
+                    if (lab) lab.textContent = prices[key].value;
+                    if (ch) {
+                        ch.textContent = prices[key].change || '';
+                        ch.className = 'price-change ' + ((prices[key].direction === 'up') ? 'change-up' : 'change-down');
+                    }
+                }
+            }
+
+            function updateLastUpdateTime() {
+                const now = new Date();
+                const options = { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' };
+                const nowStr = now.toLocaleString('tr-TR', options);
+                lastUpdateElement.textContent = 'Son güncelleme: ' + nowStr;
+                localStorage.setItem('lastUpdate', nowStr);
+            }
+
+            function updatePrices() {
+                // inputlardan oku
+                const inputs = {
+                    gram: document.getElementById('gram-input').value,
+                    ceyrek: document.getElementById('ceyrek-input').value,
+                    yarim: document.getElementById('yarim-input').value,
+                    tam: document.getElementById('tam-input').value,
+                    ata: document.getElementById('ata-input').value,
+                    dolar: document.getElementById('dolar-input').value,
+                    euro: document.getElementById('euro-input').value
+                };
+
+                for (let key in inputs) {
+                    if (inputs[key] !== undefined && String(inputs[key]).trim() !== '') {
+                        const newValue = parseLocaleNumber(inputs[key]);
+                        const oldValue = parseLocaleNumber(prices[key].value);
+                        if (!isNaN(newValue) && isFinite(newValue)) {
+                            // Güncelle
+                            prices[key].value = formatPriceNumber(newValue);
+                            // change hesapla (eski değer 0 veya NaN ise 0 göster)
+                            let change = 0;
+                            if (isFinite(oldValue) && oldValue !== 0) {
+                                change = ( (newValue - oldValue) / oldValue * 100 );
+                            } else change = 0;
+                            const chStr = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+                            prices[key].change = chStr;
+                            prices[key].direction = (change >= 0) ? 'up' : 'down';
+                        }
+                    }
+                }
+
+                applyPricesToUI();
+                updateLastUpdateTime();
+                localStorage.setItem('prices', JSON.stringify(prices));
+
+                // temizle inputlar
+                Object.keys(inputs).forEach(k => {
+                    const el = document.getElementById(k + '-input');
+                    if (el) el.value = '';
+                });
+
+                sidebar.classList.remove('open');
+
+                // toplamlara yansıt
+                updateTotals();
+            }
+
+            function updateTotals() {
+                let genel = 0;
+                for (let key in birimler) {
+                    const fiyat = parseLocaleNumber(prices[key].value);
+                    const miktar = Number(birimler[key]) || 0;
+                    const toplam = (isFinite(fiyat) ? fiyat : 0) * miktar;
+                    const td = document.getElementById('toplam-' + key);
+                    if (td) td.textContent = formatPriceNumber(toplam);
+                    genel += toplam;
+                }
+                genelToplamEl.textContent = formatPriceNumber(genel);
+                // kaydet
+                localStorage.setItem('birimler', JSON.stringify(birimler));
+            }
+
+            // Update butonu
+            updateBtn.addEventListener('click', updatePrices);
+            // enter ile de çalışsın (sidebar içindeki inputlar)
+            document.querySelectorAll('#sidebar input').forEach(inp => {
+                inp.addEventListener('keypress', e => { if (e.key === 'Enter') updatePrices(); });
+            });
+
+            // Birim inputlarını bağla (her değişimde localStorage ve toplam güncellensin)
+            for (let key in birimler) {
+                const el = document.getElementById('birim-' + key);
+                if (!el) continue;
+                // var olan değeri göster
+                el.value = birimler[key] || '';
+                el.addEventListener('input', e => {
+                    birimler[key] = e.target.value === '' ? 0 : (parseFloat(e.target.value) || 0);
+                    updateTotals();
+                });
+            }
+
+            // İlk uygulama
+            applyPricesToUI();
+            updateTotals();
+        });
+    </script>
+</body>
+</html>
