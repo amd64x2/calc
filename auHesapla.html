@@ -9,12 +9,12 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg,#1a2a6c,#c49b9b,#b8b1a3); color:#333; min-height:100vh; }
 
-        .price-bar { position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.9); color:#fff; padding:12px 0;
-            display:flex; justify-content:space-around; flex-wrap:wrap; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:1000; }
-        .price-item { display:flex; flex-direction:column; align-items:center; padding:5px 15px; min-width:120px; }
-        .price-label { font-size:14px; opacity:0.9; margin-bottom:5px; }
-        .price-value { font-weight:600; font-size:18px; }
-        .price-change { font-size:13px; margin-top:3px; }
+        .price-bar { position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.9); color:#fff; padding:8px 5px;
+            display:flex; justify-content:space-around; flex-wrap:wrap; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:1000; gap:5px; }
+        .price-item { display:flex; flex-direction:column; align-items:center; padding:5px 10px; min-width:110px; }
+        .price-label { font-size:12px; opacity:0.9; margin-bottom:3px; }
+        .price-value { font-weight:600; font-size:16px; }
+        .price-change { font-size:11px; margin-top:2px; }
         .change-up { color:#4caf50; } .change-down { color:#f44336; }
 
         .sidebar-toggle { position:fixed; bottom:20px; right:20px; background:#283593; color:#fff; border:none; border-radius:50%;
@@ -40,11 +40,11 @@
         .genel-toplam { font-size:1.25rem; font-weight:700; margin-top:12px; text-align:right; }
         
         @media (max-width:768px){ 
-            .price-bar { padding:8px 5px; }
-            .price-item{ flex:0 0 50%; margin-bottom:10px; padding:5px 8px; min-width:auto; } 
-            .price-label { font-size:11px; }
-            .price-value { font-size:15px; }
-            .price-change { font-size:11px; }
+            .price-bar { padding:5px 3px; gap:3px; }
+            .price-item{ flex:0 0 24%; margin-bottom:5px; padding:4px 3px; min-width:auto; } 
+            .price-label { font-size:9px; margin-bottom:2px; }
+            .price-value { font-size:12px; }
+            .price-change { font-size:9px; margin-top:1px; }
             .sidebar{ width:100%; right:-100%; } 
             .sidebar.open { right:0; }
             .sidebar-toggle { bottom:15px; right:15px; width:50px; height:50px; font-size:20px; }
