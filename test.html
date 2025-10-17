@@ -274,7 +274,7 @@
         }
 
         .debug-canvas {
-            display: none;
+            display: block;
             margin-top: 10px;
             border: 2px solid #667eea;
             border-radius: 8px;
@@ -563,8 +563,8 @@ function detectMarkerEdges(srcCanvasCtx){
         // Gri tonlamaya çevir
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         
-        // Threshold - beyaz noktaları bul
-        cv.threshold(gray, binary, 200, 255, cv.THRESH_BINARY);
+        // Threshold - beyaz/parlak noktaları bul (150'ye düşürdük)
+        cv.threshold(gray, binary, 150, 255, cv.THRESH_BINARY);
         
         // Morfolojik işlemler
         const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5,5));
