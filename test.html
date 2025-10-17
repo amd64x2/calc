@@ -423,26 +423,16 @@ bridgeWidthInput.addEventListener('input', updateTotalReference);
 
 // Başlat
 startBtn.addEventListener('click', async () => {
-    if (!opencvReady) {
-        showStatus('OpenCV yükleniyor, lütfen bekleyin...', 'error');
-        setTimeout(() => {
-            if (opencvReady) {
-                startMeasurement();
-            } else {
-                showStatus('OpenCV yüklenemedi, sayfayı yenileyin', 'error');
-            }
-        }, 2000);
-        return;
-    }
-    startMeasurement();
-});
-
-async function startMeasurement() {
     totalRef = updateTotalReference();
     setupSection.style.display = 'none';
     cameraSection.classList.add('active');
     await initCamera();
-}
+    
+    // OpenCV hazır değilse uyar ama devam et
+    if (!opencvReady) {
+        showStatus('⚠️ OpenCV yükleniyor, işaret tespiti birazdan aktif olacak...', '');
+    }
+});
 
 // Kamera başlat
 async function initCamera() {
@@ -777,4 +767,51 @@ function drawPupilsOnCanvas(ctx, landmarks){
     ctx.beginPath();
     ctx.arc(x1, y1, 5, 0, Math.PI*2);
     ctx.fillStyle = '#ff0000';
-    ctx.fill
+    ctx.fill();
+    
+    // Sol göz
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2-size); ctx.lineTo(x2, y2+size);
+    ctx.moveTo(x2-size, y2); ctx.lineTo(x2+size, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x2, y2, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#ff0000';
+    ctx.fill();
+}
+
+// Stop kamera
+function stopCamera(){
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    if(faceMesh) faceMesh.close();
+}
+
+// Status
+function showStatus(msg, type=''){
+    statusMsg.textContent = msg;
+    statusMsg.className = 'status ' + type;
+}
+
+// Diğer kontroller
+cancelBtn.addEventListener('click', () => {
+    stopCamera();
+    cameraSection.classList.remove('active');
+    setupSection.style.display = 'block';
+});
+
+retryBtn.addEventListener('click', () => {
+    resultSection.classList.remove('active');
+    setupSection.style.display = 'block';
+});
+
+downloadBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `PD_Olcum_${Date.now()}.png`;
+    link.href = resultImage.src;
+    link.click();
+});
+</script>
+</body>
+</html>
