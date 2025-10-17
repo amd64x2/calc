@@ -334,28 +334,35 @@
     </div>
 
     <script>
-       // Değişkenler
-let video, canvas, ctx;
-let stream;
-let lensWidth, bridgeWidth, totalRef;
+       <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+<script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
 
-// DOM Elementleri
-const setupSection = document.getElementById('setupSection');
-const cameraSection = document.getElementById('cameraSection');
-const resultSection = document.getElementById('resultSection');
+<script>
+let video, canvas, ctx;
+let faceMesh, stream;
+let totalRef; // Lens + Köprü + Lens (mm)
+let currentFaceData = null;
+
+// DOM
 const lensWidthInput = document.getElementById('lensWidth');
 const bridgeWidthInput = document.getElementById('bridgeWidth');
 const totalRefSpan = document.getElementById('totalReference');
 const startBtn = document.getElementById('startBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const captureBtn = document.getElementById('captureBtn');
+const statusMsg = document.getElementById('statusMsg');
+const setupSection = document.getElementById('setupSection');
+const cameraSection = document.getElementById('cameraSection');
+const resultSection = document.getElementById('resultSection');
+const resultImage = document.getElementById('resultImage');
+const rightPDSpan = document.getElementById('rightPD');
+const leftPDSpan = document.getElementById('leftPD');
+const totalPDSpan = document.getElementById('totalPD');
 const retryBtn = document.getElementById('retryBtn');
 const downloadBtn = document.getElementById('downloadBtn');
-const statusMsg = document.getElementById('statusMsg');
 
-let lastDetectedRect = null; // Çerçeve verisi
-
-// Referans hesaplama
+// Referans güncelle
 function updateTotalReference() {
     const lens = parseFloat(lensWidthInput.value) || 52;
     const bridge = parseFloat(bridgeWidthInput.value) || 18;
@@ -367,18 +374,15 @@ function updateTotalReference() {
 lensWidthInput.addEventListener('input', updateTotalReference);
 bridgeWidthInput.addEventListener('input', updateTotalReference);
 
-// Kamera başlat
+// Başlat
 startBtn.addEventListener('click', async () => {
-    lensWidth = parseFloat(lensWidthInput.value);
-    bridgeWidth = parseFloat(bridgeWidthInput.value);
-    totalRef = lensWidth + bridgeWidth + lensWidth;
-
+    totalRef = updateTotalReference();
     setupSection.style.display = 'none';
     cameraSection.classList.add('active');
-
     await initCamera();
 });
 
+// Kamera başlat
 async function initCamera() {
     video = document.getElementById('video');
     canvas = document.getElementById('canvas');
@@ -386,142 +390,131 @@ async function initCamera() {
 
     try {
         stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }
+            video: { width: { ideal:1280 }, height:{ ideal:720 } }
         });
-
         video.srcObject = stream;
         video.addEventListener('loadedmetadata', () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            showStatus('Gözlük çerçevesi algılanıyor...', 'info');
-            startGlassesDetection();
+            initFaceMesh();
         });
     } catch (err) {
-        showStatus('Kamera erişimi başarısız: ' + err.message, 'error');
+        showStatus('Kamera erişimi başarısız: '+err.message, 'error');
     }
 }
 
-// ==================== OpenCV.js ile Gözlük Çerçevesi Tespiti ====================
-
-function startGlassesDetection() {
-    if (typeof cv === 'undefined' || !cv.Mat) {
-        showStatus('OpenCV.js yükleniyor, lütfen bekleyin...', 'info');
-        setTimeout(startGlassesDetection, 1000);
-        return;
-    }
-    detectGlassesFrame();
-}
-
-function detectGlassesFrame() {
-    if (!video || video.readyState !== 4) {
-        requestAnimationFrame(detectGlassesFrame);
-        return;
-    }
-
-    const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-    const dst = new cv.Mat();
-    const gray = new cv.Mat();
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
-
-    // Video karesini al
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    src.data.set(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
-
-    // Gri ton + bulanıklaştır + kenar tespiti
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-    cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0);
-    cv.Canny(gray, dst, 50, 150);
-
-    // Konturları bul
-    cv.findContours(dst, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-    let bestRect = null;
-    let maxArea = 0;
-
-    for (let i = 0; i < contours.size(); i++) {
-        const cnt = contours.get(i);
-        const peri = cv.arcLength(cnt, true);
-        const approx = new cv.Mat();
-        cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
-
-        if (approx.rows === 4) { // 4 köşe: dikdörtgen olabilir
-            const area = cv.contourArea(approx);
-            if (area > maxArea) {
-                maxArea = area;
-                bestRect = approx;
-            }
-        }
-    }
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    if (bestRect) {
-        ctx.strokeStyle = '#00ff00';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        let points = [];
-        for (let i = 0; i < 4; i++) {
-            const x = bestRect.intPtr(i, 0)[0];
-            const y = bestRect.intPtr(i, 0)[1];
-            points.push({ x, y });
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.stroke();
-
-        lastDetectedRect = points;
-        captureBtn.disabled = false;
-        showStatus('🟢 Gözlük çerçevesi bulundu! Fotoğraf çekebilirsiniz', 'success');
-    } else {
-        captureBtn.disabled = true;
-        showStatus('Gözlük çerçevesi aranıyor...', 'info');
-    }
-
-    src.delete(); dst.delete(); gray.delete(); contours.delete(); hierarchy.delete();
-    requestAnimationFrame(detectGlassesFrame);
-}
-
-// ==================== Fotoğraf Çekme ve PD Hesabı ====================
-
-captureBtn.addEventListener('click', () => {
-    if (!lastDetectedRect) return;
-
-    const captureCanvas = document.createElement('canvas');
-    captureCanvas.width = canvas.width;
-    captureCanvas.height = canvas.height;
-    const captureCtx = captureCanvas.getContext('2d');
-    captureCtx.drawImage(video, 0, 0);
-
-    // Yeşil çerçeveyi çiz
-    captureCtx.strokeStyle = '#00ff00';
-    captureCtx.lineWidth = 3;
-    captureCtx.beginPath();
-    lastDetectedRect.forEach((p, i) => {
-        if (i === 0) captureCtx.moveTo(p.x, p.y);
-        else captureCtx.lineTo(p.x, p.y);
+// FaceMesh
+function initFaceMesh() {
+    faceMesh = new FaceMesh({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
     });
-    captureCtx.closePath();
-    captureCtx.stroke();
+    faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+    faceMesh.onResults(onResults);
+    detectFrame();
+}
 
-    // PD hesaplaması (örnek — ileride pupil tespitiyle birleştirilecek)
-    const widthPx = Math.hypot(
-        lastDetectedRect[1].x - lastDetectedRect[0].x,
-        lastDetectedRect[1].y - lastDetectedRect[0].y
-    );
-    const mmPerPixel = totalRef / widthPx;
-    const totalPDmm = (widthPx * mmPerPixel).toFixed(2);
+// Video karelerini gönder
+async function detectFrame() {
+    if (video.readyState === 4) {
+        await faceMesh.send({ image: video });
+    }
+    requestAnimationFrame(detectFrame);
+}
 
-    document.getElementById('totalPD').textContent = totalPDmm + ' mm';
-    document.getElementById('leftPD').textContent = '—';
-    document.getElementById('rightPD').textContent = '—';
+// Sonuç alındığında
+function onResults(results) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
 
-    const resultImage = document.getElementById('resultImage');
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+        currentFaceData = results.multiFaceLandmarks[0];
+
+        // Gözbebekleri + çapraz çiz
+        drawPupils(currentFaceData);
+
+        // İşaretleri bul ve PD hesapla
+        const edges = detectMarkerEdges(ctx,[200,200,200],[255,255,255]);
+        if(edges){
+            captureBtn.disabled = false;
+            showStatus('✓ Yüz ve işaretler algılandı, fotoğraf çekebilirsiniz', 'success');
+        } else {
+            captureBtn.disabled = true;
+            showStatus('İşaretler bulunamadı, kameraya gösterin', '');
+        }
+    } else {
+        currentFaceData = null;
+        captureBtn.disabled = true;
+        showStatus('Yüz bulunamadı, kameraya bakın', '');
+    }
+}
+
+// Gözbebeklerine + işareti çiz
+function drawPupils(landmarks){
+    const rightPupil = landmarks[468];
+    const leftPupil = landmarks[473];
+    drawCrosshair(rightPupil.x*canvas.width,rightPupil.y*canvas.height,'#ff0000');
+    drawCrosshair(leftPupil.x*canvas.width,leftPupil.y*canvas.height,'#ff0000');
+}
+
+function drawCrosshair(x,y,color){
+    ctx.strokeStyle=color;
+    ctx.lineWidth=2;
+    const size=15;
+    ctx.beginPath();
+    ctx.moveTo(x,y-size); ctx.lineTo(x,y+size);
+    ctx.moveTo(x-size,y); ctx.lineTo(x+size,y);
+    ctx.stroke();
+}
+
+// Fotoğraf çek
+captureBtn.addEventListener('click',()=>{
+    if(!currentFaceData) return;
+    const captureCanvas = document.createElement('canvas');
+    captureCanvas.width=canvas.width;
+    captureCanvas.height=canvas.height;
+    const captureCtx = captureCanvas.getContext('2d');
+    captureCtx.drawImage(video,0,0);
+
+    const landmarks = currentFaceData;
+    drawPupilsOnCanvas(captureCtx, landmarks);
+
+    const edges = detectMarkerEdges(captureCtx,[200,200,200],[255,255,255]);
+    if(!edges){
+        alert('İşaretler bulunamadı.');
+        return;
+    }
+    const pxDistance = Math.abs(edges.rightEdgeX - edges.leftEdgeX);
+    const mmPerPixel = totalRef / pxDistance;
+
+    const rightPupilX = landmarks[468].x * canvas.width;
+    const leftPupilX = landmarks[473].x * canvas.width;
+    const noseX = (edges.leftEdgeX + edges.rightEdgeX)/2;
+
+    const rightPD = ((rightPupilX - edges.leftEdgeX)*mmPerPixel).toFixed(2);
+    const leftPD = ((edges.rightEdgeX - leftPupilX)*mmPerPixel).toFixed(2);
+    const totalPD = ((leftPupilX - rightPupilX)*mmPerPixel).toFixed(2);
+
+    rightPDSpan.textContent = rightPD+' mm';
+    leftPDSpan.textContent = leftPD+' mm';
+    totalPDSpan.textContent = totalPD+' mm';
+
+    // PD yazılarını resme ekle
+    captureCtx.font='bold 24px Arial';
+    captureCtx.fillStyle='#ffffff';
+    captureCtx.strokeStyle='#000000';
+    captureCtx.lineWidth=4;
+    captureCtx.strokeText(`Sağ: ${rightPD}mm`, edges.leftEdgeX, 50);
+    captureCtx.fillText(`Sağ: ${rightPD}mm`, edges.leftEdgeX, 50);
+    captureCtx.strokeText(`Sol: ${leftPD}mm`, edges.rightEdgeX-150, 50);
+    captureCtx.fillText(`Sol: ${leftPD}mm`, edges.rightEdgeX-150, 50);
+    captureCtx.strokeText(`Toplam: ${totalPD}mm`, (edges.leftEdgeX+edges.rightEdgeX)/2-80, canvas.height-50);
+    captureCtx.fillText(`Toplam: ${totalPD}mm`, (edges.leftEdgeX+edges.rightEdgeX)/2-80, canvas.height-50);
+
     resultImage.src = captureCanvas.toDataURL('image/png');
 
     stopCamera();
@@ -529,34 +522,115 @@ captureBtn.addEventListener('click', () => {
     resultSection.classList.add('active');
 });
 
-// ==================== Kontroller ====================
+// Gözbebeklerini resme çiz
+function drawPupilsOnCanvas(ctx, landmarks){
+    const rightPupil = landmarks[468];
+    const leftPupil = landmarks[473];
+    drawCrosshairCanvas(ctx,rightPupil.x*canvas.width,rightPupil.y*canvas.height,'#ff0000');
+    drawCrosshairCanvas(ctx,leftPupil.x*canvas.width,leftPupil.y*canvas.height,'#ff0000');
+}
 
-cancelBtn.addEventListener('click', () => {
+function drawCrosshairCanvas(ctx,x,y,color){
+    ctx.strokeStyle=color;
+    ctx.lineWidth=2;
+    const size=15;
+    ctx.beginPath();
+    ctx.moveTo(x,y-size); ctx.lineTo(x,y+size);
+    ctx.moveTo(x-size,y); ctx.lineTo(x+size,y);
+    ctx.stroke();
+}
+
+// İşaret tespiti (en dış noktaları alıyor)
+function detectMarkerEdges(srcCanvasCtx, colorLower=[200,200,200], colorUpper=[255,255,255]){
+    if(!cv || !cv.Mat) return null;
+    const w=srcCanvasCtx.canvas.width;
+    const h=srcCanvasCtx.canvas.height;
+    const src = new cv.Mat(h,w,cv.CV_8UC4);
+    const rgb = new cv.Mat();
+    const mask = new cv.Mat();
+    const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE,new cv.Size(5,5));
+    const contours = new cv.MatVector();
+    const hierarchy = new cv.Mat();
+    src.data.set(srcCanvasCtx.getImageData(0,0,w,h).data);
+    cv.cvtColor(src,rgb,cv.COLOR_RGBA2RGB);
+
+    const lower = new cv.Mat(rgb.rows,rgb.cols,rgb.type(),colorLower);
+    const upper = new cv.Mat(rgb.rows,rgb.cols,rgb.type(),colorUpper);
+    cv.inRange(rgb,lower,upper,mask);
+    cv.morphologyEx(mask,mask,cv.MORPH_OPEN,kernel);
+    cv.morphologyEx(mask,mask,cv.MORPH_CLOSE,kernel);
+    cv.findContours(mask,contours,hierarchy,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE);
+
+    let contourInfos = [];
+    for(let i=0;i<contours.size();i++){
+        const cnt=contours.get(i);
+        const area = cv.contourArea(cnt);
+        if(area<20){cnt.delete(); continue;}
+        const moments = cv.moments(cnt);
+        const cx = moments.m10/(moments.m00||1);
+        contourInfos.push({cnt, area, cx});
+    }
+    contourInfos.sort((a,b)=>b.area-a.area);
+    if(contourInfos.length<2){
+        contourInfos.forEach(ci=>ci.cnt.delete());
+        src.delete(); rgb.delete(); mask.delete(); lower.delete(); upper.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
+        return null;
+    }
+
+    const leftCandidate = contourInfos[0].cx<contourInfos[1].cx ? contourInfos[0] : contourInfos[1];
+    const rightCandidate = contourInfos[0].cx<contourInfos[1].cx ? contourInfos[1] : contourInfos[0];
+
+    function extremeXFromContour(cnt,take){
+        let extremeX = take==='min'?Number.POSITIVE_INFINITY:Number.NEGATIVE_INFINITY;
+        const pts = cnt.data32S;
+        for(let i=0;i<pts.length;i+=2){
+            const x = pts[i];
+            if(take==='min' && x<extremeX) extremeX=x;
+            if(take==='max' && x>extremeX) extremeX=x;
+        }
+        return extremeX;
+    }
+
+    const leftEdgeX = extremeXFromContour(leftCandidate.cnt,'min');
+    const rightEdgeX = extremeXFromContour(rightCandidate.cnt,'max');
+
+    contourInfos.forEach(ci=>ci.cnt.delete());
+    src.delete(); rgb.delete(); mask.delete(); lower.delete(); upper.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
+    return {leftEdgeX,rightEdgeX};
+}
+
+// Stop kamera
+function stopCamera(){
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    if(faceMesh) faceMesh.close();
+}
+
+// Status
+function showStatus(msg,type=''){
+    statusMsg.textContent=msg;
+    statusMsg.className='status '+type;
+}
+
+// Diğer kontroller
+cancelBtn.addEventListener('click',()=>{
     stopCamera();
     cameraSection.classList.remove('active');
-    setupSection.style.display = 'block';
+    setupSection.style.display='block';
 });
 
-retryBtn.addEventListener('click', () => {
+retryBtn.addEventListener('click',()=>{
     resultSection.classList.remove('active');
-    setupSection.style.display = 'block';
+    setupSection.style.display='block';
 });
 
-downloadBtn.addEventListener('click', () => {
+downloadBtn.addEventListener('click',()=>{
     const link = document.createElement('a');
     link.download = `PD_Olcum_${Date.now()}.png`;
-    link.href = document.getElementById('resultImage').src;
+    link.href = resultImage.src;
     link.click();
 });
+</script>
 
-function stopCamera() {
-    if (stream) stream.getTracks().forEach(track => track.stop());
-}
-
-function showStatus(message, type) {
-    statusMsg.textContent = message;
-    statusMsg.className = 'status ' + type;
-}
 
     </script>
 </body>
