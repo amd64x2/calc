@@ -390,8 +390,13 @@ async function initCamera() {
 
     try {
         stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal:1280 }, height:{ ideal:720 } }
-        });
+    video: { 
+        facingMode: { exact: "environment" }, 
+        width: { ideal:1280 }, 
+        height: { ideal:720 }
+    }
+});
+
         video.srcObject = stream;
         video.addEventListener('loadedmetadata', () => {
             canvas.width = video.videoWidth;
