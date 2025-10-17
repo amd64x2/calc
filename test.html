@@ -389,13 +389,13 @@ async function initCamera() {
     ctx = canvas.getContext('2d');
 
     try {
-        stream = await navigator.mediaDevices.getUserMedia({
-    video: { 
-        facingMode: { exact: "environment" }, 
-        width: { ideal:1280 }, 
-        height: { ideal:720 }
-    }
-});
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
 
         video.srcObject = stream;
         video.addEventListener('loadedmetadata', () => {
