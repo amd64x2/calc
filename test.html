@@ -1,49 +1,648 @@
-s<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod ile Ürün Fiyatı Sorgulama</title>
-    <script>
-        function getPrice() {
-            var qrCode = document.getElementById('qr_code').value;
-            if (!qrCode) {
-                alert('Lütfen QR kodunu girin.');
-                return;
+    <title>Gözlük PD Ölçüm Sistemi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .info-box {
+            background: #f5f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .info-box strong {
+            color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .camera-section {
+            display: none;
+            position: relative;
+        }
+        
+        .camera-section.active {
+            display: block;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .controls button {
+            flex: 1;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-capture {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .result-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .result-section.active {
+            display: block;
+        }
+        
+        .result-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .measurements {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .measurements h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .measurement-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .measurement-item:last-child {
+            border-bottom: none;
+        }
+        
+        .measurement-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .measurement-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 600px) {
+            .input-section {
+                flex-direction: column;
             }
             
-            var xhr = new XMLHttpRequest();
-           var url = 'http://192.168.1.2:80/phpAPI/get_price.php?qr_code=' + encodeURIComponent(qrCode);
-
-
-            console.log('API URL:', url);  // URL'yi konsolda kontrol edin
-            xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        console.log('API Yanıtı:', xhr.responseText);  // Yanıtı konsolda kontrol edin
-                        var response = JSON.parse(xhr.responseText);
-                        var resultDiv = document.getElementById('result');
-                        
-                        if (response.success) {
-                            resultDiv.innerHTML = 'Ürün Fiyatı: ' + response.urun_fiyati;
-                        } else {
-                            resultDiv.innerHTML = 'Hata: ' + response.message;
-                        }
-                    } else {
-                        console.log('API Hatası:', xhr.statusText);  // Hata durumunda konsola yazdırın
-                    }
-                }
-            };
-            xhr.send();
+            .controls {
+                flex-direction: column;
+            }
         }
-    </script>
+    </style>
 </head>
 <body>
-    <h1>QR Kod ile Ürün Fiyatı Sorgulama</h1>
-    <label for="qr_code">QR Kodunu Girin:</label>
-    <input type="text" id="qr_code" placeholder="QR kodunu buraya girin">
-    <button onclick="getPrice()">Sorgula</button>
-    <div id="result"></div>
+    <div class="container">
+        <div class="header">
+            <h1>👓 Gözlük PD Ölçüm Sistemi</h1>
+            <p>Hassas pupil mesafesi ölçümü için profesyonel araç</p>
+        </div>
+        
+        <div class="content">
+            <!-- Başlangıç Ekranı -->
+            <div id="setupSection">
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="lensWidth">Lens Genişliği (mm)</label>
+                        <input type="number" id="lensWidth" value="52" min="40" max="65" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="bridgeWidth">Köprü Genişliği (mm)</label>
+                        <input type="number" id="bridgeWidth" value="18" min="12" max="24" step="1">
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <strong>Toplam Referans:</strong> <span id="totalReference">122</span> mm
+                    <br>
+                    <small>(Lens + Köprü + Lens)</small>
+                </div>
+                
+                <button class="btn" id="startBtn">📸 Ölçüm Başlat</button>
+            </div>
+            
+            <!-- Kamera Ekranı -->
+            <div id="cameraSection" class="camera-section">
+                <div id="statusMsg" class="status">Kamera hazırlanıyor...</div>
+                
+                <div class="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" id="cancelBtn">❌ İptal</button>
+                    <button class="btn btn-capture" id="captureBtn" disabled>📷 Fotoğraf Çek</button>
+                </div>
+            </div>
+            
+            <!-- Sonuç Ekranı -->
+            <div id="resultSection" class="result-section">
+                <img id="resultImage" class="result-image" alt="Ölçüm Sonucu">
+                
+                <div class="measurements">
+                    <h3>📊 Ölçüm Sonuçları</h3>
+                    <div class="measurement-item">
+                        <span class="measurement-label">Sağ PD (Monoküler)</span>
+                        <span class="measurement-value" id="rightPD">--</span>
+                    </div>
+                    <div class="measurement-item">
+                        <span class="measurement-label">Sol PD (Monoküler)</span>
+                        <span class="measurement-value" id="leftPD">--</span>
+                    </div>
+                    <div class="measurement-item">
+                        <span class="measurement-label">Toplam PD (Binoküler)</span>
+                        <span class="measurement-value" id="totalPD">--</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" id="retryBtn">🔄 Yeniden Ölç</button>
+                    <button class="btn" id="downloadBtn">💾 Sonucu İndir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Değişkenler
+        let video, canvas, ctx;
+        let faceMesh;
+        let stream;
+        let lensWidth, bridgeWidth, totalRef;
+        let currentFaceData = null;
+        
+        // DOM Elementleri
+        const setupSection = document.getElementById('setupSection');
+        const cameraSection = document.getElementById('cameraSection');
+        const resultSection = document.getElementById('resultSection');
+        const lensWidthInput = document.getElementById('lensWidth');
+        const bridgeWidthInput = document.getElementById('bridgeWidth');
+        const totalRefSpan = document.getElementById('totalReference');
+        const startBtn = document.getElementById('startBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        
+        // Referans hesaplama
+        function updateTotalReference() {
+            const lens = parseFloat(lensWidthInput.value) || 52;
+            const bridge = parseFloat(bridgeWidthInput.value) || 18;
+            const total = lens + bridge + lens;
+            totalRefSpan.textContent = total;
+            return total;
+        }
+        
+        lensWidthInput.addEventListener('input', updateTotalReference);
+        bridgeWidthInput.addEventListener('input', updateTotalReference);
+        
+        // Kamera başlat
+        startBtn.addEventListener('click', async () => {
+            lensWidth = parseFloat(lensWidthInput.value);
+            bridgeWidth = parseFloat(bridgeWidthInput.value);
+            totalRef = lensWidth + bridgeWidth + lensWidth;
+            
+            setupSection.style.display = 'none';
+            cameraSection.classList.add('active');
+            
+            await initCamera();
+        });
+        
+        async function initCamera() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                
+                video.srcObject = stream;
+                
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    initFaceMesh();
+                });
+                
+            } catch (err) {
+                showStatus('Kamera erişimi başarısız: ' + err.message, 'error');
+            }
+        }
+        
+        function initFaceMesh() {
+            faceMesh = new FaceMesh({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+            });
+            
+            faceMesh.setOptions({
+                maxNumFaces: 1,
+                refineLandmarks: true,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            
+            faceMesh.onResults(onResults);
+            
+            showStatus('Yüzünüzü kameraya gösterin ve gözlüğünüzü takın', 'success');
+            detectFace();
+        }
+        
+        async function detectFace() {
+            if (video.readyState === 4) {
+                await faceMesh.send({ image: video });
+            }
+            requestAnimationFrame(detectFace);
+        }
+        
+        function onResults(results) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+                currentFaceData = landmarks;
+                
+                drawLiveOverlay(landmarks);
+                
+                if (!captureBtn.disabled) return;
+                captureBtn.disabled = false;
+                showStatus('✓ Yüz algılandı! Fotoğraf çekebilirsiniz', 'success');
+            } else {
+                currentFaceData = null;
+                captureBtn.disabled = true;
+                showStatus('Yüz bulunamadı. Lütfen kameraya bakın', '');
+            }
+        }
+        
+        function drawLiveOverlay(landmarks) {
+            // Göz bebekleri indeksleri (MediaPipe Face Mesh)
+            const rightPupil = landmarks[468]; // Sağ göz merkezi
+            const leftPupil = landmarks[473];  // Sol göz merkezi
+            
+            // Gözlük çerçevesi için köşe noktaları (yaklaşık)
+            const rightEyeOuter = landmarks[33];
+            const rightEyeInner = landmarks[133];
+            const leftEyeInner = landmarks[362];
+            const leftEyeOuter = landmarks[263];
+            const topPoint = landmarks[10];
+            const bottomPoint = landmarks[152];
+            
+            // Çerçeve kutusu çiz
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const frameLeft = leftEyeOuter.x * canvas.width;
+            const frameRight = rightEyeOuter.x * canvas.width;
+            const frameTop = topPoint.y * canvas.height - 30;
+            const frameBottom = bottomPoint.y * canvas.height + 10;
+            
+            ctx.rect(frameRight, frameTop, frameLeft - frameRight, frameBottom - frameTop);
+            ctx.stroke();
+            
+            // Göz bebeklerine + işareti
+            drawCrosshair(rightPupil.x * canvas.width, rightPupil.y * canvas.height, '#ff0000');
+            drawCrosshair(leftPupil.x * canvas.width, leftPupil.y * canvas.height, '#ff0000');
+        }
+        
+        function drawCrosshair(x, y, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            const size = 15;
+            
+            // Dikey çizgi
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x, y + size);
+            ctx.stroke();
+            
+            // Yatay çizgi
+            ctx.beginPath();
+            ctx.moveTo(x - size, y);
+            ctx.lineTo(x + size, y);
+            ctx.stroke();
+        }
+        
+        // Fotoğraf çek
+        captureBtn.addEventListener('click', () => {
+            if (!currentFaceData) return;
+            
+            // Temiz bir canvas oluştur
+            const captureCanvas = document.createElement('canvas');
+            captureCanvas.width = canvas.width;
+            captureCanvas.height = canvas.height;
+            const captureCtx = captureCanvas.getContext('2d');
+            
+            // Video frame'ini çiz
+            captureCtx.drawImage(video, 0, 0);
+            
+            // Efektleri üzerine çiz
+            const landmarks = currentFaceData;
+            
+            // Göz bebekleri
+            const rightPupil = landmarks[468];
+            const leftPupil = landmarks[473];
+            
+            // Çerçeve kutusu
+            const rightEyeOuter = landmarks[33];
+            const leftEyeOuter = landmarks[263];
+            const topPoint = landmarks[10];
+            const bottomPoint = landmarks[152];
+            
+            const frameLeft = leftEyeOuter.x * canvas.width;
+            const frameRight = rightEyeOuter.x * canvas.width;
+            const frameTop = topPoint.y * canvas.height - 30;
+            const frameBottom = bottomPoint.y * canvas.height + 10;
+            const frameWidth = frameLeft - frameRight;
+            
+            // Çerçeve çiz
+            captureCtx.strokeStyle = '#00ff00';
+            captureCtx.lineWidth = 3;
+            captureCtx.strokeRect(frameRight, frameTop, frameWidth, frameBottom - frameTop);
+            
+            // + işaretleri
+            captureCtx.strokeStyle = '#ff0000';
+            captureCtx.lineWidth = 2;
+            const size = 15;
+            
+            // Sağ göz
+            const rxPx = rightPupil.x * canvas.width;
+            const ryPx = rightPupil.y * canvas.height;
+            captureCtx.beginPath();
+            captureCtx.moveTo(rxPx, ryPx - size);
+            captureCtx.lineTo(rxPx, ryPx + size);
+            captureCtx.moveTo(rxPx - size, ryPx);
+            captureCtx.lineTo(rxPx + size, ryPx);
+            captureCtx.stroke();
+            
+            // Sol göz
+            const lxPx = leftPupil.x * canvas.width;
+            const lyPx = leftPupil.y * canvas.height;
+            captureCtx.beginPath();
+            captureCtx.moveTo(lxPx, lyPx - size);
+            captureCtx.lineTo(lxPx, lyPx + size);
+            captureCtx.moveTo(lxPx - size, lyPx);
+            captureCtx.lineTo(lxPx + size, lyPx);
+            captureCtx.stroke();
+            
+            // PD Hesaplama
+            const mmPerPixel = totalRef / frameWidth;
+            const pupilDistancePx = Math.abs(lxPx - rxPx);
+            const totalPDmm = (pupilDistancePx * mmPerPixel).toFixed(2);
+            
+            // Burun merkezi (yaklaşık çerçevenin ortası)
+            const noseBridge = (frameLeft + frameRight) / 2;
+            const rightPDmm = (Math.abs(noseBridge - rxPx) * mmPerPixel).toFixed(2);
+            const leftPDmm = (Math.abs(lxPx - noseBridge) * mmPerPixel).toFixed(2);
+            
+            // PD değerlerini resme yaz
+            captureCtx.font = 'bold 24px Arial';
+            captureCtx.fillStyle = '#ffffff';
+            captureCtx.strokeStyle = '#000000';
+            captureCtx.lineWidth = 4;
+            
+            const textY = frameTop - 40;
+            
+            // Sağ PD
+            const rightText = `Sağ: ${rightPDmm}mm`;
+            captureCtx.strokeText(rightText, frameRight, textY);
+            captureCtx.fillText(rightText, frameRight, textY);
+            
+            // Sol PD
+            const leftText = `Sol: ${leftPDmm}mm`;
+            captureCtx.strokeText(leftText, frameLeft - 150, textY);
+            captureCtx.fillText(leftText, frameLeft - 150, textY);
+            
+            // Toplam PD
+            const totalText = `Toplam: ${totalPDmm}mm`;
+            const totalX = (frameLeft + frameRight) / 2 - 80;
+            captureCtx.strokeText(totalText, totalX, frameBottom + 40);
+            captureCtx.fillText(totalText, totalX, frameBottom + 40);
+            
+            // Sonuçları göster
+            const resultImage = document.getElementById('resultImage');
+            resultImage.src = captureCanvas.toDataURL('image/png');
+            
+            document.getElementById('rightPD').textContent = rightPDmm + ' mm';
+            document.getElementById('leftPD').textContent = leftPDmm + ' mm';
+            document.getElementById('totalPD').textContent = totalPDmm + ' mm';
+            
+            // Kamerayı kapat
+            stopCamera();
+            
+            // Sonuç ekranına geç
+            cameraSection.classList.remove('active');
+            resultSection.classList.add('active');
+        });
+        
+        // İptal
+        cancelBtn.addEventListener('click', () => {
+            stopCamera();
+            cameraSection.classList.remove('active');
+            setupSection.style.display = 'block';
+        });
+        
+        // Yeniden ölç
+        retryBtn.addEventListener('click', () => {
+            resultSection.classList.remove('active');
+            setupSection.style.display = 'block';
+        });
+        
+        // İndir
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `PD_Olcum_${Date.now()}.png`;
+            link.href = document.getElementById('resultImage').src;
+            link.click();
+        });
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (faceMesh) {
+                faceMesh.close();
+            }
+        }
+        
+        function showStatus(message, type) {
+            statusMsg.textContent = message;
+            statusMsg.className = 'status ' + type;
+        }
+    </script>
 </body>
 </html>
