@@ -205,6 +205,11 @@
             color: #c62828;
         }
         
+        .status-warning {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
         .debug-info {
             background: #f5f5f5;
             padding: 10px;
@@ -218,6 +223,20 @@
         
         .debug-info.show {
             display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -239,7 +258,9 @@
             <input type="number" id="frameWidth" placeholder="Örn: 140" value="140" min="100" max="200">
         </div>
         
-        <div id="status" class="status status-info" style="display:none;"></div>
+        <div id="status" class="status status-info">
+            <div class="loading-spinner"></div> OpenCV.js yükleniyor, lütfen bekleyin...
+        </div>
         
         <div class="camera-container" id="cameraContainer" style="display:none;">
             <video id="video" autoplay playsinline></video>
@@ -247,7 +268,7 @@
             <canvas id="overlay" class="canvas-overlay"></canvas>
         </div>
         
-        <button id="startCamera" class="btn btn-primary">📷 Kamerayı Aç (Arka Kamera)</button>
+        <button id="startCamera" class="btn btn-primary" disabled>📷 Kamerayı Aç (Arka Kamera)</button>
         <button id="captureBtn" class="btn btn-success" style="display:none;" disabled>📸 Fotoğraf Çek ve PD Hesapla</button>
         
         <div id="resultBox" class="result-box">
@@ -259,7 +280,7 @@
         <div id="debugInfo" class="debug-info"></div>
     </div>
 
-    <script async src="https://docs.opencv.org/4.5.2/opencv.js"></script>
+    <script async src="https://docs.opencv.org/4.5.2/opencv.js" onload="checkOpenCV()"></script>
     
     <script>
         let opencvReady = false;
@@ -270,26 +291,42 @@
         let ctx = canvasElement.getContext('2d');
         let overlayCtx = overlayElement.getContext('2d');
         
+        // OpenCV yükleme kontrolü
+        function checkOpenCV() {
+            if (typeof cv !== 'undefined') {
+                if (cv.getBuildInformation) {
+                    onOpenCvReady();
+                } else {
+                    cv['onRuntimeInitialized'] = onOpenCvReady;
+                }
+            } else {
+                setTimeout(checkOpenCV, 100);
+            }
+        }
+        
         // OpenCV hazır olduğunda
         function onOpenCvReady() {
             opencvReady = true;
-            console.log('OpenCV.js hazır!');
-            updateStatus('OpenCV yüklendi ✓', 'success');
+            console.log('✓ OpenCV.js hazır!');
+            console.log('OpenCV version:', cv.getBuildInformation());
+            
+            updateStatus('✓ Sistem hazır! Kamerayı açabilirsiniz', 'success');
+            document.getElementById('startCamera').disabled = false;
         }
         
-        // OpenCV yükleme kontrolü
-        if (typeof cv !== 'undefined') {
-            if (cv.getBuildInformation) {
-                onOpenCvReady();
-            } else {
-                cv['onRuntimeInitialized'] = onOpenCvReady;
-            }
-        }
+        // Sayfa yüklendiğinde kontrol et
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (!opencvReady) {
+                    updateStatus('OpenCV yükleniyor... (Bu 5-10 saniye sürebilir)', 'warning');
+                }
+            }, 2000);
+        });
         
         // Status güncelleme
         function updateStatus(message, type = 'info') {
             const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
+            statusEl.innerHTML = message;
             statusEl.className = `status status-${type}`;
             statusEl.style.display = 'block';
         }
@@ -332,7 +369,7 @@
                     document.getElementById('captureBtn').style.display = 'block';
                     document.getElementById('captureBtn').disabled = false;
                     
-                    updateStatus('Kamera hazır! Gözlüğü takın ve fotoğraf çekin', 'success');
+                    updateStatus('✓ Kamera hazır! Gözlüğü takın ve fotoğraf çekin', 'success');
                     
                     // Video önizlemesini göster
                     renderPreview();
@@ -340,7 +377,7 @@
                 
             } catch (error) {
                 console.error('Kamera hatası:', error);
-                updateStatus('Kamera açılamadı: ' + error.message, 'error');
+                updateStatus('❌ Kamera açılamadı: ' + error.message, 'error');
             }
         });
         
@@ -354,30 +391,38 @@
         
         // Fotoğraf çek ve PD hesapla
         document.getElementById('captureBtn').addEventListener('click', () => {
-            if (!opencvReady) {
-                updateStatus('OpenCV henüz yüklenmedi, lütfen bekleyin...', 'error');
+            console.log('OpenCV durumu:', opencvReady);
+            console.log('cv objesi:', typeof cv);
+            
+            if (!opencvReady || typeof cv === 'undefined') {
+                updateStatus('❌ OpenCV henüz yüklenmedi. Lütfen birkaç saniye bekleyip tekrar deneyin.', 'error');
                 return;
             }
             
             const frameWidth = parseFloat(document.getElementById('frameWidth').value);
             if (!frameWidth || frameWidth < 100 || frameWidth > 200) {
-                updateStatus('Lütfen geçerli bir çerçeve genişliği girin (100-200mm)', 'error');
+                updateStatus('❌ Lütfen geçerli bir çerçeve genişliği girin (100-200mm)', 'error');
                 return;
             }
             
-            updateStatus('Fotoğraf çekildi, analiz ediliyor...', 'info');
+            updateStatus('📸 Fotoğraf çekildi, analiz ediliyor...', 'info');
             
             // Fotoğrafı çek
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
             videoElement.style.display = 'none';
             
             // PD hesapla
-            calculatePD(frameWidth);
+            setTimeout(() => {
+                calculatePD(frameWidth);
+            }, 100);
         });
         
         // Siyah nokta tespiti
         function detectMarkerEdges(srcCanvasCtx) {
-            if (!opencvReady || !window.cv) return null;
+            if (!opencvReady || !window.cv) {
+                console.error('OpenCV hazır değil!');
+                return null;
+            }
             
             try {
                 const w = srcCanvasCtx.canvas.width;
