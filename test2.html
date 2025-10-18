@@ -399,9 +399,106 @@
         });
         
         // Video önizleme
+       // Video önizleme - CANLI TESPİT
         function renderPreview() {
             if (!stream) return;
+            
+            // Video frame'ini çiz
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // Overlay'i temizle
+            overlayCtx.clearRect(0, 0, overlayElement.width, overlayElement.height);
+            
+            // Canlı tespit yap
+            try {
+                const frameWidth = parseFloat(document.getElementById('frameWidth').value);
+                
+                // Siyah noktaları tespit et
+                const markers = detectMarkerEdges(ctx);
+                
+                if (markers && frameWidth > 0) {
+                    // Çerçeve noktalarını çiz - Yeşil
+                    overlayCtx.strokeStyle = '#00ff00';
+                    overlayCtx.lineWidth = 3;
+                    overlayCtx.beginPath();
+                    overlayCtx.arc(markers.leftEdgeX, markers.leftY, 20, 0, 2 * Math.PI);
+                    overlayCtx.stroke();
+                    overlayCtx.beginPath();
+                    overlayCtx.arc(markers.rightEdgeX, markers.rightY, 20, 0, 2 * Math.PI);
+                    overlayCtx.stroke();
+                    
+                    // Çerçeve çizgisi
+                    overlayCtx.beginPath();
+                    overlayCtx.moveTo(markers.leftEdgeX, markers.leftY);
+                    overlayCtx.lineTo(markers.rightEdgeX, markers.rightY);
+                    overlayCtx.stroke();
+                    
+                    // Göz bebeklerini tespit et
+                    const pupils = detectPupils(ctx);
+                    
+                    if (pupils) {
+                        // Göz bebekleri - Kırmızı
+                        overlayCtx.strokeStyle = '#ff0000';
+                        overlayCtx.lineWidth = 2;
+                        
+                        overlayCtx.beginPath();
+                        overlayCtx.arc(pupils.leftPupil.x, pupils.leftPupil.y, pupils.leftPupil.radius + 5, 0, 2 * Math.PI);
+                        overlayCtx.stroke();
+                        
+                        overlayCtx.beginPath();
+                        overlayCtx.arc(pupils.rightPupil.x, pupils.rightPupil.y, pupils.rightPupil.radius + 5, 0, 2 * Math.PI);
+                        overlayCtx.stroke();
+                        
+                        // PD çizgisi - Sarı
+                        overlayCtx.strokeStyle = '#ffff00';
+                        overlayCtx.lineWidth = 2;
+                        overlayCtx.beginPath();
+                        overlayCtx.moveTo(pupils.leftPupil.x, pupils.leftPupil.y);
+                        overlayCtx.lineTo(pupils.rightPupil.x, pupils.rightPupil.y);
+                        overlayCtx.stroke();
+                        
+                        // PD hesapla ve göster
+                        const frameWidthPixels = markers.rightEdgeX - markers.leftEdgeX;
+                        const pixelPerMm = frameWidthPixels / frameWidth;
+                        const frameCenterX = (markers.leftEdgeX + markers.rightEdgeX) / 2;
+                        
+                        const leftPD_px = Math.abs(frameCenterX - pupils.leftPupil.x);
+                        const leftPD_mm = leftPD_px / pixelPerMm;
+                        
+                        const rightPD_px = Math.abs(pupils.rightPupil.x - frameCenterX);
+                        const rightPD_mm = rightPD_px / pixelPerMm;
+                        
+                        const totalPD_px = Math.abs(pupils.rightPupil.x - pupils.leftPupil.x);
+                        const totalPD_mm = totalPD_px / pixelPerMm;
+                        
+                        // Ekrana yaz
+                        overlayCtx.font = 'bold 24px Arial';
+                        overlayCtx.fillStyle = '#00ff00';
+                        overlayCtx.strokeStyle = '#000000';
+                        overlayCtx.lineWidth = 3;
+                        
+                        // Sol PD
+                        const leftText = `Sol: ${leftPD_mm.toFixed(1)}mm`;
+                        overlayCtx.strokeText(leftText, 20, 50);
+                        overlayCtx.fillText(leftText, 20, 50);
+                        
+                        // Sağ PD
+                        const rightText = `Sağ: ${rightPD_mm.toFixed(1)}mm`;
+                        overlayCtx.strokeText(rightText, 20, 85);
+                        overlayCtx.fillText(rightText, 20, 85);
+                        
+                        // Toplam PD
+                        overlayCtx.font = 'bold 32px Arial';
+                        overlayCtx.fillStyle = '#ffff00';
+                        const totalText = `TOPLAM: ${totalPD_mm.toFixed(1)}mm`;
+                        overlayCtx.strokeText(totalText, 20, 130);
+                        overlayCtx.fillText(totalText, 20, 130);
+                    }
+                }
+            } catch (err) {
+                // Hata olsa bile önizlemeye devam et
+            }
+            
             requestAnimationFrame(renderPreview);
         }
         
