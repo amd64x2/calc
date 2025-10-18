@@ -564,7 +564,8 @@ function detectMarkerEdges(srcCanvasCtx){
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         
         // 2. Siyah noktaları bul (invert threshold)
-        cv.threshold(gray, binary, 80, 255, cv.THRESH_BINARY_INV);
+        // Siyah noktaları bulmak için ters threshold
+        cv.threshold(gray, binary, 50, 255, cv.THRESH_BINARY_INV);
 
         // 3. Gürültü azaltma
         const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3,3));
