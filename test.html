@@ -560,91 +560,62 @@ function detectMarkerEdges(srcCanvasCtx){
         const gray = new cv.Mat();
         const binary = new cv.Mat();
         
-        // Gri tonlamaya çevir
+        // 1. Gri tonlama
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         
-        // Threshold - beyaz/parlak noktaları bul (150'ye düşürdük)
-        cv.threshold(gray, binary, 150, 255, cv.THRESH_BINARY);
-        
-        // Morfolojik işlemler
-        const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5,5));
-        cv.morphologyEx(binary, binary, cv.MORPH_CLOSE, kernel);
+        // 2. Siyah noktaları bul (invert threshold)
+        cv.threshold(gray, binary, 80, 255, cv.THRESH_BINARY_INV);
+
+        // 3. Gürültü azaltma
+        const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3,3));
         cv.morphologyEx(binary, binary, cv.MORPH_OPEN, kernel);
         
-        // Debug için göster
-        cv.imshow(debugCanvas, binary);
-        
-        // Konturları bul
+        // 4. Kontur bul
         const contours = new cv.MatVector();
         const hierarchy = new cv.Mat();
         cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
         
         let candidates = [];
         
-        // Konturları filtrele
         for(let i=0; i<contours.size(); i++){
             const cnt = contours.get(i);
             const area = cv.contourArea(cnt);
-            
-            // Minimum alan kontrolü
-            if(area < 100 || area > w*h*0.1) {
+            if(area < 30 || area > w*h*0.05) {
                 cnt.delete();
                 continue;
             }
-            
-            // Merkez noktasını hesapla
             const moments = cv.moments(cnt);
             const cx = moments.m10 / (moments.m00 || 1);
             const cy = moments.m01 / (moments.m00 || 1);
             
-            // Yüz seviyesinde mi kontrol et (ortadan yukarı bölge)
-            if(cy > h*0.3 && cy < h*0.7) {
+            if(cy > h*0.3 && cy < h*0.7){
                 candidates.push({cnt, area, cx, cy});
             } else {
                 cnt.delete();
             }
         }
-        
-        // Alan bazında sırala
-        candidates.sort((a,b) => b.area - a.area);
-        
-        console.log(`Toplam kontur: ${contours.size()}, Aday: ${candidates.length}`);
-        
+
         if(candidates.length < 2){
             candidates.forEach(c => c.cnt.delete());
             src.delete(); gray.delete(); binary.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
             return null;
         }
+
+        // En soldaki ve en sağdaki noktaları bul
+        const sorted = candidates.slice(0, 2).sort((a,b)=>a.cx-b.cx);
+        const left = sorted[0];
+        const right = sorted[1];
+
+        const leftEdgeX = left.cx;
+        const rightEdgeX = right.cx;
         
-        // En büyük iki konturu al ve solda/sağda olduklarını kontrol et
-        const sorted = candidates.slice(0, 2).sort((a,b) => a.cx - b.cx);
-        const leftCandidate = sorted[0];
-        const rightCandidate = sorted[1];
-        
-        // En sol ve en sağ noktaları bul
-        function getExtremeX(cnt, type) {
-            let extremeX = type === 'min' ? Infinity : -Infinity;
-            const data = cnt.data32S;
-            for(let i=0; i<data.length; i+=2) {
-                const x = data[i];
-                if(type === 'min') extremeX = Math.min(extremeX, x);
-                else extremeX = Math.max(extremeX, x);
-            }
-            return extremeX;
-        }
-        
-        const leftEdgeX = getExtremeX(leftCandidate.cnt, 'min');
-        const rightEdgeX = getExtremeX(rightCandidate.cnt, 'max');
-        
-        // Temizlik
         candidates.forEach(c => c.cnt.delete());
         src.delete(); gray.delete(); binary.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
         
-        // Geçerlilik kontrolü
-        if(rightEdgeX - leftEdgeX < w*0.2 || rightEdgeX - leftEdgeX > w*0.8) {
+        if(rightEdgeX - leftEdgeX < w*0.2 || rightEdgeX - leftEdgeX > w*0.9){
             return null;
         }
-        
+
         return {leftEdgeX, rightEdgeX};
         
     } catch(err) {
@@ -652,6 +623,7 @@ function detectMarkerEdges(srcCanvasCtx){
         return null;
     }
 }
+
 
 // Fotoğraf çek
 captureBtn.addEventListener('click',()=>{
