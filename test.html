@@ -548,6 +548,7 @@ function drawCrosshair(x,y,color){
 }
 
 // İşaret tespiti - İYİLEŞTİRİLMİŞ
+// İşaret tespiti - SİYAH NOKTA İÇİN OPTİMİZE EDİLMİŞ
 function detectMarkerEdges(srcCanvasCtx){
     if(!opencvReady || !window.cv) return null;
     
@@ -559,19 +560,28 @@ function detectMarkerEdges(srcCanvasCtx){
         const src = cv.matFromImageData(imgData);
         const gray = new cv.Mat();
         const binary = new cv.Mat();
+        const blurred = new cv.Mat();
         
         // 1. Gri tonlama
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         
-        // 2. Siyah noktaları bul (invert threshold)
-        // Siyah noktaları bulmak için ters threshold
-        cv.threshold(gray, binary, 50, 255, cv.THRESH_BINARY_INV);
-
-        // 3. Gürültü azaltma
-        const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(3,3));
-        cv.morphologyEx(binary, binary, cv.MORPH_OPEN, kernel);
+        // 2. Gaussian blur uygula (gürültüyü azalt)
+        cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
         
-        // 4. Kontur bul
+        // 3. SİYAH noktaları bulmak için threshold
+        // Düşük threshold değeri (30) - sadece çok koyu noktaları yakala
+        cv.threshold(blurred, binary, 30, 255, cv.THRESH_BINARY_INV);
+        
+        // 4. Morfolojik işlemlerle noktaları belirginleştir
+        const kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(5,5));
+        
+        // Önce erode (küçük gürültüleri temizle)
+        cv.erode(binary, binary, kernel);
+        
+        // Sonra dilate (kalan noktaları büyüt)
+        cv.dilate(binary, binary, kernel);
+        
+        // 5. Kontur bul
         const contours = new cv.MatVector();
         const hierarchy = new cv.Mat();
         cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
@@ -581,42 +591,78 @@ function detectMarkerEdges(srcCanvasCtx){
         for(let i=0; i<contours.size(); i++){
             const cnt = contours.get(i);
             const area = cv.contourArea(cnt);
-            if(area < 30 || area > w*h*0.05) {
+            
+            // Alan filtresini ayarla (siyah noktalar için)
+            if(area < 50 || area > 2000) { // 50-2000 piksel arası
                 cnt.delete();
                 continue;
             }
+            
+            // Dairesellik kontrolü - siyah noktalar dairesel olmalı
+            const perimeter = cv.arcLength(cnt, true);
+            const circularity = (4 * Math.PI * area) / (perimeter * perimeter);
+            
+            if(circularity < 0.5) { // Dairesel değilse atla
+                cnt.delete();
+                continue;
+            }
+            
             const moments = cv.moments(cnt);
             const cx = moments.m10 / (moments.m00 || 1);
             const cy = moments.m01 / (moments.m00 || 1);
             
-            if(cy > h*0.3 && cy < h*0.7){
-                candidates.push({cnt, area, cx, cy});
+            // Yüz bölgesinde mi kontrol et (göz hizasında)
+            if(cy > h*0.3 && cy < h*0.7 && cx > w*0.1 && cx < w*0.9){
+                candidates.push({cnt, area, cx, cy, circularity});
             } else {
                 cnt.delete();
             }
         }
 
+        // Debug için konturları çiz
+        debugCtx.clearRect(0,0,debugCanvas.width,debugCanvas.height);
+        debugCtx.drawImage(srcCanvasCtx.canvas,0,0);
+        debugCtx.strokeStyle = 'red';
+        candidates.forEach(candidate => {
+            debugCtx.beginPath();
+            debugCtx.arc(candidate.cx, candidate.cy, 10, 0, Math.PI*2);
+            debugCtx.stroke();
+            debugCtx.fillText(`A:${candidate.area.toFixed(0)} C:${candidate.circularity.toFixed(2)}`, candidate.cx-30, candidate.cy-15);
+        });
+        debugCanvas.style.display = 'block';
+
         if(candidates.length < 2){
             candidates.forEach(c => c.cnt.delete());
-            src.delete(); gray.delete(); binary.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
+            src.delete(); gray.delete(); binary.delete(); blurred.delete(); 
+            kernel.delete(); contours.delete(); hierarchy.delete();
             return null;
         }
 
-        // En soldaki ve en sağdaki noktaları bul
-        const sorted = candidates.slice(0, 2).sort((a,b)=>a.cx-b.cx);
-        const left = sorted[0];
-        const right = sorted[1];
+        // En iyi 4 adayı al ve en soldaki/sağdakileri seç
+        candidates.sort((a,b) => b.circularity - a.circularity); // Daireselliğe göre sırala
+        const bestCandidates = candidates.slice(0, 4); // En dairesel 4 aday
+        
+        // X koordinatına göre sırala
+        bestCandidates.sort((a,b) => a.cx - b.cx);
+        
+        const left = bestCandidates[0];
+        const right = bestCandidates[bestCandidates.length - 1];
 
         const leftEdgeX = left.cx;
         const rightEdgeX = right.cx;
         
         candidates.forEach(c => c.cnt.delete());
-        src.delete(); gray.delete(); binary.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
+        src.delete(); gray.delete(); binary.delete(); blurred.delete();
+        kernel.delete(); contours.delete(); hierarchy.delete();
         
-        if(rightEdgeX - leftEdgeX < w*0.2 || rightEdgeX - leftEdgeX > w*0.9){
+        // Mantıklı bir mesafe kontrolü
+        const distance = rightEdgeX - leftEdgeX;
+        if(distance < w*0.2 || distance > w*0.9){
+            console.log('Mesafe uygun değil:', distance);
             return null;
         }
 
+        console.log('Noktalar bulundu - Sol:', leftEdgeX, 'Sağ:', rightEdgeX, 'Mesafe:', distance);
         return {leftEdgeX, rightEdgeX};
         
     } catch(err) {
