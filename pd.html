@@ -282,8 +282,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>👓 PD Ölçüm Sistemi V.2</h1>
-        <p class="subtitle">Pupillary Distance - Göz Bebeği Mesafesi Ölçümü</p>
+        <h1>👓 PD Ölçüm Sistemi</h1>
+        <p class="subtitle">Pupillary Distance - Göz Bebeği Mesafesi Ölçümü V.3</p>
         
         <div class="info-box">
             <p><strong>📝 Kullanım Talimatları:</strong></p>
@@ -296,7 +296,7 @@
         
         <div class="input-group">
             <label for="frameWidth">Çerçeve Genişliği (mm):</label>
-            <input type="number" id="frameWidth" placeholder="Örn: 140" value="120" min="100" max="200">
+            <input type="number" id="frameWidth" placeholder="Örn: 140" value="140" min="100" max="200">
         </div>
         
         <div id="status" class="status status-info">
@@ -780,4 +780,30 @@
             document.getElementById('totalPD').textContent = totalPD_mm.toFixed(1);
             document.getElementById('resultBox').classList.add('show');
             
-            updateStatus('✓ Ölçüm tamamlandı!
+            updateStatus('✓ Ölçüm tamamlandı! Tekrar ölçüm yapmak için sayfayı yenileyin.', 'success');
+            
+            drawOverlay(markers, pupils);
+            
+            showDebug(`
+                <strong>Tespit Bilgileri:</strong><br>
+                Çerçeve genişliği: ${frameWidthPixels.toFixed(0)}px = ${realFrameWidth_mm}mm<br>
+                Piksel/mm oranı: ${pixelPerMm.toFixed(3)}<br>
+                <br>
+                <strong>Çerçeve Noktaları:</strong><br>
+                Sol: (${markers.leftEdgeX.toFixed(0)}, ${markers.leftY.toFixed(0)})<br>
+                Sağ: (${markers.rightEdgeX.toFixed(0)}, ${markers.rightY.toFixed(0)})<br>
+                Merkez: ${frameCenterX.toFixed(0)}px<br>
+                <br>
+                <strong>Göz Bebekleri:</strong><br>
+                Sol göz: (${pupils.leftPupil.x.toFixed(0)}, ${pupils.leftPupil.y.toFixed(0)})<br>
+                Sağ göz: (${pupils.rightPupil.x.toFixed(0)}, ${pupils.rightPupil.y.toFixed(0)})<br>
+                <br>
+                <strong>PD Değerleri:</strong><br>
+                Sol PD: ${leftPD_px.toFixed(0)}px = ${leftPD_mm.toFixed(2)}mm<br>
+                Sağ PD: ${rightPD_px.toFixed(0)}px = ${rightPD_mm.toFixed(2)}mm<br>
+                Toplam: ${totalPD_px.toFixed(0)}px = ${totalPD_mm.toFixed(1)}mm
+            `);
+        }
+    </script>
+</body>
+</html>
