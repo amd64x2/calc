@@ -82,10 +82,6 @@
             display: block;
         }
         
-        #video {
-            display: none;
-        }
-        
         .canvas-overlay {
             position: absolute;
             top: 0;
@@ -194,6 +190,34 @@
             margin-bottom: 5px;
         }
         
+        .legend {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .legend.show {
+            display: block;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        
         .status {
             text-align: center;
             padding: 10px;
@@ -258,7 +282,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>👓 PD Ölçüm Sistemi</h1>
+        <h1>👓 PD Ölçüm Sistemi V.2</h1>
         <p class="subtitle">Pupillary Distance - Göz Bebeği Mesafesi Ölçümü</p>
         
         <div class="info-box">
@@ -266,7 +290,8 @@
             <p>1. Gözlük çerçevenizin gerçek genişliğini (mm) girin</p>
             <p>2. Çerçevenin her iki camının dış köşesine siyah nokta koyun (keçeli kalemle)</p>
             <p>3. Kamerayı açın ve gözlüğü takarak yüzünüzü kameraya gösterin</p>
-            <p>4. Fotoğraf çekin - sistem otomatik olarak PD'nizi hesaplayacak</p>
+            <p>4. Canlı önizlemede yeşil ve kırmızı işaretleri görene kadar bekleyin</p>
+            <p>5. Her şey doğru görünüyorsa fotoğraf çekin</p>
         </div>
         
         <div class="input-group">
@@ -276,6 +301,21 @@
         
         <div id="status" class="status status-info">
             <span class="loading-spinner"></span> OpenCV.js yükleniyor, lütfen bekleyin...
+        </div>
+        
+        <div class="legend" id="legend">
+            <div class="legend-item">
+                <span class="legend-color" style="background: #00ff00; border: 2px solid #00ff00;"></span>
+                Çerçeve Noktaları
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: transparent; border: 2px solid #ff0000;"></span>
+                Göz Bebekleri
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ffff00;"></span>
+                PD Ölçüm Çizgisi
+            </div>
         </div>
         
         <div class="camera-container" id="cameraContainer" style="display:none;">
@@ -321,6 +361,8 @@
         let overlayElement = document.getElementById('overlay');
         let ctx = canvasElement.getContext('2d');
         let overlayCtx = overlayElement.getContext('2d');
+        let isCapturing = false;
+        let animationId = null;
         
         // OpenCV yükleme kontrolü
         function checkOpenCV() {
@@ -386,10 +428,12 @@
                     document.getElementById('startCamera').style.display = 'none';
                     document.getElementById('captureBtn').style.display = 'block';
                     document.getElementById('captureBtn').disabled = false;
+                    document.getElementById('legend').classList.add('show');
                     
-                    updateStatus('✓ Kamera hazır! Gözlüğü takın ve fotoğraf çekin', 'success');
+                    updateStatus('✓ Canlı tespit aktif! Yeşil ve kırmızı işaretleri görünce fotoğraf çekin', 'success');
                     
-                    renderPreview();
+                    // Canlı tespit başlat
+                    startLiveDetection();
                 };
                 
             } catch (error) {
@@ -398,11 +442,38 @@
             }
         });
         
-        // Video önizleme
-        function renderPreview() {
-            if (!stream) return;
+        // Canlı tespit
+        function startLiveDetection() {
+            if (!stream || isCapturing) return;
+            
+            // Canvas'a video çiz
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-            requestAnimationFrame(renderPreview);
+            
+            // Tespit yap (her frame'de değil, performans için)
+            if (animationId === null || animationId % 3 === 0) {
+                detectAndDrawLive();
+            }
+            
+            animationId = requestAnimationFrame(startLiveDetection);
+        }
+        
+        // Canlı tespit ve çizim
+        function detectAndDrawLive() {
+            if (!opencvReady) return;
+            
+            try {
+                // Siyah noktaları tespit et
+                const markers = detectMarkerEdges(ctx);
+                
+                // Göz bebeklerini tespit et
+                const pupils = detectPupils(ctx);
+                
+                // Overlay'e çiz
+                drawOverlay(markers, pupils);
+                
+            } catch (err) {
+                console.error('Canlı tespit hatası:', err);
+            }
         }
         
         // Fotoğraf çek
@@ -418,10 +489,16 @@
                 return;
             }
             
+            // Canlı tespiti durdur
+            isCapturing = true;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
             updateStatus('📸 Fotoğraf çekildi, analiz ediliyor...', 'info');
             
+            // Son frame'i yakala
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-            videoElement.style.display = 'none';
             
             setTimeout(() => {
                 calculatePD(frameWidth);
@@ -550,7 +627,6 @@
                 };
                 
             } catch (err) {
-                console.error('Marker detection error:', err);
                 return null;
             }
         }
@@ -569,7 +645,6 @@
                 
                 cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
                 
-                // HoughCircles ile göz bebeği tespiti
                 const circles = new cv.Mat();
                 cv.HoughCircles(gray, circles, cv.HOUGH_GRADIENT, 1, h/8, 100, 30, 5, 30);
                 
@@ -580,7 +655,6 @@
                     const y = circles.data32F[i * 3 + 1];
                     const radius = circles.data32F[i * 3 + 2];
                     
-                    // Göz bölgesinde mi kontrol et (üst yarıda)
                     if (y > h * 0.25 && y < h * 0.6) {
                         pupils.push({ x, y, radius });
                     }
@@ -592,7 +666,6 @@
                 
                 if (pupils.length < 2) return null;
                 
-                // X'e göre sırala (sol-sağ)
                 pupils.sort((a, b) => a.x - b.x);
                 
                 return {
@@ -601,7 +674,6 @@
                 };
                 
             } catch (err) {
-                console.error('Pupil detection error:', err);
                 return null;
             }
         }
@@ -613,7 +685,7 @@
             if (markers) {
                 // Çerçeve noktaları - Yeşil
                 overlayCtx.strokeStyle = '#00ff00';
-                overlayCtx.lineWidth = 3;
+                overlayCtx.lineWidth = 4;
                 overlayCtx.beginPath();
                 overlayCtx.arc(markers.leftEdgeX, markers.leftY, 20, 0, 2 * Math.PI);
                 overlayCtx.stroke();
@@ -622,16 +694,24 @@
                 overlayCtx.stroke();
                 
                 // Çerçeve çizgisi
+                overlayCtx.setLineDash([5, 5]);
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(markers.leftEdgeX, markers.leftY);
                 overlayCtx.lineTo(markers.rightEdgeX, markers.rightY);
                 overlayCtx.stroke();
+                overlayCtx.setLineDash([]);
+                
+                // Etiketler
+                overlayCtx.fillStyle = '#00ff00';
+                overlayCtx.font = 'bold 16px Arial';
+                overlayCtx.fillText('L', markers.leftEdgeX - 8, markers.leftY - 25);
+                overlayCtx.fillText('R', markers.rightEdgeX - 8, markers.rightY - 25);
             }
             
             if (pupils) {
                 // Göz bebekleri - Kırmızı
                 overlayCtx.strokeStyle = '#ff0000';
-                overlayCtx.lineWidth = 2;
+                overlayCtx.lineWidth = 3;
                 
                 overlayCtx.beginPath();
                 overlayCtx.arc(pupils.leftPupil.x, pupils.leftPupil.y, pupils.leftPupil.radius + 5, 0, 2 * Math.PI);
@@ -641,87 +721,63 @@
                 overlayCtx.arc(pupils.rightPupil.x, pupils.rightPupil.y, pupils.rightPupil.radius + 5, 0, 2 * Math.PI);
                 overlayCtx.stroke();
                 
-                // PD çizgisi
+                // PD çizgisi - Sarı
                 overlayCtx.strokeStyle = '#ffff00';
-                overlayCtx.lineWidth = 2;
+                overlayCtx.lineWidth = 3;
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(pupils.leftPupil.x, pupils.leftPupil.y);
                 overlayCtx.lineTo(pupils.rightPupil.x, pupils.rightPupil.y);
                 overlayCtx.stroke();
+                
+                // Merkez noktalar
+                overlayCtx.fillStyle = '#ff0000';
+                overlayCtx.beginPath();
+                overlayCtx.arc(pupils.leftPupil.x, pupils.leftPupil.y, 3, 0, 2 * Math.PI);
+                overlayCtx.fill();
+                overlayCtx.beginPath();
+                overlayCtx.arc(pupils.rightPupil.x, pupils.rightPupil.y, 3, 0, 2 * Math.PI);
+                overlayCtx.fill();
             }
         }
         
         // PD Hesaplama
         function calculatePD(realFrameWidth_mm) {
-            // 1. Çerçeve noktalarını tespit et
             const markers = detectMarkerEdges(ctx);
             
             if (!markers) {
                 updateStatus('❌ Siyah noktalar bulunamadı! Çerçeveye net siyah noktalar koyun.', 'error');
+                isCapturing = false;
+                startLiveDetection();
                 return;
             }
             
             const frameWidthPixels = markers.rightEdgeX - markers.leftEdgeX;
             const pixelPerMm = frameWidthPixels / realFrameWidth_mm;
             
-            console.log('Piksel/mm oranı:', pixelPerMm);
-            
-            // 2. Göz bebeklerini tespit et
             const pupils = detectPupils(ctx);
             
             if (!pupils) {
-                updateStatus('❌ Göz bebekleri tespit edilemedi! Kameraya doğrudan bakın.', 'error');
+                updateStatus('❌ Göz bebekleri tespit edilemedi! Kameraya doğrudan bakın ve tekrar deneyin.', 'error');
                 drawOverlay(markers, null);
+                isCapturing = false;
+                startLiveDetection();
                 return;
             }
             
-            // 3. PD hesapla
             const frameCenterX = (markers.leftEdgeX + markers.rightEdgeX) / 2;
             
-            // Sol göz PD (çerçeve merkezinden sol göz bebeğine)
             const leftPD_px = Math.abs(frameCenterX - pupils.leftPupil.x);
             const leftPD_mm = leftPD_px / pixelPerMm;
             
-            // Sağ göz PD (çerçeve merkezinden sağ göz bebeğine)
             const rightPD_px = Math.abs(pupils.rightPupil.x - frameCenterX);
             const rightPD_mm = rightPD_px / pixelPerMm;
             
-            // Toplam PD (iki göz arası)
             const totalPD_px = Math.abs(pupils.rightPupil.x - pupils.leftPupil.x);
             const totalPD_mm = totalPD_px / pixelPerMm;
             
-            // Sonuçları göster
             document.getElementById('leftPD').textContent = leftPD_mm.toFixed(2);
             document.getElementById('rightPD').textContent = rightPD_mm.toFixed(2);
             document.getElementById('totalPD').textContent = totalPD_mm.toFixed(1);
             document.getElementById('resultBox').classList.add('show');
             
-            updateStatus('✓ Ölçüm tamamlandı!', 'success');
-            
-            // Overlay çiz
-            drawOverlay(markers, pupils);
-            
-            // Debug bilgisi
-            showDebug(`
-                <strong>Tespit Bilgileri:</strong><br>
-                Çerçeve genişliği: ${frameWidthPixels.toFixed(0)}px = ${realFrameWidth_mm}mm<br>
-                Piksel/mm oranı: ${pixelPerMm.toFixed(3)}<br>
-                <br>
-                <strong>Çerçeve Noktaları:</strong><br>
-                Sol: (${markers.leftEdgeX.toFixed(0)}, ${markers.leftY.toFixed(0)})<br>
-                Sağ: (${markers.rightEdgeX.toFixed(0)}, ${markers.rightY.toFixed(0)})<br>
-                Merkez: ${frameCenterX.toFixed(0)}px<br>
-                <br>
-                <strong>Göz Bebekleri:</strong><br>
-                Sol göz: (${pupils.leftPupil.x.toFixed(0)}, ${pupils.leftPupil.y.toFixed(0)})<br>
-                Sağ göz: (${pupils.rightPupil.x.toFixed(0)}, ${pupils.rightPupil.y.toFixed(0)})<br>
-                <br>
-                <strong>PD Değerleri:</strong><br>
-                Sol PD: ${leftPD_px.toFixed(0)}px = ${leftPD_mm.toFixed(2)}mm<br>
-                Sağ PD: ${rightPD_px.toFixed(0)}px = ${rightPD_mm.toFixed(2)}mm<br>
-                Toplam: ${totalPD_px.toFixed(0)}px = ${totalPD_mm.toFixed(1)}mm
-            `);
-        }
-    </script>
-</body>
-</html>
+            updateStatus('✓ Ölçüm tamamlandı!
