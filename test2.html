@@ -165,7 +165,7 @@
             font-size: 24px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.1s;
-            z-index: 4;
+            z-index: 10;
         }
 
         .vertical-handle:active {
@@ -200,7 +200,7 @@
             font-size: 24px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.1s;
-            z-index: 4;
+            z-index: 10;
         }
 
         .horizontal-handle:active {
@@ -223,8 +223,7 @@
         #info {
             position: absolute;
             top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 20px;
             background: rgba(0, 0, 0, 0.8);
             color: #fff;
             padding: 15px 25px;
@@ -265,7 +264,7 @@
             transition: transform 0.1s;
             font-weight: bold;
             color: white;
-            z-index: 4;
+            z-index: 10;
         }
 
         .new-vertical-handle:active {
@@ -287,7 +286,7 @@
 
         #measurementInfo {
             position: absolute;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.85);
@@ -298,6 +297,7 @@
             font-weight: bold;
             z-index: 4;
             line-height: 1.6;
+            text-align: center;
         }
 
         #statusMessage {
@@ -505,11 +505,13 @@
         // Çizim Fonksiyonu
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = isPhotoTaken ? 0.7 : 1.0;
+            
+            // Fotoğraf çekildiğinde çizgileri daha belirgin hale getir
+            ctx.globalAlpha = isPhotoTaken ? 0.9 : 1.0;
 
             // Dikey çizgiler
             ctx.strokeStyle = '#ff4444';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = isPhotoTaken ? 4 : 3;
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#ff4444';
             ctx.beginPath();
@@ -543,6 +545,7 @@
             const lineHeight = 100;
             ctx.strokeStyle = '#ff66aa';
             ctx.shadowColor = '#ff66aa';
+            ctx.lineWidth = isPhotoTaken ? 4 : 3;
             ctx.beginPath();
             ctx.moveTo(rLineX, rLineY - lineHeight);
             ctx.lineTo(rLineX, rLineY);
@@ -569,8 +572,8 @@
 
             // Kutu çizimi
             ctx.setLineDash([10, 10]);
-            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = isPhotoTaken ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)';
+            ctx.lineWidth = isPhotoTaken ? 3 : 2;
             ctx.strokeRect(leftLineX, topLineY, rightLineX - leftLineX, bottomLineY - topLineY);
             ctx.setLineDash([]);
 
@@ -578,9 +581,9 @@
         }
 
         function drawCross(x, y) {
-            const crossSize = 15;
+            const crossSize = isPhotoTaken ? 20 : 15;
             ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = isPhotoTaken ? 5 : 4;
             ctx.shadowBlur = 10;
             ctx.shadowColor = '#ff0000';
             ctx.beginPath();
@@ -593,9 +596,9 @@
         }
 
         function drawCorner(x, y) {
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillStyle = isPhotoTaken ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.8)';
             ctx.beginPath();
-            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.arc(x, y, isPhotoTaken ? 10 : 8, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -639,6 +642,8 @@
                 showAllHandles(true);
                 measurementInfo.style.display = 'block';
             }
+            
+            draw();
         }
 
         function showAllHandles(show) {
