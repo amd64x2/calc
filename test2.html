@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -18,7 +19,6 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Header Stilleri */
         #header {
             position: absolute;
             top: 0;
@@ -91,7 +91,6 @@
             margin-top: 5px;
         }
 
-        /* Kamera butonları */
         #cameraControls {
             display: flex;
             gap: 10px;
@@ -128,7 +127,6 @@
             z-index: 2;
         }
 
-        /* Kamera önizleme */
         #cameraPreview {
             position: absolute;
             top: 0;
@@ -140,7 +138,6 @@
             z-index: 1;
         }
 
-        /* Çekilen fotoğraf */
         #capturedImage {
             position: absolute;
             top: 0;
@@ -153,7 +150,6 @@
             z-index: 3;
         }
 
-        /* Dikey çizgiler için tutacaklar */
         .vertical-handle {
             position: absolute;
             width: 60px;
@@ -189,7 +185,6 @@
             left: 75%;
         }
 
-        /* Yatay çubuklar için tutacaklar */
         .horizontal-handle {
             position: absolute;
             width: 60px;
@@ -225,7 +220,6 @@
             top: 70%;
         }
 
-        /* Bilgi paneli */
         #info {
             position: absolute;
             top: 120px;
@@ -255,7 +249,6 @@
             vertical-align: middle;
         }
 
-        /* Yeni dikey çizgiler için tutacaklar */
         .new-vertical-handle {
             position: absolute;
             width: 60px;
@@ -292,22 +285,21 @@
             top: 100px;
         }
 
-        /* Ölçüm bilgisi */
         #measurementInfo {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: #fff;
-            padding: 10px 20px;
+            padding: 15px 25px;
             border-radius: 15px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             z-index: 4;
+            line-height: 1.6;
         }
 
-        /* Durum mesajı */
         #statusMessage {
             position: absolute;
             top: 50%;
@@ -322,21 +314,10 @@
             z-index: 5;
             display: none;
         }
-        canvas {
-    z-index: 10;
-}
-
-.vertical-handle, .horizontal-handle, .new-vertical-handle {
-    z-index: 20;
-}
-
-#capturedImage {
-    z-index: 5;
-}
     </style>
 </head>
+
 <body>
-    <!-- Header -->
     <div id="header">
         <div class="input-group">
             <div class="input-label">Ekartman:</div>
@@ -345,7 +326,7 @@
                 <div class="value-display" id="ekartmanValue">52</div>
                 <button class="value-btn" onclick="changeEkartman(1)">+</button>
             </div>
-            
+
             <div class="input-label">Köprü:</div>
             <div class="value-control">
                 <button class="value-btn" onclick="changeKopru(-1)">-</button>
@@ -353,12 +334,12 @@
                 <button class="value-btn" onclick="changeKopru(1)">+</button>
             </div>
         </div>
-        
+
         <div class="input-group">
             <div class="input-label">Çerçeve Genişliği:</div>
-            <div id="frameWidth">88 mm</div>
+            <div id="frameWidth">122 mm</div>
         </div>
-        
+
         <div id="cameraControls">
             <button class="camera-btn" onclick="openCamera()" id="openCameraBtn">Kamerayı Aç</button>
             <button class="camera-btn" onclick="takePhoto()" style="display:none;" id="takePhotoBtn">Fotoğraf Çek</button>
@@ -371,16 +352,12 @@
         <canvas id="canvas"></canvas>
         <video id="cameraPreview" autoplay playsinline></video>
         <img id="capturedImage" alt="Çekilen Fotoğraf">
-        
-        <!-- Dikey çizgi tutacakları -->
+
         <div id="leftHandle" class="vertical-handle">🔴</div>
         <div id="rightHandle" class="vertical-handle">🔵</div>
-
-        <!-- Yatay çubuk tutacakları -->
         <div id="topHandle" class="horizontal-handle">🟢</div>
         <div id="bottomHandle" class="horizontal-handle">🟠</div>
 
-        <!-- Bilgi paneli -->
         <div id="info">
             <div class="info-row">
                 <span class="color-box" style="background: #ff4444;"></span> Sol Çizgi
@@ -395,27 +372,31 @@
             </div>
         </div>
 
-        <!-- Yeni dikey çizgi tutacakları -->
-        <div id="rHandle" class="new-vertical-handle">L</div>
-        <div id="lHandle" class="new-vertical-handle">R</div>
+        <div id="rHandle" class="new-vertical-handle">R</div>
+        <div id="lHandle" class="new-vertical-handle">L</div>
 
-        <!-- Ölçüm bilgisi -->
         <div id="measurementInfo"></div>
-
-        <!-- Durum mesajı -->
         <div id="statusMessage"></div>
     </div>
 
     <script>
-        // Değişkenler
+        // Temel Değişkenler
+        let canvas, ctx;
+        let leftLineX = 0;
+        let rightLineX = 0;
+        let topLineY = 0;
+        let bottomLineY = 0;
+        let rLineX = 0;
+        let rLineY = 0;
+        let lLineX = 0;
+        let lLineY = 0;
         let ekartman = 52;
         let kopru = 18;
-        let stream = null;
-        let isCameraActive = false;
+        let mmPerPx = 1;
         let isPhotoTaken = false;
+        let isCameraActive = false;
+        let stream = null;
 
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
         const cameraPreview = document.getElementById('cameraPreview');
         const capturedImage = document.getElementById('capturedImage');
         const openCameraBtn = document.getElementById('openCameraBtn');
@@ -424,7 +405,6 @@
         const retakePhotoBtn = document.getElementById('retakePhotoBtn');
         const statusMessage = document.getElementById('statusMessage');
 
-        // Tutacak elementleri
         const leftHandle = document.getElementById('leftHandle');
         const rightHandle = document.getElementById('rightHandle');
         const topHandle = document.getElementById('topHandle');
@@ -434,112 +414,251 @@
         const infoPanel = document.getElementById('info');
         const measurementInfo = document.getElementById('measurementInfo');
 
-        // Çizgi pozisyonları
-        let leftLineX = 0;
-        let rightLineX = 0;
-        let topLineY = 0;
-        let bottomLineY = 0;
-        let rLineX = 0;
-        let rLineY = 0;
-        let lLineX = 0;
-        let lLineY = 0;
-
-        // Sürükleme durumu
         let dragging = null;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
 
-        // UI durumunu güncelle
+        // Başlatma
+        window.onload = function () {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            updateFrameWidth();
+            updateUIState();
+            updateMeasurementInfo();
+        };
+
+        // Canvas Boyutlandırma
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (leftLineX === 0) {
+                leftLineX = canvas.width * 0.25;
+                rightLineX = canvas.width * 0.75;
+                topLineY = canvas.height * 0.3;
+                bottomLineY = canvas.height * 0.7;
+                rLineX = canvas.width * 0.4;
+                rLineY = canvas.height - 100;
+                lLineX = canvas.width * 0.6;
+                lLineY = canvas.height - 100;
+                updateHandles();
+            }
+
+            draw();
+        }
+
+        // Frame Genişliği Hesabı
+        function updateFrameWidth() {
+            const total = (2 * ekartman) + kopru;
+            document.getElementById('frameWidth').textContent = total + ' mm';
+            updateMeasurementInfo();
+        }
+
+        function getFrameWidthMM() {
+            const text = document.getElementById('frameWidth').textContent;
+            return parseFloat(text.replace('mm', '').trim());
+        }
+
+        // Ekartman / Köprü Kontrolleri
+        function changeEkartman(delta) {
+            ekartman = Math.max(30, Math.min(80, ekartman + delta));
+            document.getElementById('ekartmanValue').textContent = ekartman;
+            updateFrameWidth();
+        }
+
+        function changeKopru(delta) {
+            kopru = Math.max(10, Math.min(30, kopru + delta));
+            document.getElementById('kopruValue').textContent = kopru;
+            updateFrameWidth();
+        }
+
+        // Ölçüm Hesaplama
+        function updateMeasurementInfo() {
+            const frameWidthMM = getFrameWidthMM();
+            const width_px = Math.abs(rightLineX - leftLineX);
+            const height_px = Math.abs(bottomLineY - topLineY);
+
+            if (width_px === 0) return;
+
+            mmPerPx = frameWidthMM / width_px;
+
+            const width_mm = (width_px * mmPerPx).toFixed(2);
+            const height_mm = (height_px * mmPerPx).toFixed(2);
+
+            const centerX = (leftLineX + rightLineX) / 2;
+            const R_pd_px = Math.abs(centerX - rLineX);
+            const L_pd_px = Math.abs(centerX - lLineX);
+
+            const R_pd_mm = (R_pd_px * mmPerPx).toFixed(2);
+            const L_pd_mm = (L_pd_px * mmPerPx).toFixed(2);
+
+            // Ayna etkisi düzeltmesi: Ekranda soldaki göz = Sağ göz (R)
+            measurementInfo.innerHTML = `
+                <b>Genişlik:</b> ${width_mm} mm &nbsp;&nbsp;
+                <b>Yükseklik:</b> ${height_mm} mm<br>
+                <b>Sağ PD:</b> ${L_pd_mm} mm &nbsp;&nbsp;
+                <b>Sol PD:</b> ${R_pd_mm} mm
+            `;
+        }
+
+        // Çizim Fonksiyonu
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = isPhotoTaken ? 0.7 : 1.0;
+
+            // Dikey çizgiler
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ff4444';
+            ctx.beginPath();
+            ctx.moveTo(leftLineX, 0);
+            ctx.lineTo(leftLineX, canvas.height);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#4444ff';
+            ctx.shadowColor = '#4444ff';
+            ctx.beginPath();
+            ctx.moveTo(rightLineX, 0);
+            ctx.lineTo(rightLineX, canvas.height);
+            ctx.stroke();
+
+            // Yatay çizgiler
+            ctx.strokeStyle = '#44ff44';
+            ctx.shadowColor = '#44ff44';
+            ctx.beginPath();
+            ctx.moveTo(0, topLineY);
+            ctx.lineTo(canvas.width, topLineY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ffaa44';
+            ctx.shadowColor = '#ffaa44';
+            ctx.beginPath();
+            ctx.moveTo(0, bottomLineY);
+            ctx.lineTo(canvas.width, bottomLineY);
+            ctx.stroke();
+
+            // R - L kısa çizgiler
+            const lineHeight = 100;
+            ctx.strokeStyle = '#ff66aa';
+            ctx.shadowColor = '#ff66aa';
+            ctx.beginPath();
+            ctx.moveTo(rLineX, rLineY - lineHeight);
+            ctx.lineTo(rLineX, rLineY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#66aaff';
+            ctx.shadowColor = '#66aaff';
+            ctx.beginPath();
+            ctx.moveTo(lLineX, lLineY - lineHeight);
+            ctx.lineTo(lLineX, lLineY);
+            ctx.stroke();
+
+            // Artı işaretleri
+            drawCross(rLineX, rLineY - lineHeight - 20);
+            drawCross(lLineX, lLineY - lineHeight - 20);
+
+            ctx.shadowBlur = 0;
+
+            // Köşe noktaları
+            drawCorner(leftLineX, topLineY);
+            drawCorner(rightLineX, topLineY);
+            drawCorner(leftLineX, bottomLineY);
+            drawCorner(rightLineX, bottomLineY);
+
+            // Kutu çizimi
+            ctx.setLineDash([10, 10]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(leftLineX, topLineY, rightLineX - leftLineX, bottomLineY - topLineY);
+            ctx.setLineDash([]);
+
+            ctx.globalAlpha = 1.0;
+        }
+
+        function drawCross(x, y) {
+            const crossSize = 15;
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff0000';
+            ctx.beginPath();
+            ctx.moveTo(x - crossSize, y);
+            ctx.lineTo(x + crossSize, y);
+            ctx.moveTo(x, y - crossSize);
+            ctx.lineTo(x, y + crossSize);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawCorner(x, y) {
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // UI Durumu
         function updateUIState() {
             if (isPhotoTaken) {
-                // Fotoğraf çekilmiş durum
                 showStatus("Fotoğraf çekildi! Ölçüm yapabilirsiniz.");
                 setTimeout(() => {
                     statusMessage.style.display = 'none';
                 }, 2000);
-                
+
                 capturedImage.style.display = 'block';
                 cameraPreview.style.display = 'none';
                 openCameraBtn.style.display = 'none';
                 takePhotoBtn.style.display = 'none';
                 closeCameraBtn.style.display = 'none';
                 retakePhotoBtn.style.display = 'inline-block';
-                
-                // Tüm tutamaçları göster
+
                 showAllHandles(true);
                 measurementInfo.style.display = 'block';
-                
+
             } else if (isCameraActive) {
-                // Kamera açık durum
                 capturedImage.style.display = 'none';
                 cameraPreview.style.display = 'block';
                 openCameraBtn.style.display = 'none';
                 takePhotoBtn.style.display = 'inline-block';
                 closeCameraBtn.style.display = 'inline-block';
                 retakePhotoBtn.style.display = 'none';
-                
-                // Tüm tutamaçları gizle
+
                 showAllHandles(false);
                 measurementInfo.style.display = 'none';
-                
+
             } else {
-                // Normal durum
                 capturedImage.style.display = 'none';
                 cameraPreview.style.display = 'none';
                 openCameraBtn.style.display = 'inline-block';
                 takePhotoBtn.style.display = 'none';
                 closeCameraBtn.style.display = 'none';
                 retakePhotoBtn.style.display = 'none';
-                
-                // Tüm tutamaçları göster
+
                 showAllHandles(true);
                 measurementInfo.style.display = 'block';
             }
         }
 
-        // Tüm tutamaçları göster/gizle
         function showAllHandles(show) {
-            const handles = [
-                leftHandle, rightHandle, topHandle, bottomHandle, 
-                rHandle, lHandle, infoPanel, measurementInfo
-            ];
-            
+            const handles = [leftHandle, rightHandle, topHandle, bottomHandle, rHandle, lHandle, infoPanel];
             handles.forEach(handle => {
                 handle.style.display = show ? 'flex' : 'none';
             });
         }
 
-        // Durum mesajı göster
         function showStatus(message) {
             statusMessage.textContent = message;
             statusMessage.style.display = 'block';
         }
 
-        // Değer değiştirme fonksiyonları
-        function changeEkartman(delta) {
-            ekartman = Math.max(1, ekartman + delta);
-            document.getElementById('ekartmanValue').textContent = ekartman;
-            calculateFrameWidth();
-        }
-
-        function changeKopru(delta) {
-            kopru = Math.max(1, kopru + delta);
-            document.getElementById('kopruValue').textContent = kopru;
-            calculateFrameWidth();
-        }
-
-        function calculateFrameWidth() {
-            const frameWidth = ekartman + kopru + ekartman;
-            document.getElementById('frameWidth').textContent = frameWidth + ' mm';
-            return frameWidth;
-        }
-
-        // Kamera fonksiyonları
+        // Kamera Fonksiyonları
         async function openCamera() {
             try {
                 showStatus("Kamera açılıyor...");
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
                 });
                 cameraPreview.srcObject = stream;
                 isCameraActive = true;
@@ -568,24 +687,19 @@
             if (!isCameraActive) return;
 
             showStatus("Fotoğraf çekiliyor...");
-            
-            // Canvas'a kamera görüntüsünü çiz
+
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
             tempCanvas.width = cameraPreview.videoWidth;
             tempCanvas.height = cameraPreview.videoHeight;
             tempCtx.drawImage(cameraPreview, 0, 0);
-            
-            // Canvas'tan data URL al
+
             const imageDataURL = tempCanvas.toDataURL('image/jpeg');
             capturedImage.src = imageDataURL;
-            
-            // Kamera kapat
+
             closeCamera();
             isPhotoTaken = true;
             updateUIState();
-            
-            // Ölçüm bilgisini güncelle
             updateMeasurementInfo();
         }
 
@@ -599,17 +713,7 @@
             }, 2000);
         }
 
-        // Ölçüm bilgisini güncelle
-        function updateMeasurementInfo() {
-            const rlDistance = Math.abs(lLineX - rLineX);
-            const frameWidth = calculateFrameWidth();
-            const pixelToMm = frameWidth / (rightLineX - leftLineX);
-            const rlDistanceMm = (rlDistance * pixelToMm).toFixed(1);
-            
-            measurementInfo.textContent = `R-L Mesafesi: ${rlDistanceMm} mm`;
-        }
-
-        // Tutacak pozisyonlarını güncelle
+        // Tutamaç Güncelleme
         function updateHandles() {
             leftHandle.style.left = leftLineX + 'px';
             rightHandle.style.left = rightLineX + 'px';
@@ -621,157 +725,17 @@
             lHandle.style.top = lLineY + 'px';
         }
 
-        // Canvas boyutlandırma
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-           
-            // İlk yükleme için pozisyonları ayarla
-            if (leftLineX === 0) {
-                leftLineX = canvas.width * 0.25;
-                rightLineX = canvas.width * 0.75;
-                topLineY = canvas.height * 0.3;
-                bottomLineY = canvas.height * 0.7;
-                rLineX = canvas.width * 0.4;
-                rLineY = canvas.height - 100;
-                lLineX = canvas.width * 0.6;
-                lLineY = canvas.height - 100;
-                updateHandles();
-            }
-           
-            draw();
-        }
-
-        // Çizim fonksiyonu
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-           
-            // Sadece fotoğraf çekilmemişse çizim yap
-            if (!isPhotoTaken) {
-                // Sol dikey çizgi (kırmızı)
-                ctx.strokeStyle = '#ff4444';
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#ff4444';
-                ctx.beginPath();
-                ctx.moveTo(leftLineX, 0);
-                ctx.lineTo(leftLineX, canvas.height);
-                ctx.stroke();
-               
-                // Sağ dikey çizgi (mavi)
-                ctx.strokeStyle = '#4444ff';
-                ctx.shadowColor = '#4444ff';
-                ctx.beginPath();
-                ctx.moveTo(rightLineX, 0);
-                ctx.lineTo(rightLineX, canvas.height);
-                ctx.stroke();
-               
-                // Üst yatay çubuk (yeşil)
-                ctx.strokeStyle = '#44ff44';
-                ctx.shadowColor = '#44ff44';
-                ctx.beginPath();
-                ctx.moveTo(0, topLineY);
-                ctx.lineTo(canvas.width, topLineY);
-                ctx.stroke();
-               
-                // Alt yatay çubuk (turuncu)
-                ctx.strokeStyle = '#ffaa44';
-                ctx.shadowColor = '#ffaa44';
-                ctx.beginPath();
-                ctx.moveTo(0, bottomLineY);
-                ctx.lineTo(canvas.width, bottomLineY);
-                ctx.stroke();
-               
-                // Yeni dikey çizgiler (100px uzunluğunda)
-                const lineHeight = 100;
-
-                // R çizgisi (pembe)
-                ctx.strokeStyle = '#ff66aa';
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#ff66aa';
-                ctx.beginPath();
-                ctx.moveTo(rLineX, rLineY - lineHeight);
-                ctx.lineTo(rLineX, rLineY);
-                ctx.stroke();
-
-                // L çizgisi (açık mavi)
-                ctx.strokeStyle = '#66aaff';
-                ctx.shadowColor = '#66aaff';
-                ctx.beginPath();
-                ctx.moveTo(lLineX, lLineY - lineHeight);
-                ctx.lineTo(lLineX, lLineY);
-                ctx.stroke();
-
-                // Kırmızı artı işaretleri
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 4;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ff0000';
-
-                // R için artı işareti
-                const crossSize = 15;
-                const rCrossTop = rLineY - lineHeight - 20;
-               
-                ctx.beginPath();
-                ctx.moveTo(rLineX - crossSize, rCrossTop);
-                ctx.lineTo(rLineX + crossSize, rCrossTop);
-                ctx.moveTo(rLineX, rCrossTop - crossSize);
-                ctx.lineTo(rLineX, rCrossTop + crossSize);
-                ctx.stroke();
-
-                // L için artı işareti
-                const lCrossTop = lLineY - lineHeight - 20;
-               
-                ctx.beginPath();
-                ctx.moveTo(lLineX - crossSize, lCrossTop);
-                ctx.lineTo(lLineX + crossSize, lCrossTop);
-                ctx.moveTo(lLineX, lCrossTop - crossSize);
-                ctx.lineTo(lLineX, lCrossTop + crossSize);
-                ctx.stroke();
-               
-                ctx.shadowBlur = 0;
-               
-                // Köşe noktalarını vurgula
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                const radius = 8;
-               
-                ctx.beginPath();
-                ctx.arc(leftLineX, topLineY, radius, 0, Math.PI * 2);
-                ctx.fill();
-               
-                ctx.beginPath();
-                ctx.arc(rightLineX, topLineY, radius, 0, Math.PI * 2);
-                ctx.fill();
-               
-                ctx.beginPath();
-                ctx.arc(leftLineX, bottomLineY, radius, 0, Math.PI * 2);
-                ctx.fill();
-               
-                ctx.beginPath();
-                ctx.arc(rightLineX, bottomLineY, radius, 0, Math.PI * 2);
-                ctx.fill();
-               
-                // Kutu çiz (kesikli çizgi)
-                ctx.setLineDash([10, 10]);
-                ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(leftLineX, topLineY, rightLineX - leftLineX, bottomLineY - topLineY);
-                ctx.setLineDash([]);
-            }
-        }
-
-        // Sürükleme fonksiyonları
+        // Sürükleme Fonksiyonları
         function startDrag(handle, e) {
-            if (isCameraActive) return; // Kamera açıkken sürükleme yapma
+            if (isCameraActive) return;
             e.preventDefault();
             dragging = handle;
-            
+
             const touch = e.touches ? e.touches[0] : e;
             const rect = canvas.getBoundingClientRect();
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
-            
+
             if (handle === 'r') {
                 dragOffsetX = x - rLineX;
                 dragOffsetY = y - rLineY;
@@ -786,12 +750,12 @@
 
         function onMove(e) {
             if (!dragging || isCameraActive) return;
-           
+
             const touch = e.touches ? e.touches[0] : e;
             const rect = canvas.getBoundingClientRect();
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
-           
+
             if (dragging === 'left') {
                 leftLineX = Math.max(0, Math.min(x, canvas.width));
             } else if (dragging === 'right') {
@@ -807,7 +771,7 @@
                 lLineX = Math.max(0, Math.min(x - dragOffsetX, canvas.width));
                 lLineY = Math.max(0, Math.min(y - dragOffsetY, canvas.height));
             }
-           
+
             updateHandles();
             draw();
             updateMeasurementInfo();
@@ -819,7 +783,7 @@
             dragOffsetY = 0;
         }
 
-        // Event listeners
+        // Event Listeners
         window.addEventListener('resize', resizeCanvas);
         document.addEventListener('mousemove', onMove);
         document.addEventListener('touchmove', onMove);
@@ -838,12 +802,7 @@
         rHandle.addEventListener('touchstart', (e) => startDrag('r', e));
         lHandle.addEventListener('mousedown', (e) => startDrag('l', e));
         lHandle.addEventListener('touchstart', (e) => startDrag('l', e));
-
-        // İlk yükleme
-        resizeCanvas();
-        calculateFrameWidth();
-        updateUIState();
-        updateMeasurementInfo();
     </script>
 </body>
+
 </html>
