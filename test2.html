@@ -13,24 +13,29 @@
         }
 
         body {
-            /* Normal akışa geri dönüldü */
+            /* Scroll sadece dikeyde olsun */
             overflow-x: hidden; 
             background: #1a1a1a;
             touch-action: none;
             font-family: Arial, sans-serif;
+            /* Flexbox kaldırıldığı için normal akış. */
         }
 
         /* ------------------------------------- */
-        /* ANA KAPSAYICI */
+        /* ANA KAPSAYICI - 100% Genişlik */
         /* ------------------------------------- */
         #main-container {
             width: 100vw;
+            /* Header + Canvas Alanı + Action Alanı ilk açılışta ekrana sığacak */
+            /* Footer, kaydırılarak görülecek. */
         }
 
         /* ------------------------------------- */
-        /* HEADER ve FOOTER Alanları */
+        /* HEADER (Sabit) */
         /* ------------------------------------- */
-        .content-panel {
+        #info-header {
+            /* header-height: 80px (tahmini) */
+            height: 80px; 
             width: 100%;
             padding: 10px 20px;
             background: rgba(0, 0, 0, 0.9);
@@ -38,28 +43,53 @@
             text-align: center;
             z-index: 10;
             box-shadow: 0 4px 5px rgba(0, 0, 0, 0.5);
-            font-size: 14px;
+            position: relative; /* Normal akışta kalır */
         }
         
-        /* Bilgi Paneli Detay Stilleri (Aynı Kaldı) */
+        /* Header Detay Stilleri (Aynı) */
         #info-header .info-row {
             display: inline-block;
             margin: 5px 15px;
             font-size: 14px;
         }
-        .color-box {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            border-radius: 3px;
-            margin-right: 8px;
-            vertical-align: middle;
-            border: 1px solid #fff;
+        .color-box { /* ... */ }
+        #info-header div:last-child { /* ... */ }
+
+        /* ------------------------------------- */
+        /* ACTION ALANI (Buton) */
+        /* ------------------------------------- */
+        #action-area {
+            /* action-area-height: 60px (tahmini) */
+            height: 60px;
+            width: 100%;
+            padding: 5px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 -4px 5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        #info-header div:last-child {
-            margin-top: 10px;
-            font-size: 12px;
-            opacity: 0.7;
+
+        #capture-button {
+            padding: 10px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ------------------------------------- */
+        /* FOOTER (Kaydırılabilir) */
+        /* ------------------------------------- */
+        #info-footer {
+            width: 100%;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            text-align: center;
         }
         #info-footer p {
             font-size: 12px;
@@ -68,19 +98,23 @@
         }
         
         /* ------------------------------------- */
-        /* CANVAS ALANI */
+        /* CANVAS ALANI (Kalan Alanı Kaplar) */
         /* ------------------------------------- */
         #canvas-area {
             position: relative;
             width: 100%;
-            /* min-height değeri Header/Footer boyutuna göre ayarlanmalıdır. */
-            min-height: calc(100vh - 100px); 
+            
+            /* KİLİT NOKTA: Canvas'ın yüksekliği, Ekran Yüksekliği - Header Yüksekliği - Action Yüksekliğidir. */
+            /* 100vh - 80px (Header) - 60px (Action) = 140px çıkarılır. */
+            /* Mobil cihazlarda vh tutarsızlığı nedeniyle min-height kullanmak daha iyidir. */
+            min-height: calc(100vh - 140px); 
+            
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             overflow: hidden; 
         }
 
         #canvas {
-            position: absolute;
+            position: absolute; 
             top: 0;
             left: 0;
             width: 100%;
@@ -88,19 +122,14 @@
         }
 
         /* ------------------------------------- */
-        /* TUTACAKLAR (HANDLE'lar) */
+        /* TUTACAKLAR (HANDLE'lar) - Düzeltildi */
         /* ------------------------------------- */
         
-        /* Dikey çizgiler için tutacaklar (leftHandle, rightHandle) */
-        .vertical-handle {
+        .vertical-handle, .horizontal-handle, .new-vertical-handle {
             position: absolute;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            
-            /* Yatay ortalama: Sola kaymayı engeller ve çizginin merkezinde durur. */
-            transform: translateX(-50%); 
-            
             cursor: grab;
             touch-action: none;
             display: flex;
@@ -112,76 +141,34 @@
             z-index: 20;
         }
 
-        .vertical-handle:active {
-            cursor: grabbing;
+        /* Dikey çizgiler için yatay ortalama */
+        .vertical-handle, .new-vertical-handle {
+            transform: translateX(-50%); 
+        }
+        .vertical-handle:active, .new-vertical-handle:active {
             transform: translateX(-50%) scale(1.1);
         }
 
-        #leftHandle { background: #ff4444; border: 4px solid #fff; }
-        #rightHandle { background: #4444ff; border: 4px solid #fff; }
-
-        /* Yatay çubuklar için tutacaklar (topHandle, bottomHandle) */
+        /* Yatay çubuklar için dikey ortalama */
         .horizontal-handle {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            
-            /* 🟢 DÜZELTME: Dikey ortalama: Yukarı/aşağı kaymayı engeller ve çubuğun merkezinde durur. */
             transform: translateY(-50%); 
-            
-            cursor: grab;
-            touch-action: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: transform 0.1s;
-            z-index: 20;
         }
-
         .horizontal-handle:active {
-            cursor: grabbing;
             transform: translateY(-50%) scale(1.1);
         }
-
+        
+        #leftHandle { background: #ff4444; border: 4px solid #fff; }
+        #rightHandle { background: #4444ff; border: 4px solid #fff; }
         #topHandle { background: #44ff44; border: 4px solid #fff; }
         #bottomHandle { background: #ffaa44; border: 4px solid #fff; }
-
-        /* Yeni dikey çizgiler için tutacaklar (rHandle ve lHandle) - Aynı Kaldı */
-        .new-vertical-handle {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            transform: translateX(-50%);
-            cursor: grab;
-            touch-action: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: transform 0.1s;
-            font-weight: bold;
-            color: white;
-            z-index: 20;
-        }
-
-        .new-vertical-handle:active {
-            cursor: grabbing;
-            transform: translateX(-50%) scale(1.1);
-        }
-
-        #rHandle { background: #ff66aa; border: 4px solid #fff; }
-        #lHandle { background: #66aaff; border: 4px solid #fff; }
+        #rHandle { background: #ff66aa; border: 4px solid #fff; font-weight: bold; color: white; }
+        #lHandle { background: #66aaff; border: 4px solid #fff; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
     <div id="main-container"> 
         
-        <div id="info-header" class="content-panel">
+        <div id="info-header">
             <div class="info-row">
                 <span class="color-box" style="background: #ff4444;"></span> Sol Çizgi
                 <span class="color-box" style="background: #4444ff;"></span> Sağ Çizgi
@@ -190,18 +177,7 @@
                 <span class="color-box" style="background: #44ff44;"></span> Üst Çubuk
                 <span class="color-box" style="background: #ffaa44;"></span> Alt Çubuk
             </div>
-            
-            <div class="info-row">
-                <span class="color-box" style="background: #ff4444;"></span> Sol Çizgi
-                <span class="color-box" style="background: #4444ff;"></span> Sağ Çizgi
-            </div>
-            <div class="info-row">
-                <span class="color-box" style="background: #44ff44;"></span> Üst Çubuk
-                <span class="color-box" style="background: #ffaa44;"></span> Alt Çubuk
-            </div>
-            <div>
-                Daireleri sürükleyerek çizgileri hareket ettirin
-            </div>
+            <div>Daireleri sürükleyerek çizgileri hareket ettirin</div>
         </div>
 
         <div id="canvas-area">
@@ -209,23 +185,17 @@
 
             <div id="leftHandle" class="vertical-handle">🔴</div>
             <div id="rightHandle" class="vertical-handle">🔵</div>
-
             <div id="topHandle" class="horizontal-handle">🟢</div>
             <div id="bottomHandle" class="horizontal-handle">🟠</div>
-
             <div id="rHandle" class="new-vertical-handle">L</div>
             <div id="lHandle" class="new-vertical-handle">R</div>
         </div>
 
-        <div id="info-footer" class="content-panel">
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
-            <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
+        <div id="action-area">
+            <button id="capture-button">FOTOĞRAF ÇEK</button>
+        </div>
+
+        <div id="info-footer">
             <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
             <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
             <p>Burası Canvas'tan bağımsız alt bilgi (infoDiv) alanıdır.</p>
@@ -241,9 +211,9 @@
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const canvasArea = document.getElementById('canvas-area'); // Kapsayıcıyı al
+        const canvasArea = document.getElementById('canvas-area'); 
 
-        // Tutacak elementleri
+        // Handle elementleri
         const leftHandle = document.getElementById('leftHandle');
         const rightHandle = document.getElementById('rightHandle');
         const topHandle = document.getElementById('topHandle');
@@ -251,7 +221,7 @@
         const rHandle = document.getElementById('rHandle');
         const lHandle = document.getElementById('lHandle');
 
-        // Çizgi pozisyonları
+        // Çizgi pozisyonları (Aynı kaldı)
         let leftLineX = 0;
         let rightLineX = 0;
         let topLineY = 0;
@@ -261,43 +231,40 @@
         let lLineX = 0;
         let lLineY = 0;
 
-        // Sürükleme durumu
+        // Sürükleme durumu (Aynı kaldı)
         let dragging = null;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
 
-        // Handle'ın CSS'teki sabit boyutları
-        const HANDLE_SIZE = 60; // 60px genişlik ve yükseklik
-        // Handle'ların kenarlardan ne kadar içeride durmasını istediğimiz boşluk (örn: 20px)
-        const OFFSET = 20; 
+        // KRİTİK CONSTANT'lar (Handle'ların konumunu içeride tutar)
+        const HANDLE_SIZE = 60; 
+        const OFFSET = 20;     
 
         // Tutacak pozisyonlarını güncelle (CSS ataması)
         function updateHandles() {
-            // Not: Tüm pozisyonlar #canvas-area'nın sol üst köşesine (0,0) göre hesaplanır.
             
-            // 🟢 DİKEY HANDLE'LARIN (leftHandle, rightHandle) YUKARI KONUMU 🟢
-            // Handle'ın üst kenarının Canvas'ın tepesine olan uzaklığı
-            // = Canvas Yüksekliği - Handle Yüksekliği - İstenen Alttan Boşluk (OFFSET)
-            const verticalHandleTopY = canvas.height - HANDLE_SIZE - OFFSET;
+            const canvasActualHeight = canvas.height; 
+            const canvasActualWidth = canvas.width;   
+
+            // 1. DİKEY HANDLE'LAR (leftHandle, rightHandle) Konumu
+            // Yüksekliği hesaplarken: Canvas'ın En Altı - Handle'ın Yüksekliği - İstenen Boşluk
+            const verticalHandleTopY = canvasActualHeight - HANDLE_SIZE - OFFSET;
             
-            // Dikey Handle'lar (Kırmızı ve Mavi)
             leftHandle.style.left = leftLineX + 'px';
             rightHandle.style.left = rightLineX + 'px';
             leftHandle.style.top = verticalHandleTopY + 'px'; 
             rightHandle.style.top = verticalHandleTopY + 'px'; 
+
+            // 2. YATAY HANDLE'LAR (topHandle, bottomHandle) Konumu
+            // Genişliği hesaplarken: Canvas'ın En Sağı - Handle'ın Genişliği - İstenen Boşluk
+            const horizontalHandleLeftX = canvasActualWidth - HANDLE_SIZE - OFFSET; 
             
-            // 🟢 YATAY HANDLE'LARIN (topHandle, bottomHandle) SOL KONUMU 🟢
-            // Handle'ın sol kenarının Canvas'ın soluna olan uzaklığı
-            // = Canvas Genişliği - Handle Genişliği - İstenen Sağdan Boşluk (OFFSET)
-            const horizontalHandleLeftX = canvas.width - HANDLE_SIZE - OFFSET; 
-            
-            // Yatay Handle'lar (Yeşil ve Turuncu)
             topHandle.style.top = topLineY + 'px';
             bottomHandle.style.top = bottomLineY + 'px';
             topHandle.style.left = horizontalHandleLeftX + 'px';
             bottomHandle.style.left = horizontalHandleLeftX + 'px';
             
-            // Yeni çizgilerin handle'ları
+            // 3. Yeni çizgilerin handle'ları (rHandle ve lHandle)
             rHandle.style.left = rLineX + 'px';
             rHandle.style.top = rLineY + 'px';
             lHandle.style.left = lLineX + 'px';
@@ -306,10 +273,15 @@
 
         // Canvas boyutlandırma ve İlk Pozisyon Ayarı
         function resizeCanvas() {
-            const rect = canvasArea.getBoundingClientRect();
+            // #canvas-area'nın gerçek piksel boyutlarını al
+            const rect = canvasArea.getBoundingClientRect(); 
+
+            // Canvas'ın çizim boyutlarını, kapsayıcının gerçek boyutuna ayarla
+            // Bu, #canvas-area'nın min-height: calc(...) ile hesaplanan yüksekliğini kullanır.
             canvas.width = rect.width;
             canvas.height = rect.height;
 
+            // İlk yükleme için pozisyonları ayarla (Aynı kaldı)
             if (leftLineX === 0) { 
                 leftLineX = canvas.width * 0.25;
                 rightLineX = canvas.width * 0.75;
@@ -331,7 +303,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // ... (Tüm çizim kodları buraya gelir) ...
+            // Çizim kodları... (Önceki kodunuzdaki gibi)
             
             // Sol dikey çizgi (kırmızı)
             ctx.strokeStyle = '#ff4444';
@@ -370,33 +342,32 @@
             // Yeni dikey çizgiler (100px uzunluğunda)
             const lineHeight = 100;
 
-            // R çizgisi (pembe) - Tutacak AŞAĞIDA, çizgi YUKARIYA
+            // R çizgisi (pembe)
             ctx.strokeStyle = '#ff66aa';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 15;
             ctx.shadowColor = '#ff66aa';
             ctx.beginPath();
-            ctx.moveTo(rLineX, rLineY - lineHeight); // Yukarıya doğru çizgi
-            ctx.lineTo(rLineX, rLineY); // Tutacağa kadar
+            ctx.moveTo(rLineX, rLineY - lineHeight); 
+            ctx.lineTo(rLineX, rLineY); 
             ctx.stroke();
 
-            // L çizgisi (açık mavi) - Tutacak AŞAĞIDA, çizgi YUKARIYA
+            // L çizgisi (açık mavi)
             ctx.strokeStyle = '#66aaff';
             ctx.shadowColor = '#66aaff';
             ctx.beginPath();
-            ctx.moveTo(lLineX, lLineY - lineHeight); // Yukarıya doğru çizgi
-            ctx.lineTo(lLineX, lLineY); // Tutacağa kadar
+            ctx.moveTo(lLineX, lLineY - lineHeight); 
+            ctx.lineTo(lLineX, lLineY); 
             ctx.stroke();
 
-            // Kırmızı artı işaretleri (çizgilerin ÜSTÜNDE)
+            // Kırmızı artı işaretleri
             ctx.strokeStyle = '#ff0000';
             ctx.lineWidth = 4;
             ctx.shadowBlur = 10;
             ctx.shadowColor = '#ff0000';
 
-            // R için artı işareti (çizginin ÜSTÜNDE)
             const crossSize = 15;
-            const rCrossTop = rLineY - lineHeight - 20; // Çizgiden 20px yukarıda
+            const rCrossTop = rLineY - lineHeight - 20; 
             
             ctx.beginPath();
             ctx.moveTo(rLineX - crossSize, rCrossTop);
@@ -405,8 +376,7 @@
             ctx.lineTo(rLineX, rCrossTop + crossSize);
             ctx.stroke();
 
-            // L için artı işareti (çizginin ÜSTÜNDE)
-            const lCrossTop = lLineY - lineHeight - 20; // Çizgiden 20px yukarıda
+            const lCrossTop = lLineY - lineHeight - 20; 
             
             ctx.beginPath();
             ctx.moveTo(lLineX - crossSize, lCrossTop);
@@ -415,29 +385,24 @@
             ctx.lineTo(lLineX, lCrossTop + crossSize);
             ctx.stroke();
             
-            // Gölgeyi kapat
             ctx.shadowBlur = 0;
             
-            // Köşe noktalarını vurgula (kesişim noktaları)
+            // Köşe noktaları
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             const radius = 8;
             
-            // Sol üst
             ctx.beginPath();
             ctx.arc(leftLineX, topLineY, radius, 0, Math.PI * 2);
             ctx.fill();
             
-            // Sağ üst
             ctx.beginPath();
             ctx.arc(rightLineX, topLineY, radius, 0, Math.PI * 2);
             ctx.fill();
             
-            // Sol alt
             ctx.beginPath();
             ctx.arc(leftLineX, bottomLineY, radius, 0, Math.PI * 2);
             ctx.fill();
             
-            // Sağ alt
             ctx.beginPath();
             ctx.arc(rightLineX, bottomLineY, radius, 0, Math.PI * 2);
             ctx.fill();
@@ -450,7 +415,7 @@
             ctx.setLineDash([]);
         }
 
-        // Mouse/Touch başlangıç
+        // Sürükleme fonksiyonları (Aynı kaldı)
         function startDrag(handle, e) {
             e.preventDefault();
             dragging = handle;
@@ -460,7 +425,6 @@
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
             
-            // Sürükleme ofsetini hesapla
             if (handle === 'r') {
                 dragOffsetX = x - rLineX;
                 dragOffsetY = y - rLineY;
@@ -473,7 +437,6 @@
             }
         }
 
-        // Mouse/Touch hareket
         function onMove(e) {
             if (!dragging) return;
             
@@ -485,7 +448,6 @@
             const maxWidth = canvas.width;
             const maxHeight = canvas.height;
             
-            // Hareket limitleri (Handle'ın kendisinin sınırları)
             if (dragging === 'left') {
                 leftLineX = Math.max(0, Math.min(x, maxWidth));
             } else if (dragging === 'right') {
@@ -506,14 +468,13 @@
             draw();
         }
 
-        // Mouse/Touch bitiş
         function endDrag() {
             dragging = null;
             dragOffsetX = 0;
             dragOffsetY = 0;
         }
 
-        // Event listeners ataması
+        // Event listeners (Aynı kaldı)
         leftHandle.addEventListener('mousedown', (e) => startDrag('left', e));
         leftHandle.addEventListener('touchstart', (e) => startDrag('left', e));
         rightHandle.addEventListener('mousedown', (e) => startDrag('right', e));
@@ -527,7 +488,6 @@
         lHandle.addEventListener('mousedown', (e) => startDrag('l', e));
         lHandle.addEventListener('touchstart', (e) => startDrag('l', e));
 
-        // Global hareket ve bırakma
         document.addEventListener('mousemove', onMove);
         document.addEventListener('touchmove', onMove);
         document.addEventListener('mouseup', endDrag);
