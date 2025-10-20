@@ -30,12 +30,9 @@
         /* HEADER (Yeni Kontrol Yapısına Uyarlandı) */
         /* ------------------------------------- */
         #info-header {
-            /* 🟢 YÜKSEKLİK OTOMATİK OLMALI: Yüksekliği 80px yerine auto yapalım. */
-            /* Yeni içeriğe göre esnemesi için height: auto; */
             height: auto;
             width: 100%;
             padding: 10px 15px;
-            /* Kenar boşlukları */
             background: rgba(0, 0, 0, 0.9);
             color: #fff;
             z-index: 10;
@@ -49,18 +46,14 @@
         .controls-wrapper {
             display: flex;
             flex-wrap: wrap;
-            /* Mobil uyumluluk için alt satıra geçiş */
             gap: 10px;
-            /* Gruplar arası boşluk */
             justify-content: flex-start;
-            /* Grupları sola hizala */
             align-items: center;
         }
 
         .input-group {
             display: flex;
             align-items: center;
-            /* margin-bottom: 10px; Mobil cihazda dikey boşluğu yönetmek için kaldırıldı */
         }
 
         .input-group.full-width {
@@ -73,7 +66,6 @@
 
         .input-label {
             min-width: 80px;
-            /* Biraz küçültüldü */
             font-weight: normal;
             margin-right: 5px;
             font-size: 14px;
@@ -86,15 +78,12 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 2px 5px;
-            /* İç dolgu küçültüldü */
             margin-right: 10px;
         }
 
         .value-btn {
             width: 25px;
-            /* Küçültüldü */
             height: 25px;
-            /* Küçültüldü */
             border: none;
             border-radius: 50%;
             background: #667eea;
@@ -115,7 +104,6 @@
 
         .value-display {
             min-width: 35px;
-            /* Küçültüldü */
             text-align: center;
             font-weight: bold;
             margin: 0 5px;
@@ -130,7 +118,7 @@
         }
 
         /* ------------------------------------- */
-        /* CANVAS, ACTION, FOOTER STİLLERİ (Aynı kaldı, sadece yükseklik calc düzeltildi) */
+        /* CANVAS, ACTION, FOOTER STİLLERİ */
         /* ------------------------------------- */
 
         #action-area {
@@ -147,11 +135,7 @@
         #canvas-area {
             position: relative;
             width: 100%;
-            /* 🔴 KRİTİK DÜZELTME: Header yüksekliği artık sabit 80px değil, OTOMATİK. */
-            /* Header yüksekliğini JS ile hesaplayıp Canvas alanını dinamik olarak ayarlamamız gerekecek. */
-            /* Şimdilik eski calc() kuralını (min 140px) bıraktık, ancak JS'te güncelleyeceğiz. */
             min-height: calc(100vh - 180px);
-
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             overflow: visible;
         }
@@ -176,7 +160,6 @@
             height: 60px;
             border-radius: 50%;
             cursor: grab;
-            /* DÜZELTME: touch-action sadece handle'lara uygulandı */
             touch-action: none;
             display: flex;
             align-items: center;
@@ -187,7 +170,7 @@
             z-index: 20;
         }
 
-        /* Merkezleme kuralları (Aynı kaldı) */
+        /* Merkezleme kuralları */
         .vertical-handle,
         .new-vertical-handle {
             transform: translateX(-50%);
@@ -245,6 +228,51 @@
             justify-content: flex-center;
             margin-left: auto;
         }
+
+        /* ------------------------------------- */
+        /* FOOTER STİLLERİ */
+        /* ------------------------------------- */
+        #info-footer {
+            width: 100%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        #info-footer p {
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        /* ------------------------------------- */
+        /* FOTOĞRAF ÇEK BUTONU */
+        /* ------------------------------------- */
+        #capture-button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #capture-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        #capture-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 
@@ -257,22 +285,18 @@
                 <div class="input-group">
                     <div class="input-label">Ekartman:</div>
                     <div class="value-control">
-                        <button class="value-btn" onmousedown="startChange(-1, 'ekartman')"
-                            ontouchstart="startChange(-1, 'ekartman')">-</button>
+                        <button class="value-btn" id="ekartman-minus">-</button>
                         <div class="value-display" id="ekartmanValue">52</div>
-                        <button class="value-btn" onmousedown="startChange(1, 'ekartman')"
-                            ontouchstart="startChange(1, 'ekartman')">+</button>
+                        <button class="value-btn" id="ekartman-plus">+</button>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <div class="input-label">Köprü:</div>
                     <div class="value-control">
-                        <button class="value-btn" onmousedown="startChange(-1, 'kopru')"
-                            ontouchstart="startChange(-1, 'kopru')">-</button>
+                        <button class="value-btn" id="kopru-minus">-</button>
                         <div class="value-display" id="kopruValue">18</div>
-                        <button class="value-btn" onmousedown="startChange(1, 'kopru')"
-                            ontouchstart="startChange(1, 'kopru')">+</button>
+                        <button class="value-btn" id="kopru-plus">+</button>
                     </div>
                 </div>
 
@@ -320,7 +344,7 @@
         const infoHeader = document.getElementById('info-header');
         const actionArea = document.getElementById('action-area');
 
-        // Handle elementleri (Aynı kaldı)
+        // Handle elementleri
         const leftHandle = document.getElementById('leftHandle');
         const rightHandle = document.getElementById('rightHandle');
         const topHandle = document.getElementById('topHandle');
@@ -328,7 +352,7 @@
         const rHandle = document.getElementById('rHandle');
         const lHandle = document.getElementById('lHandle');
 
-        // Çizgi pozisyonları (Aynı kaldı)
+        // Çizgi pozisyonları
         let leftLineX = 0;
         let rightLineX = 0;
         let topLineY = 0;
@@ -338,16 +362,16 @@
         let lLineX = 0;
         let lLineY = 0;
 
-        // Sürükleme durumu (Aynı kaldı)
+        // Sürükleme durumu
         let dragging = null;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
 
-        // KRİTİK CONSTANT'lar (Aynı kaldı)
+        // KRİTİK CONSTANT'lar
         const HANDLE_SIZE = 60;
         const OFFSET = 20;
 
-        // 🟢 YENİ DEĞER DEĞİŞKENLERİ
+        // Değer değişkenleri
         let ekartmanValue = 52;
         let kopruValue = 18;
 
@@ -356,36 +380,35 @@
         let changeTimeout;
 
         // ----------------------------------------------------
-        // YENİ EKARTMAN VE KÖPRÜ FONKSİYONLARI
+        // EKARTMAN VE KÖPRÜ FONKSİYONLARI
         // ----------------------------------------------------
 
         // Çerçeve genişliğini hesaplar ve günceller
         function updateFrameWidth() {
-            // EKARTMAN + KÖPRÜ + EKARTMAN
             const totalWidth = ekartmanValue * 2 + kopruValue;
             document.getElementById('frameWidth').textContent = `${totalWidth} mm`;
-
-            // Çizgilerin yeni genişliğe göre konumunu ayarla (Opsiyonel: Eğer ekartman çizgileri etkileyecekse)
-            // Örn: Eğer sol ve sağ çizgiler (leftLineX, rightLineX) bu ekartman değerlerine göre otomatik konumlanacaksa:
-            // updateLinePositions(totalWidth); 
-
-            draw(); // Çizimi güncelle
+            draw();
         }
 
         // Ekartman veya Köprü değerini değiştirir
         function changeValue(delta, type) {
             if (type === 'ekartman') {
-                ekartmanValue = Math.max(40, Math.min(65, ekartmanValue + delta)); // Örn. 40-65 arası limit
+                ekartmanValue = Math.max(40, Math.min(65, ekartmanValue + delta));
                 document.getElementById('ekartmanValue').textContent = ekartmanValue;
             } else if (type === 'kopru') {
-                kopruValue = Math.max(10, Math.min(25, kopruValue + delta)); // Örn. 10-25 arası limit
+                kopruValue = Math.max(10, Math.min(25, kopruValue + delta));
                 document.getElementById('kopruValue').textContent = kopruValue;
             }
-            updateFrameWidth(); // Değişiklikten sonra çerçeve genişliğini güncelle
+            updateFrameWidth();
         }
 
         // Basılı tutma başlangıcı (Mouse Down / Touch Start)
-        function startChange(delta, type) {
+        function startChange(delta, type, e) {
+            // Sadece touch olayında preventDefault kullan (mouse olayında değil)
+            if (e && e.type === 'touchstart') {
+                e.preventDefault();
+            }
+            
             // İlk tıklamada bir kez değiştir
             changeValue(delta, type);
 
@@ -415,22 +438,17 @@
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
         // ----------------------------------------------------
 
-        // Header yüksekliği değiştiği için bu fonksiyonu dinamikleştirmemiz gerekiyor.
         function resizeCanvas() {
-            // Header ve Action alanlarının anlık yüksekliklerini al
             const headerHeight = infoHeader.offsetHeight;
             const actionHeight = actionArea.offsetHeight;
 
-            // Canvas Area'nın yeni min-height değerini hesapla
             const newMinHeight = `calc(100vh - ${headerHeight + actionHeight}px)`;
             canvasArea.style.minHeight = newMinHeight;
 
-            // Canvas'ın boyutlarını ayarla
             const rect = canvasArea.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
 
-            // İlk yükleme için pozisyonları ayarla
             if (leftLineX === 0) {
                 leftLineX = canvas.width * 0.25;
                 rightLineX = canvas.width * 0.75;
@@ -441,7 +459,6 @@
                 lLineX = canvas.width * 0.6;
                 lLineY = canvas.height * 0.8;
 
-                // İlk yüklemede çerçeve genişliğini de hesapla
                 updateFrameWidth();
             }
 
@@ -450,34 +467,30 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // Tutacak pozisyonlarını güncelle (Aynı kaldı)
+        // Tutacak pozisyonlarını güncelle
         function updateHandles() {
             const canvasActualHeight = canvas.height;
             const canvasActualWidth = canvas.width;
 
-            // Dikey Handle'lar (Alt)
             const verticalHandleTopY = canvasActualHeight - HANDLE_SIZE - OFFSET;
             leftHandle.style.left = leftLineX + 'px';
             rightHandle.style.left = rightLineX + 'px';
             leftHandle.style.top = verticalHandleTopY + 'px';
             rightHandle.style.top = verticalHandleTopY + 'px';
 
-            // Yatay Handle'lar (Sağ)
             const horizontalHandleLeftX = canvasActualWidth - HANDLE_SIZE - OFFSET;
             topHandle.style.top = topLineY + 'px';
             bottomHandle.style.top = bottomLineY + 'px';
             topHandle.style.left = horizontalHandleLeftX + 'px';
             bottomHandle.style.left = horizontalHandleLeftX + 'px';
 
-            // Yeni çizgilerin handle'ları
             rHandle.style.left = rLineX + 'px';
             rHandle.style.top = rLineY + 'px';
             lHandle.style.left = lLineX + 'px';
             lHandle.style.top = lLineY + 'px';
         }
 
-
-        // Çizim fonksiyonu (Aynı kaldı)
+        // Çizim fonksiyonu
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -549,7 +562,7 @@
             ctx.setLineDash([]);
         }
 
-        // Sürükleme fonksiyonları (Aynı kaldı)
+        // Sürükleme fonksiyonları
         function startDrag(handle, e) {
             e.preventDefault();
             dragging = handle;
@@ -608,7 +621,7 @@
             dragOffsetY = 0;
         }
 
-        // Event listeners (Tüm handle'lar için geri getirildi)
+        // Event listeners
         leftHandle.addEventListener('mousedown', (e) => startDrag('left', e));
         leftHandle.addEventListener('touchstart', (e) => startDrag('left', e));
         rightHandle.addEventListener('mousedown', (e) => startDrag('right', e));
@@ -626,6 +639,22 @@
         document.addEventListener('touchmove', onMove);
         document.addEventListener('mouseup', endDrag);
         document.addEventListener('touchend', endDrag);
+
+        // Buton event listener'ları
+        const ekartmanMinus = document.getElementById('ekartman-minus');
+        const ekartmanPlus = document.getElementById('ekartman-plus');
+        const kopruMinus = document.getElementById('kopru-minus');
+        const kopruPlus = document.getElementById('kopru-plus');
+
+        ekartmanMinus.addEventListener('mousedown', (e) => startChange(-1, 'ekartman', e));
+        ekartmanMinus.addEventListener('touchstart', (e) => startChange(-1, 'ekartman', e));
+        ekartmanPlus.addEventListener('mousedown', (e) => startChange(1, 'ekartman', e));
+        ekartmanPlus.addEventListener('touchstart', (e) => startChange(1, 'ekartman', e));
+        
+        kopruMinus.addEventListener('mousedown', (e) => startChange(-1, 'kopru', e));
+        kopruMinus.addEventListener('touchstart', (e) => startChange(-1, 'kopru', e));
+        kopruPlus.addEventListener('mousedown', (e) => startChange(1, 'kopru', e));
+        kopruPlus.addEventListener('touchstart', (e) => startChange(1, 'kopru', e));
 
         // Sayfa yüklendiğinde boyutlandırma ve ilk hesaplamayı başlat
         resizeCanvas();
