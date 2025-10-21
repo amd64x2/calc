@@ -168,8 +168,8 @@
         .horizontal-handle,
         .new-vertical-handle {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             cursor: grab;
             touch-action: none;
@@ -437,7 +437,7 @@
             position: absolute;
             width: 30px;
             height: 30px;*/
-        const HANDLE_SIZE = 30; //daire çapı ----------------------------------------------------------------------------------------------------------------------------------------------------------
+        const HANDLE_SIZE = 60; //daire çapı ----------------------------------------------------------------------------------------------------------------------------------------------------------
         const OFFSET = 20;
 
         // Değer değişkenleri
@@ -785,7 +785,7 @@
             ctx.beginPath(); ctx.moveTo(lLineX, lLineY - lineHeight); ctx.lineTo(lLineX, lLineY); ctx.stroke();
 
             // Kırmızı artı işaretleri
-            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 0.5; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 1; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
             // ctx.lineWidth = 0.5---------------------------------------------------------------------------------- + çizgi kalınlığı------------------------------------------------------------------------------
 
             const crossSize = 15;
