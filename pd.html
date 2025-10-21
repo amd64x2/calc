@@ -453,10 +453,11 @@
         // Resim değişkenleri
         let loadedImage = null;
         let imageLoaded = false;
+        let imageScale = { x: 0, y: 0, width: 0, height: 0 };
 
         // MediaPipe değişkenleri
         let faceMesh = null;
-        let isFaceMeshInitialized = false;
+        let isFaceMeshReady = false;
 
         // Buton sürekli basılı tutma değişkenleri
         let changeInterval;
@@ -466,31 +467,47 @@
         // MEDIAPIPE GÖZ TESPİTİ
         // ----------------------------------------------------
 
-        function initFaceMesh() {
-            if (isFaceMeshInitialized) return;
+        async function initFaceMesh() {
+            if (isFaceMeshReady) return;
 
-            faceMesh = new FaceMesh({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-            });
+            try {
+                faceMesh = new FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
 
-            faceMesh.setOptions({
-                maxNumFaces: 1,
-                refineLandmarks: true,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
+                faceMesh.setOptions({
+                    maxNumFaces: 1,
+                    refineLandmarks: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
 
-            faceMesh.onResults(onFaceDetected);
-            isFaceMeshInitialized = true;
+                faceMesh.onResults(onFaceDetected);
 
-            console.log('✅ MediaPipe Face Mesh başlatıldı');
+                // Dummy resim ile başlatma (modeli yüklemek için)
+                const dummyCanvas = document.createElement('canvas');
+                dummyCanvas.width = 100;
+                dummyCanvas.height = 100;
+                await faceMesh.send({ image: dummyCanvas });
+
+                isFaceMeshReady = true;
+                console.log('✅ MediaPipe Face Mesh hazır');
+
+                // Kamera butonunu aktif et
+                const cameraBtn = document.getElementById('open-camera-button');
+                if (cameraBtn) {
+                    cameraBtn.disabled = false;
+                    cameraBtn.textContent = '📷 FOTOĞRAF ÇEK';
+                }
+            } catch (error) {
+                console.error('❌ MediaPipe başlatma hatası:', error);
+            }
         }
 
         async function detectEyes() {
+            if (!isFaceMeshReady || !loadedImage) return;
+
             try {
-                if (!isFaceMeshInitialized) {
-                    initFaceMesh();
-                }
                 await faceMesh.send({ image: loadedImage });
             } catch (error) {
                 console.warn('⚠️ Göz tespiti başarısız:', error);
@@ -515,22 +532,23 @@
 
                 // Çizgi yüksekliği ve artı işaretinin konumu
                 const lineHeight = 100;
-                const crossOffset = 20; // Artı işareti çizginin 20px üstünde
+                const crossOffset = 20;
 
-                // R tutamacı: Kişinin SAĞ gözü (rightIris)
-                // Artı işareti göz bebeğine gelecek, çizgi onun altında
-                rLineX = rightIris.x * canvas.width;
-                rLineY = (rightIris.y * canvas.height) + lineHeight + crossOffset;
+                // Iris koordinatlarını resmin gerçek konumuna göre dönüştür
+                rLineX = imageScale.x + (rightIris.x * imageScale.width);
+                rLineY = imageScale.y + (rightIris.y * imageScale.height) + lineHeight + crossOffset;
 
-                // L tutamacı: Kişinin SOL gözü (leftIris)
-                lLineX = leftIris.x * canvas.width;
-                lLineY = (leftIris.y * canvas.height) + lineHeight + crossOffset;
+                lLineX = imageScale.x + (leftIris.x * imageScale.width);
+                lLineY = imageScale.y + (leftIris.y * imageScale.height) + lineHeight + crossOffset;
 
-                updateHandles();
-                draw();
-                calculateMeasurements();
+                // ZORUNLU RENDER
+                requestAnimationFrame(() => {
+                    updateHandles();
+                    draw();
+                    calculateMeasurements();
+                });
 
-                console.log('✅ Göz bebekleri otomatik konumlandırıldı (artı işaretleri göz bebeklerinde)');
+                console.log('✅ Göz bebekleri otomatik konumlandırıldı');
             } else {
                 console.warn('⚠️ Yüz tespit edilemedi');
             }
@@ -591,6 +609,31 @@
         }
 
         // ----------------------------------------------------
+        // RESİM EN-BOY ORANI HESAPLAMA
+        // ----------------------------------------------------
+
+        function calculateImageScale() {
+            if (!loadedImage) return;
+
+            const canvasAspect = canvas.width / canvas.height;
+            const imageAspect = loadedImage.width / loadedImage.height;
+
+            if (imageAspect > canvasAspect) {
+                // Resim daha geniş → Canvas genişliğine sığdır
+                imageScale.width = canvas.width;
+                imageScale.height = canvas.width / imageAspect;
+                imageScale.x = 0;
+                imageScale.y = (canvas.height - imageScale.height) / 2;
+            } else {
+                // Resim daha uzun → Canvas yüksekliğine sığdır
+                imageScale.height = canvas.height;
+                imageScale.width = canvas.height * imageAspect;
+                imageScale.x = (canvas.width - imageScale.width) / 2;
+                imageScale.y = 0;
+            }
+        }
+
+        // ----------------------------------------------------
         // KAMERA VE RESİM YÖNETİMİ
         // ----------------------------------------------------
 
@@ -610,14 +653,13 @@
                     imageLoaded = true;
 
                     resizeCanvas();
+                    calculateImageScale();
                     draw();
 
-                    // 🆕 Otomatik göz tespiti
-                    detectEyes().then(() => {
-                        console.log('✅ Göz tespiti tamamlandı');
-                    }).catch(err => {
-                        console.warn('⚠️ Göz tespiti sırasında hata:', err);
-                    });
+                    // Otomatik göz tespiti
+                    setTimeout(() => {
+                        detectEyes();
+                    }, 100);
 
                     document.getElementById('save-button').disabled = false;
 
@@ -652,10 +694,18 @@
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
 
+            // Resmi EN-BOY ORANI KORUNARAK çiz
             if (loadedImage) {
-                tempCtx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
+                tempCtx.drawImage(
+                    loadedImage,
+                    imageScale.x,
+                    imageScale.y,
+                    imageScale.width,
+                    imageScale.height
+                );
             }
 
+            // Çizgileri çiz
             tempCtx.strokeStyle = '#ff4444'; tempCtx.lineWidth = 3; tempCtx.shadowBlur = 20; tempCtx.shadowColor = '#ff4444';
             tempCtx.beginPath(); tempCtx.moveTo(leftLineX, 0); tempCtx.lineTo(leftLineX, canvas.height); tempCtx.stroke();
 
@@ -773,6 +823,11 @@
                 updateFrameWidth();
             }
 
+            // Resim yüklüyse ölçeklemeyi yeniden hesapla
+            if (imageLoaded) {
+                calculateImageScale();
+            }
+
             updateHandles();
             draw();
             calculateMeasurements();
@@ -804,8 +859,15 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Resmi EN-BOY ORANI KORUNARAK çiz
             if (imageLoaded && loadedImage) {
-                ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(
+                    loadedImage,
+                    imageScale.x,
+                    imageScale.y,
+                    imageScale.width,
+                    imageScale.height
+                );
             }
 
             ctx.strokeStyle = '#ff4444'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#ff4444';
@@ -977,6 +1039,16 @@
 
         const saveBtn = document.getElementById('save-button');
         saveBtn.addEventListener('click', saveImage);
+
+        // SAYFA YÜKLENİNCE MEDIAPIPE'I BAŞLAT
+        window.addEventListener('load', () => {
+            const cameraBtn = document.getElementById('open-camera-button');
+            if (cameraBtn) {
+                cameraBtn.disabled = true;
+                cameraBtn.textContent = '⏳ Hazırlanıyor...';
+            }
+            initFaceMesh();
+        });
 
         resizeCanvas();
 </script>
