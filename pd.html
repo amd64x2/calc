@@ -501,30 +501,36 @@
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 const landmarks = results.multiFaceLandmarks[0];
 
-                // Sağ iris merkezi (468-471 ortalaması)
+                // Sağ iris merkezi (468-471 ortalaması) - kişinin SAĞ gözü
                 const rightIris = {
                     x: (landmarks[468].x + landmarks[469].x + landmarks[470].x + landmarks[471].x) / 4,
                     y: (landmarks[468].y + landmarks[469].y + landmarks[470].y + landmarks[471].y) / 4
                 };
 
-                // Sol iris merkezi (473-476 ortalaması)
+                // Sol iris merkezi (473-476 ortalaması) - kişinin SOL gözü
                 const leftIris = {
                     x: (landmarks[473].x + landmarks[474].x + landmarks[475].x + landmarks[476].x) / 4,
                     y: (landmarks[473].y + landmarks[474].y + landmarks[475].y + landmarks[476].y) / 4
                 };
 
-                // R tutamacı sol göz, L tutamacı sağ göz
-                rLineX = leftIris.x * canvas.width;
-                rLineY = leftIris.y * canvas.height;
+                // Çizgi yüksekliği ve artı işaretinin konumu
+                const lineHeight = 100;
+                const crossOffset = 20; // Artı işareti çizginin 20px üstünde
 
-                lLineX = rightIris.x * canvas.width;
-                lLineY = rightIris.y * canvas.height;
+                // R tutamacı: Kişinin SAĞ gözü (rightIris)
+                // Artı işareti göz bebeğine gelecek, çizgi onun altında
+                rLineX = rightIris.x * canvas.width;
+                rLineY = (rightIris.y * canvas.height) + lineHeight + crossOffset;
+
+                // L tutamacı: Kişinin SOL gözü (leftIris)
+                lLineX = leftIris.x * canvas.width;
+                lLineY = (leftIris.y * canvas.height) + lineHeight + crossOffset;
 
                 updateHandles();
                 draw();
                 calculateMeasurements();
 
-                console.log('✅ Göz bebekleri otomatik konumlandırıldı');
+                console.log('✅ Göz bebekleri otomatik konumlandırıldı (artı işaretleri göz bebeklerinde)');
             } else {
                 console.warn('⚠️ Yüz tespit edilemedi');
             }
