@@ -314,7 +314,7 @@
             <div class="controls-wrapper">
 
                 <div class="input-group">
-                    <div class="input-label">Ekartman:</div>
+                    <div class="input-label">Ekartman(c2):</div>
                     <div class="value-control">
                         <button class="value-btn" id="ekartman-minus">-</button>
                         <div class="value-display" id="ekartmanValue">52</div>
@@ -430,7 +430,14 @@
         let dragOffsetY = 0;
 
         // KRİTİK CONSTANT'lar
-        const HANDLE_SIZE = 30;
+        /*
+        .vertical-handle,
+        .horizontal-handle,
+        .new-vertical-handle {
+            position: absolute;
+            width: 30px;
+            height: 30px;*/
+        const HANDLE_SIZE = 30; //daire çapı ----------------------------------------------------------------------------------------------------------------------------------------------------------
         const OFFSET = 20;
 
         // Değer değişkenleri
@@ -589,7 +596,7 @@
             tempCtx.strokeStyle = '#ffaa44'; tempCtx.shadowColor = '#ffaa44';
             tempCtx.beginPath(); tempCtx.moveTo(0, bottomLineY); tempCtx.lineTo(canvas.width, bottomLineY); tempCtx.stroke();
             
-            const lineHeight = 40;
+            const lineHeight = 100;
             tempCtx.strokeStyle = '#ff66aa'; tempCtx.lineWidth = 3; tempCtx.shadowBlur = 15; tempCtx.shadowColor = '#ff66aa';
             tempCtx.beginPath(); tempCtx.moveTo(rLineX, rLineY - lineHeight); tempCtx.lineTo(rLineX, rLineY); tempCtx.stroke();
             
@@ -767,7 +774,7 @@
             ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
 
             // Yeni dikey çizgiler (100px uzunluğunda)
-            const lineHeight = 100;
+            const lineHeight = 40; //------------------------------------------------------------------------------------------ 100 dü------------------------------------------------
 
             // R çizgisi (pembe)
             ctx.strokeStyle = '#ff66aa'; ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = '#ff66aa';
@@ -778,7 +785,8 @@
             ctx.beginPath(); ctx.moveTo(lLineX, lLineY - lineHeight); ctx.lineTo(lLineX, lLineY); ctx.stroke();
 
             // Kırmızı artı işaretleri
-            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 1; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 0.5; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+            // ctx.lineWidth = 0.5---------------------------------------------------------------------------------- + çizgi kalınlığı------------------------------------------------------------------------------
 
             const crossSize = 15;
             const rCrossTop = rLineY - lineHeight - 20;
