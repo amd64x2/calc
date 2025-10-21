@@ -168,8 +168,8 @@
         .horizontal-handle,
         .new-vertical-handle {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: grab;
             touch-action: none;
@@ -778,7 +778,7 @@
             ctx.beginPath(); ctx.moveTo(lLineX, lLineY - lineHeight); ctx.lineTo(lLineX, lLineY); ctx.stroke();
 
             // Kırmızı artı işaretleri
-            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 4; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 1; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
 
             const crossSize = 15;
             const rCrossTop = rLineY - lineHeight - 20;
