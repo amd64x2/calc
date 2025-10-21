@@ -168,8 +168,8 @@
         .horizontal-handle,
         .new-vertical-handle {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             cursor: grab;
             touch-action: none;
@@ -261,7 +261,9 @@
         /* ------------------------------------- */
         /* BUTONLAR */
         /* ------------------------------------- */
-        #open-camera-button, #calibrate-button, #save-button {
+        #open-camera-button,
+        #calibrate-button,
+        #save-button {
             padding: 15px 30px;
             font-size: 16px;
             font-weight: bold;
@@ -295,12 +297,16 @@
             opacity: 0.5;
         }
 
-        #open-camera-button:hover, #calibrate-button:hover, #save-button:not(:disabled):hover {
+        #open-camera-button:hover,
+        #calibrate-button:hover,
+        #save-button:not(:disabled):hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        #open-camera-button:active, #calibrate-button:active, #save-button:not(:disabled):active {
+        #open-camera-button:active,
+        #calibrate-button:active,
+        #save-button:not(:disabled):active {
             transform: translateY(0);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
@@ -314,7 +320,7 @@
             <div class="controls-wrapper">
 
                 <div class="input-group">
-                    <div class="input-label">Ekartman +:</div>
+                    <div class="input-label">Ekartman:</div>
                     <div class="value-control">
                         <button class="value-btn" id="ekartman-minus">-</button>
                         <div class="value-display" id="ekartmanValue">52</div>
@@ -355,17 +361,16 @@
             <button id="open-camera-button">📸 KAMERA AÇ</button>
             <button id="calibrate-button" style="margin-left: 15px;">KALİBRE ET</button>
         </div>
-        
+
         <!-- Kamera Input (gizli) -->
         <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
-        
+
         <!-- Kullanıcı Bilgisi ve Kaydetme Alanı -->
         <div id="save-area">
             <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <label for="username-input" style="font-weight: bold; color: #667eea;">Kullanıcı Adı:</label>
-                    <input type="text" id="username-input" placeholder="İsim giriniz" 
-                           style="padding: 10px 15px; border: 2px solid #667eea; border-radius: 20px; 
+                    <input type="text" id="username-input" placeholder="İsim giriniz" style="padding: 10px 15px; border: 2px solid #667eea; border-radius: 20px; 
                                   font-size: 14px; outline: none; min-width: 200px;">
                 </div>
                 <button id="save-button" disabled>💾 RESMİ KAYDET</button>
@@ -430,7 +435,14 @@
         let dragOffsetY = 0;
 
         // KRİTİK CONSTANT'lar
-        const HANDLE_SIZE = 60;
+        /*
+        .vertical-handle,
+        .horizontal-handle,
+        .new-vertical-handle {
+            position: absolute;
+            width: 30px;
+            height: 30px;*/
+        const HANDLE_SIZE = 50; //daire çapı ----------------------------------------------------------------------------------------------------------------------------------------------------------
         const OFFSET = 20;
 
         // Değer değişkenleri
@@ -459,13 +471,13 @@
             const totalWidth = ekartmanValue * 2 + kopruValue;
             document.getElementById('frameWidth').textContent = `${totalWidth} mm`;
             document.getElementById('ref-width-display').textContent = totalWidth;
-            
+
             // Eğer kalibrasyon yapılmışsa, yeni değerle tekrar kalibre et
             if (isCalibrated) {
                 calibrationMM = totalWidth;
                 calculateMeasurements();
             }
-            
+
             draw();
         }
 
@@ -487,7 +499,7 @@
             if (e && e.type === 'touchstart') {
                 e.preventDefault();
             }
-            
+
             // İlk tıklamada bir kez değiştir
             changeValue(delta, type);
 
@@ -526,19 +538,19 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     loadedImage = img;
                     imageLoaded = true;
-                    
+
                     // Canvas'a resmi yerleştir
                     resizeCanvas();
                     draw();
-                    
+
                     // Kaydet butonunu aktif et
                     document.getElementById('save-button').disabled = false;
-                    
+
                     console.log(`Resim yüklendi: ${img.width}x${img.height}`);
                 };
                 img.src = event.target.result;
@@ -548,7 +560,7 @@
 
         function saveImage() {
             const username = document.getElementById('username-input').value.trim();
-            
+
             if (!username) {
                 alert('⚠️ Lütfen kullanıcı adı giriniz!');
                 return;
@@ -567,40 +579,40 @@
             // Canvas'ı resim olarak kaydet
             const tempCanvas = document.createElement('canvas');
             const tempCtx = tempCanvas.getContext('2d');
-            
+
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
-            
+
             // Resmi çiz
             if (loadedImage) {
                 tempCtx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
             }
-            
+
             // Üzerine çizgileri çiz (mevcut draw fonksiyonundaki gibi)
             tempCtx.strokeStyle = '#ff4444'; tempCtx.lineWidth = 3; tempCtx.shadowBlur = 20; tempCtx.shadowColor = '#ff4444';
             tempCtx.beginPath(); tempCtx.moveTo(leftLineX, 0); tempCtx.lineTo(leftLineX, canvas.height); tempCtx.stroke();
-            
+
             tempCtx.strokeStyle = '#4444ff'; tempCtx.shadowColor = '#4444ff';
             tempCtx.beginPath(); tempCtx.moveTo(rightLineX, 0); tempCtx.lineTo(rightLineX, canvas.height); tempCtx.stroke();
-            
+
             tempCtx.strokeStyle = '#44ff44'; tempCtx.shadowColor = '#44ff44';
             tempCtx.beginPath(); tempCtx.moveTo(0, topLineY); tempCtx.lineTo(canvas.width, topLineY); tempCtx.stroke();
-            
+
             tempCtx.strokeStyle = '#ffaa44'; tempCtx.shadowColor = '#ffaa44';
             tempCtx.beginPath(); tempCtx.moveTo(0, bottomLineY); tempCtx.lineTo(canvas.width, bottomLineY); tempCtx.stroke();
-            
+
             const lineHeight = 100;
             tempCtx.strokeStyle = '#ff66aa'; tempCtx.lineWidth = 3; tempCtx.shadowBlur = 15; tempCtx.shadowColor = '#ff66aa';
             tempCtx.beginPath(); tempCtx.moveTo(rLineX, rLineY - lineHeight); tempCtx.lineTo(rLineX, rLineY); tempCtx.stroke();
-            
+
             tempCtx.strokeStyle = '#66aaff'; tempCtx.shadowColor = '#66aaff';
             tempCtx.beginPath(); tempCtx.moveTo(lLineX, lLineY - lineHeight); tempCtx.lineTo(lLineX, lLineY); tempCtx.stroke();
-            
+
             // İndir
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
             const filename = `${username}_${timestamp}.png`;
-            
-            tempCanvas.toBlob(function(blob) {
+
+            tempCanvas.toBlob(function (blob) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -609,7 +621,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 alert(`✅ Resim kaydedildi: ${filename}`);
             });
         }
@@ -623,21 +635,21 @@
             // Çizgi kalınlığı 3px, her çizgi merkezden 1.5px iki yana uzanır
             // İç kenar mesafesi = merkez mesafesi - 3px
             calibrationPixels = Math.abs(rightLineX - leftLineX) - 3;
-            
+
             // Manuel girilen referans değeri kaydet
             calibrationMM = ekartmanValue * 2 + kopruValue;
-            
+
             // Kalibrasyon yapıldı
             isCalibrated = true;
-            
+
             // Buton rengini değiştir (başarı göstergesi)
             const calibrateBtn = document.getElementById('calibrate-button');
             calibrateBtn.textContent = '✓ KALİBRE EDİLDİ';
             calibrateBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
-            
+
             // Ölçümleri güncelle
             calculateMeasurements();
-            
+
             console.log(`Kalibrasyon yapıldı: ${calibrationPixels}px (iç kenar) = ${calibrationMM}mm`);
         }
 
@@ -654,29 +666,29 @@
                 document.getElementById('left-pd-result').textContent = '-- KALİBRE EDİLMEDİ --';
                 return;
             }
-            
+
             // Piksel başına mm oranı (kalibrasyon değerlerine göre)
             const pixelToMM = calibrationMM / calibrationPixels;
-            
+
             // 1. GENİŞLİK: Dikey çizgiler arası (İÇ KENARDAN İÇ KENARA - 3px düşülerek)
             const widthPixels = Math.abs(rightLineX - leftLineX) - 3;
             const widthMM = widthPixels * pixelToMM;
-            
+
             // 2. YÜKSEKLİK: Yatay çizgiler arası (İÇ KENARDAN İÇ KENARA - 3px düşülerek)
             const heightPixels = Math.abs(bottomLineY - topLineY) - 3;
             const heightMM = heightPixels * pixelToMM;
-            
+
             // 3. MERKEZ NOKTASI: Dikey çizgilerin ortası
             const centerX = (leftLineX + rightLineX) / 2;
-            
+
             // 4. SAĞ PD: R tutamacının (sol göz) merkeze uzaklığı
             const rightPDPixels = Math.abs(rLineX - centerX);
             const rightPDMM = rightPDPixels * pixelToMM;
-            
+
             // 5. SOL PD: L tutamacının (sağ göz) merkeze uzaklığı
             const leftPDPixels = Math.abs(lLineX - centerX);
             const leftPDMM = leftPDPixels * pixelToMM;
-            
+
             // Sonuçları footer'a yazdır (virgülden sonra 2 hane)
             document.getElementById('width-result').textContent = widthMM.toFixed(2).replace('.', ',') + ' mm';
             document.getElementById('height-result').textContent = heightMM.toFixed(2).replace('.', ',') + ' mm';
@@ -825,53 +837,62 @@
             dragging = handle;
 
             const touch = e.touches ? e.touches[0] : e;
-            const rect = canvasArea.getBoundingClientRect();
+            const rect = canvas.getBoundingClientRect();
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
 
-            if (handle === 'r') {
+            // Varsayılan olarak 0 başlat
+            dragOffsetX = 0;
+            dragOffsetY = 0;
+
+            if (handle === 'left') {
+                dragOffsetX = x - leftLineX;
+            } else if (handle === 'right') {
+                dragOffsetX = x - rightLineX;
+            } else if (handle === 'top') {
+                dragOffsetY = y - topLineY;
+            } else if (handle === 'bottom') {
+                dragOffsetY = y - bottomLineY;
+            } else if (handle === 'r') {
                 dragOffsetX = x - rLineX;
                 dragOffsetY = y - rLineY;
             } else if (handle === 'l') {
                 dragOffsetX = x - lLineX;
                 dragOffsetY = y - lLineY;
-            } else {
-                dragOffsetX = 0;
-                dragOffsetY = 0;
             }
         }
 
         function onMove(e) {
-            if (!dragging) return;
+    if (!dragging) return;
 
-            const touch = e.touches ? e.touches[0] : e;
-            const rect = canvasArea.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
+    const touch = e.touches ? e.touches[0] : e;
+    const rect = canvasArea.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
 
-            const maxWidth = canvas.width;
-            const maxHeight = canvas.height;
+    const maxWidth = canvas.width;
+    const maxHeight = canvas.height;
 
-            if (dragging === 'left') {
-                leftLineX = Math.max(0, Math.min(x, maxWidth));
-            } else if (dragging === 'right') {
-                rightLineX = Math.max(0, Math.min(x, maxWidth));
-            } else if (dragging === 'top') {
-                topLineY = Math.max(0, Math.min(y, maxHeight));
-            } else if (dragging === 'bottom') {
-                bottomLineY = Math.max(0, Math.min(y, maxHeight));
-            } else if (dragging === 'r') {
-                rLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-                rLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-            } else if (dragging === 'l') {
-                lLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-                lLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-            }
+    if (dragging === 'left') {
+        leftLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+    } else if (dragging === 'right') {
+        rightLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+    } else if (dragging === 'top') {
+        topLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+    } else if (dragging === 'bottom') {
+        bottomLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+    } else if (dragging === 'r') {
+        rLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+        rLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+    } else if (dragging === 'l') {
+        lLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+        lLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+    }
 
-            updateHandles();
-            draw();
-            calculateMeasurements(); // Hareket sırasında ölçümleri güncelle
-        }
+    updateHandles();
+    draw();
+    calculateMeasurements(); // Hareket sırasında ölçümleri güncelle
+}
 
         function endDrag() {
             dragging = null;
@@ -908,7 +929,7 @@
         ekartmanMinus.addEventListener('touchstart', (e) => startChange(-1, 'ekartman', e));
         ekartmanPlus.addEventListener('mousedown', (e) => startChange(1, 'ekartman', e));
         ekartmanPlus.addEventListener('touchstart', (e) => startChange(1, 'ekartman', e));
-        
+
         kopruMinus.addEventListener('mousedown', (e) => startChange(-1, 'kopru', e));
         kopruMinus.addEventListener('touchstart', (e) => startChange(-1, 'kopru', e));
         kopruPlus.addEventListener('mousedown', (e) => startChange(1, 'kopru', e));
