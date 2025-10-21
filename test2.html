@@ -779,7 +779,7 @@
             ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
 
             // Yeni dikey çizgiler (100px uzunluğunda)
-            const lineHeight = 40; //------------------------------------------------------------------------------------------ 100 dü------------------------------------------------
+            const lineHeight = 100; //------------------------------------------------------------------------------------------ 100 dü------------------------------------------------
 
             // R çizgisi (pembe)
             ctx.strokeStyle = '#ff66aa'; ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = '#ff66aa';
@@ -790,7 +790,7 @@
             ctx.beginPath(); ctx.moveTo(lLineX, lLineY - lineHeight); ctx.lineTo(lLineX, lLineY); ctx.stroke();
 
             // Kırmızı artı işaretleri
-            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 0.5; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
+            ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 1; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
             // ctx.lineWidth = 0.5---------------------------------------------------------------------------------- + çizgi kalınlığı------------------------------------------------------------------------------
 
             const crossSize = 15;
@@ -953,5 +953,4 @@
         resizeCanvas();
     </script>
 </body>
-
 </html>
