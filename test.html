@@ -742,6 +742,45 @@
             sagCerceveMerkezX = sagCerceve.x + (sagCerceve.width / 2);
             sagCerceveMerkezY = sagCerceve.y + (sagCerceve.height / 2);
 
+            
+            //--------------
+            // Daire ayarları
+            const circleDiameter = 5;
+            const circleRadius = circleDiameter / 2; // Yarıçap = 2.5 piksel
+            const circleColor = '#008000'; // Yeşil
+
+            // Çizim stilini daireler için ayarla
+            ctx.fillStyle = circleColor; // Dairenin içini doldurmak için renk
+            ctx.strokeStyle = circleColor; // Dairenin kenar rengi (içi dolu olacağı için çok önemli değil)
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 0; // Gölge olmasın
+
+            // 1. SOL ÇERÇEVE MERKEZİNE DAİRE ÇİZİMİ
+            ctx.beginPath();
+            ctx.arc(
+                solCerceveMerkezX,
+                solCerceveMerkezY,
+                circleRadius,      // Yarıçap
+                0,                 // Başlangıç açısı (radyan)
+                Math.PI * 2        // Bitiş açısı (tam daire için 2 * Pi)
+            );
+            ctx.fill(); // Dairenin içini doldur
+
+            // 2. SAĞ ÇERÇEVE MERKEZİNE DAİRE ÇİZİMİ
+            ctx.beginPath();
+            ctx.arc(
+                sagCerceveMerkezX,
+                sagCerceveMerkezY,
+                circleRadius,      // Yarıçap
+                0,                 // Başlangıç açısı (radyan)
+                Math.PI * 2        // Bitiş açısı (tam daire için 2 * Pi)
+            );
+            ctx.fill(); // Dairenin içini doldur
+            //--------------
+
+
+
+            /*
             // Çizim stili ayarları (Çizgilerin kutuyla aynı görünmesini sağlamak için)
             ctx.strokeStyle = '#D2691E'; // Kutu ile aynı renk
             ctx.lineWidth = 1;          // Kutu ile aynı kalınlık
@@ -771,6 +810,8 @@
             // ******************************************************
             // YENİ EKLENEN KISIM SONU
             // ******************************************************
+
+            */
 
             // Gölge efektini sıfırla (eğer başka çizimler varsa temizlenmesi için)
             ctx.shadowBlur = 0;
