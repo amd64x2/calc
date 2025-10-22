@@ -435,7 +435,7 @@
         let dragOffsetY = 0;
 
         // KRİTİK CONSTANT'lar
-        /* CSS deki yeri
+        /*
         .vertical-handle,
         .horizontal-handle,
         .new-vertical-handle {
@@ -653,181 +653,33 @@
             }
         }
 
-        // ----------------------------------------------------
-        // R ve L hariç diğer tutamaçları gizle
-        // ----------------------------------------------------
-        function hideNonRlHandles() {
-            leftHandle.style.display = 'none';
-            rightHandle.style.display = 'none';
-            topHandle.style.display = 'none';
-            bottomHandle.style.display = 'none';
 
-            // R ve L tutamaçlarını göster (güvence olarak)
-            rHandle.style.display = 'absolute';
-            lHandle.style.display = 'absolute';
-        }
-
-        // Global değişkenler (Eğer bu değişkenler zaten tanımlı değilse, dosyanızın en başında tanımlamalısınız)
-        let solCerceveMerkezX = 0;
-        let solCerceveMerkezY = 0;
-        let sagCerceveMerkezX = 0;
-        let sagCerceveMerkezY = 0;
-
-
-        function kutula() {
-            // ... (Mevcut kodunuzun başlangıcı) ...
-
-            // Ekartman değerini al (mm cinsinden)
-            const ekartmanMM = parseInt(document.getElementById('ekartmanValue').textContent);
-
-            // Piksel başına mm oranını hesapla (kalibrasyon değerlerine göre)
-            // NOT: calibrationMM, calibrationPixels'ın global/tanımlı olduğunu varsayıyorum.
-            const pixelToMM = calibrationMM / calibrationPixels;
-
-            // Ekartman değerini piksele çevir
-            const ekartmanPixels = ekartmanMM / pixelToMM;
-
-            // Çizgi kalınlığını hesaba kat (1.5px her iki taraf için)
-            const lineOffset = 1.5;
-
-            // SOL GÖZ ÇERÇEVESİ
-            // NOT: leftLineX, topLineY, bottomLineY'nin global/tanımlı olduğunu varsayıyorum.
-            const solCerceve = {
-                x: leftLineX + lineOffset, // Sol çizginin sağ kenarından başla
-                y: topLineY + lineOffset,  // Üst çizginin alt kenarından başla
-                width: ekartmanPixels,     // Ekartman kadar genişlik
-                height: (bottomLineY - topLineY) - 3 // Yükseklik (iç kenar)
-            };
-
-            // SAĞ GÖZ ÇERÇEVESİ
-            const sagCerceve = {
-                x: rightLineX - lineOffset - ekartmanPixels, // Sağ çizginin solundan ekartman kadar geriye
-                y: topLineY + lineOffset,
-                width: ekartmanPixels,
-                height: (bottomLineY - topLineY) - 3
-            };
-
-            // Çizim stilini ayarla
-            ctx.strokeStyle = '#D2691E'; // Truncu (turuncu-kahverengi) renk
-            ctx.lineWidth = 1; //3
-            ctx.setLineDash([]); // Kesikli çizgi değil, düz çizgi
-            ctx.shadowBlur = 0; //10
-            ctx.shadowColor = '#D2691E';
-
-            // Sol çerçeveyi çiz
-            ctx.strokeRect(
-                solCerceve.x,
-                solCerceve.y,
-                solCerceve.width,
-                solCerceve.height
-            );
-
-            // Sağ çerçeveyi çiz
-            ctx.strokeRect(
-                sagCerceve.x,
-                sagCerceve.y,
-                sagCerceve.width,
-                sagCerceve.height
-            );
-
-            // ******************************************************
-            // YENİ EKLENEN KISIM: MERKEZ NOKTALARINI HESAPLAMA ve ÇİZME
-            // ******************************************************
-
-            // 1. SOL ÇERÇEVE MERKEZİNİ HESAPLA ve GLOBAL DEĞİŞKENE ATA
-            solCerceveMerkezX = solCerceve.x + (solCerceve.width / 2);
-            solCerceveMerkezY = solCerceve.y + (solCerceve.height / 2);
-
-            // 2. SAĞ ÇERÇEVE MERKEZİNİ HESAPLA ve GLOBAL DEĞİŞKENE ATA
-            sagCerceveMerkezX = sagCerceve.x + (sagCerceve.width / 2);
-            sagCerceveMerkezY = sagCerceve.y + (sagCerceve.height / 2);
-
-            
-            //--------------
-            // Daire ayarları
-            const circleDiameter = 5;
-            const circleRadius = circleDiameter / 2; // Yarıçap = 2.5 piksel
-            const circleColor = '#008000'; // Yeşil
-
-            // Çizim stilini daireler için ayarla
-            ctx.fillStyle = circleColor; // Dairenin içini doldurmak için renk
-            ctx.strokeStyle = circleColor; // Dairenin kenar rengi (içi dolu olacağı için çok önemli değil)
-            ctx.lineWidth = 1;
-            ctx.shadowBlur = 0; // Gölge olmasın
-
-            // 1. SOL ÇERÇEVE MERKEZİNE DAİRE ÇİZİMİ
-            ctx.beginPath();
-            ctx.arc(
-                solCerceveMerkezX,
-                solCerceveMerkezY,
-                circleRadius,      // Yarıçap
-                0,                 // Başlangıç açısı (radyan)
-                Math.PI * 2        // Bitiş açısı (tam daire için 2 * Pi)
-            );
-            ctx.fill(); // Dairenin içini doldur
-
-            // 2. SAĞ ÇERÇEVE MERKEZİNE DAİRE ÇİZİMİ
-            ctx.beginPath();
-            ctx.arc(
-                sagCerceveMerkezX,
-                sagCerceveMerkezY,
-                circleRadius,      // Yarıçap
-                0,                 // Başlangıç açısı (radyan)
-                Math.PI * 2        // Bitiş açısı (tam daire için 2 * Pi)
-            );
-            ctx.fill(); // Dairenin içini doldur
-            //--------------
-
-
-
-            /*
-            // Çizim stili ayarları (Çizgilerin kutuyla aynı görünmesini sağlamak için)
-            ctx.strokeStyle = '#D2691E'; // Kutu ile aynı renk
-            ctx.lineWidth = 1;          // Kutu ile aynı kalınlık
-            ctx.setLineDash([]);        // Düz çizgi
-            ctx.shadowBlur = 0;         // Gölge olmasın
-
-            // SOL ÇERÇEVE MERKEZ ÇİZGİLERİ
-            ctx.beginPath();
-            // Yatay Çizgi (Kutunun solundan sağına)
-            ctx.moveTo(solCerceve.x, solCerceveMerkezY);
-            ctx.lineTo(solCerceve.x + solCerceve.width, solCerceveMerkezY);
-            // Dikey Çizgi (Kutunun üstünden altına)
-            ctx.moveTo(solCerceveMerkezX, solCerceve.y);
-            ctx.lineTo(solCerceveMerkezX, solCerceve.y + solCerceve.height);
-            ctx.stroke(); // Çizgileri çiz
-
-            // SAĞ ÇERÇEVE MERKEZ ÇİZGİLERİ
-            ctx.beginPath();
-            // Yatay Çizgi (Kutunun solundan sağına)
-            ctx.moveTo(sagCerceve.x, sagCerceveMerkezY);
-            ctx.lineTo(sagCerceve.x + sagCerceve.width, sagCerceveMerkezY);
-            // Dikey Çizgi (Kutunun üstünden altına)
-            ctx.moveTo(sagCerceveMerkezX, sagCerceve.y);
-            ctx.lineTo(sagCerceveMerkezX, sagCerceve.y + sagCerceve.height);
-            ctx.stroke(); // Çizgileri çiz
-
-            // ******************************************************
-            // YENİ EKLENEN KISIM SONU
-            // ******************************************************
-
-            */
-
-            // Gölge efektini sıfırla (eğer başka çizimler varsa temizlenmesi için)
-            ctx.shadowBlur = 0;
-
-            console.log(`Çerçeveler çizildi: Sol(${solCerceve.x}, ${solCerceve.y}, ${solCerceve.width}, ${solCerceve.height}) Sağ(${sagCerceve.x}, ${sagCerceve.y}, ${sagCerceve.width}, ${sagCerceve.height})`);
-            console.log(`Merkez Koordinatları: Sol Merkez (${solCerceveMerkezX}, ${solCerceveMerkezY}), Sağ Merkez (${sagCerceveMerkezX}, ${sagCerceveMerkezY})`);
-        }
         // ----------------------------------------------------
         // KALİBRASYON FONKSİYONU
         // ----------------------------------------------------
 
         function calibrate() {
-            // Dikey çizgiler arasındaki piksel mesafesini kaydet (İÇ KENARDAN İÇ KENARA)
-            // Çizgi kalınlığı 3px, her çizgi merkezden 1.5px iki yana uzanır
-            // İç kenar mesafesi = merkez mesafesi - 3px
-            calibrationPixels = Math.abs(rightLineX - leftLineX) - 3;
+            if (!imageLoaded) {
+                alert('⚠️ Lütfen önce fotoğraf yükleyin!');
+                return;
+            }
+
+            // ÖNEMLİ: Kalibrasyon pikselleri RESMİN GERÇEK GENİŞLİĞİNE göre hesaplanmalı!
+            // Canvas'taki çizgi mesafesi ile resmin gerçek genişliği orantılı değilse hata oluşur
+
+            // Canvas'taki çizgi mesafesi (piksel)
+            const canvasLineDistance = Math.abs(rightLineX - leftLineX) - 3;
+
+            // Resmin canvas içindeki gerçek genişliği
+            const imageWidthOnCanvas = imageScale.width;
+
+            // Canvas genişliği
+            const canvasWidth = canvas.width;
+
+            // ÖNEMLİ: Kalibrasyon piksel mesafesini RESİM ÖLÇEĞİNE GÖRE normalize et
+            // Örnek: Canvas 1000px, resim 750px ise çizgi mesafesi 500px ise
+            // Gerçek resim üzerindeki mesafe: 500 * (750/1000) = 375px
+            calibrationPixels = canvasLineDistance * (imageWidthOnCanvas / canvasWidth);
 
             // Manuel girilen referans değeri kaydet
             calibrationMM = ekartmanValue * 2 + kopruValue;
@@ -840,18 +692,16 @@
             calibrateBtn.textContent = '✓ KALİBRE EDİLDİ';
             calibrateBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
 
-            // KRİTİK: R ve L hariç diğer tutamaçları gizle
-            hideNonRlHandles();
-
-            // Çerçeveleri kutula
-            kutula();
-
             // Ölçümleri güncelle
             calculateMeasurements();
 
-            console.log(`Kalibrasyon yapıldı: ${calibrationPixels}px (iç kenar) = ${calibrationMM}mm`);
+            console.log(`Kalibrasyon yapıldı:`);
+            console.log(`- Canvas çizgi mesafesi: ${canvasLineDistance.toFixed(2)}px`);
+            console.log(`- Resim genişliği canvas'ta: ${imageWidthOnCanvas.toFixed(2)}px`);
+            console.log(`- Canvas genişliği: ${canvasWidth}px`);
+            console.log(`- Normalize edilmiş kalibrasyon: ${calibrationPixels.toFixed(2)}px = ${calibrationMM}mm`);
+            console.log(`- Ölçek faktörü: ${(imageWidthOnCanvas / canvasWidth).toFixed(4)}`);
         }
-
         // ----------------------------------------------------
         // ÖLÇÜM HESAPLAMA FONKSİYONLARI
         // ----------------------------------------------------
@@ -869,23 +719,36 @@
             // Piksel başına mm oranı (kalibrasyon değerlerine göre)
             const pixelToMM = calibrationMM / calibrationPixels;
 
-            // 1. GENİŞLİK: Dikey çizgiler arası (İÇ KENARDAN İÇ KENARA - 3px düşülerek)
-            const widthPixels = Math.abs(rightLineX - leftLineX) - 3;
+            // ÖNEMLİ: Resim ölçeğine göre normalize etme faktörü
+            const imageWidthOnCanvas = imageScale.width;
+            const canvasWidth = canvas.width;
+            const imageHeightOnCanvas = imageScale.height;
+            const canvasHeight = canvas.height;
+
+            const scaleX = imageWidthOnCanvas / canvasWidth;
+            const scaleY = imageHeightOnCanvas / canvasHeight;
+
+            // 1. GENİŞLİK: Dikey çizgiler arası (RESİM ÖLÇEĞİNE GÖRE normalize edilmiş)
+            const widthPixelsCanvas = Math.abs(rightLineX - leftLineX) - 3;
+            const widthPixels = widthPixelsCanvas * scaleX;
             const widthMM = widthPixels * pixelToMM;
 
-            // 2. YÜKSEKLİK: Yatay çizgiler arası (İÇ KENARDAN İÇ KENARA - 3px düşülerek)
-            const heightPixels = Math.abs(bottomLineY - topLineY) - 3;
+            // 2. YÜKSEKLİK: Yatay çizgiler arası (RESİM ÖLÇEĞİNE GÖRE normalize edilmiş)
+            const heightPixelsCanvas = Math.abs(bottomLineY - topLineY) - 3;
+            const heightPixels = heightPixelsCanvas * scaleY;
             const heightMM = heightPixels * pixelToMM;
 
             // 3. MERKEZ NOKTASI: Dikey çizgilerin ortası
             const centerX = (leftLineX + rightLineX) / 2;
 
-            // 4. SAĞ PD: R tutamacının (sol göz) merkeze uzaklığı
-            const rightPDPixels = Math.abs(rLineX - centerX);
+            // 4. SAĞ PD: R tutamacının (sol göz) merkeze uzaklığı (RESİM ÖLÇEĞİNE GÖRE)
+            const rightPDPixelsCanvas = Math.abs(rLineX - centerX);
+            const rightPDPixels = rightPDPixelsCanvas * scaleX;
             const rightPDMM = rightPDPixels * pixelToMM;
 
-            // 5. SOL PD: L tutamacının (sağ göz) merkeze uzaklığı
-            const leftPDPixels = Math.abs(lLineX - centerX);
+            // 5. SOL PD: L tutamacının (sağ göz) merkeze uzaklığı (RESİM ÖLÇEĞİNE GÖRE)
+            const leftPDPixelsCanvas = Math.abs(lLineX - centerX);
+            const leftPDPixels = leftPDPixelsCanvas * scaleX;
             const leftPDMM = leftPDPixels * pixelToMM;
 
             // Sonuçları footer'a yazdır (virgülden sonra 2 hane)
@@ -894,18 +757,6 @@
             document.getElementById('right-pd-result').textContent = rightPDMM.toFixed(2).replace('.', ',') + ' mm';
             document.getElementById('left-pd-result').textContent = leftPDMM.toFixed(2).replace('.', ',') + ' mm';
         }
-
-
-        // Tüm tutamaçları göster
-        function showAllHandles() {
-            leftHandle.style.display = 'absolute;';
-            rightHandle.style.display = 'absolute;';
-            topHandle.style.display = 'absolute;';
-            bottomHandle.style.display = 'absolute;';
-            rHandle.style.display = 'absolute;';
-            lHandle.style.display = 'absolute;';
-        }
-
         // ----------------------------------------------------
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
         // ----------------------------------------------------
@@ -920,12 +771,6 @@
             const rect = canvasArea.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
-
-            // Tüm tutamaçları göster (sayfa yüklendiğinde veya boyut değiştiğinde)
-            if (!isCalibrated) {
-                showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
-
-            }
 
             if (leftLineX === 0) {
                 leftLineX = canvas.width * 0.25;
@@ -990,24 +835,21 @@
                 );
             }
 
-            if (!isCalibrated) {
-                // Sol dikey çizgi (kırmızı)
-                ctx.strokeStyle = '#ff4444'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#ff4444';
-                ctx.beginPath(); ctx.moveTo(leftLineX, 0); ctx.lineTo(leftLineX, canvas.height); ctx.stroke();
+            // Sol dikey çizgi (kırmızı)
+            ctx.strokeStyle = '#ff4444'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#ff4444';
+            ctx.beginPath(); ctx.moveTo(leftLineX, 0); ctx.lineTo(leftLineX, canvas.height); ctx.stroke();
 
-                // Sağ dikey çizgi (mavi)
-                ctx.strokeStyle = '#4444ff'; ctx.shadowColor = '#4444ff';
-                ctx.beginPath(); ctx.moveTo(rightLineX, 0); ctx.lineTo(rightLineX, canvas.height); ctx.stroke();
+            // Sağ dikey çizgi (mavi)
+            ctx.strokeStyle = '#4444ff'; ctx.shadowColor = '#4444ff';
+            ctx.beginPath(); ctx.moveTo(rightLineX, 0); ctx.lineTo(rightLineX, canvas.height); ctx.stroke();
 
-                // Üst yatay çubuk (yeşil)
-                ctx.strokeStyle = '#44ff44'; ctx.shadowColor = '#44ff44';
-                ctx.beginPath(); ctx.moveTo(0, topLineY); ctx.lineTo(canvas.width, topLineY); ctx.stroke();
+            // Üst yatay çubuk (yeşil)
+            ctx.strokeStyle = '#44ff44'; ctx.shadowColor = '#44ff44';
+            ctx.beginPath(); ctx.moveTo(0, topLineY); ctx.lineTo(canvas.width, topLineY); ctx.stroke();
 
-                // Alt yatay çubuk (turuncu)
-                ctx.strokeStyle = '#ffaa44'; ctx.shadowColor = '#ffaa44';
-                ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
-            }
-
+            // Alt yatay çubuk (turuncu)
+            ctx.strokeStyle = '#ffaa44'; ctx.shadowColor = '#ffaa44';
+            ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
 
             // Yeni dikey çizgiler (100px uzunluğunda)
             const lineHeight = 100;
@@ -1023,7 +865,7 @@
             // Kırmızı artı işaretleri
             ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 1; ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
 
-            const crossSize = 7;
+            const crossSize = 15;
             const rCrossTop = rLineY - lineHeight - 20;
 
             ctx.beginPath();
@@ -1059,14 +901,7 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(leftLineX, topLineY, rightLineX - leftLineX, bottomLineY - topLineY);
             ctx.setLineDash([]);
-
-            // Eğer kalibrasyon yapıldıysa çerçeveleri çiz
-            if (isCalibrated) {
-                kutula();
-            }
         }
-
-
         // Sürükleme fonksiyonları
         function startDrag(handle, e) {
             e.preventDefault();
