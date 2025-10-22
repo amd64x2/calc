@@ -803,15 +803,15 @@
         }
 
 
-// Tüm tutamaçları göster
-function showAllHandles() {
-    leftHandle.style.display = 'block';
-    rightHandle.style.display = 'block';
-    topHandle.style.display = 'block';
-    bottomHandle.style.display = 'block';
-    rHandle.style.display = 'block';
-    lHandle.style.display = 'block';
-}
+        // Tüm tutamaçları göster
+        function showAllHandles() {
+            leftHandle.style.display = 'block';
+            rightHandle.style.display = 'block';
+            topHandle.style.display = 'block';
+            bottomHandle.style.display = 'block';
+            rHandle.style.display = 'block';
+            lHandle.style.display = 'block';
+        }
 
         // ----------------------------------------------------
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
@@ -829,16 +829,16 @@ function showAllHandles() {
             canvas.height = rect.height;
 
             // Tüm tutamaçları göster (sayfa yüklendiğinde veya boyut değiştiğinde)
-    if (!isCalibrated) {
-        showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
-        // Veya direkt olarak:
-        leftHandle.style.display = 'block';
-        rightHandle.style.display = 'block';
-        topHandle.style.display = 'block';
-        bottomHandle.style.display = 'block';
-        rHandle.style.display = 'block';
-        lHandle.style.display = 'block';
-    }
+            if (!isCalibrated) {
+                showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
+                // Veya direkt olarak:
+                leftHandle.style.display = 'block';
+                rightHandle.style.display = 'block';
+                topHandle.style.display = 'block';
+                bottomHandle.style.display = 'block';
+                rHandle.style.display = 'block';
+                lHandle.style.display = 'block';
+            }
 
             if (leftLineX === 0) {
                 leftLineX = canvas.width * 0.25;
@@ -971,8 +971,9 @@ function showAllHandles() {
             ctx.setLineDash([]);
 
             // Eğer kalibrasyon yapıldıysa çerçeveleri çiz
-    if (isCalibrated) {
-        kutula();
+            if (isCalibrated) {
+                kutula();
+            }
         }
 
 
