@@ -802,6 +802,17 @@
             document.getElementById('left-pd-result').textContent = leftPDMM.toFixed(2).replace('.', ',') + ' mm';
         }
 
+
+// Tüm tutamaçları göster
+function showAllHandles() {
+    leftHandle.style.display = 'block';
+    rightHandle.style.display = 'block';
+    topHandle.style.display = 'block';
+    bottomHandle.style.display = 'block';
+    rHandle.style.display = 'block';
+    lHandle.style.display = 'block';
+}
+
         // ----------------------------------------------------
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
         // ----------------------------------------------------
@@ -816,6 +827,18 @@
             const rect = canvasArea.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
+
+            // Tüm tutamaçları göster (sayfa yüklendiğinde veya boyut değiştiğinde)
+    if (!isCalibrated) {
+        showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
+        // Veya direkt olarak:
+        leftHandle.style.display = 'block';
+        rightHandle.style.display = 'block';
+        topHandle.style.display = 'block';
+        bottomHandle.style.display = 'block';
+        rHandle.style.display = 'block';
+        lHandle.style.display = 'block';
+    }
 
             if (leftLineX === 0) {
                 leftLineX = canvas.width * 0.25;
