@@ -667,12 +667,21 @@
             lHandle.style.display = 'absolute';
         }
 
+        // Global değişkenler (Eğer bu değişkenler zaten tanımlı değilse, dosyanızın en başında tanımlamalısınız)
+        let solCerceveMerkezX = 0;
+        let solCerceveMerkezY = 0;
+        let sagCerceveMerkezX = 0;
+        let sagCerceveMerkezY = 0;
+
 
         function kutula() {
+            // ... (Mevcut kodunuzun başlangıcı) ...
+
             // Ekartman değerini al (mm cinsinden)
             const ekartmanMM = parseInt(document.getElementById('ekartmanValue').textContent);
 
             // Piksel başına mm oranını hesapla (kalibrasyon değerlerine göre)
+            // NOT: calibrationMM, calibrationPixels'ın global/tanımlı olduğunu varsayıyorum.
             const pixelToMM = calibrationMM / calibrationPixels;
 
             // Ekartman değerini piksele çevir
@@ -682,6 +691,7 @@
             const lineOffset = 1.5;
 
             // SOL GÖZ ÇERÇEVESİ
+            // NOT: leftLineX, topLineY, bottomLineY'nin global/tanımlı olduğunu varsayıyorum.
             const solCerceve = {
                 x: leftLineX + lineOffset, // Sol çizginin sağ kenarından başla
                 y: topLineY + lineOffset,  // Üst çizginin alt kenarından başla
@@ -720,12 +730,54 @@
                 sagCerceve.height
             );
 
-            // Gölge efektini sıfırla
+            // ******************************************************
+            // YENİ EKLENEN KISIM: MERKEZ NOKTALARINI HESAPLAMA ve ÇİZME
+            // ******************************************************
+
+            // 1. SOL ÇERÇEVE MERKEZİNİ HESAPLA ve GLOBAL DEĞİŞKENE ATA
+            solCerceveMerkezX = solCerceve.x + (solCerceve.width / 2);
+            solCerceveMerkezY = solCerceve.y + (solCerceve.height / 2);
+
+            // 2. SAĞ ÇERÇEVE MERKEZİNİ HESAPLA ve GLOBAL DEĞİŞKENE ATA
+            sagCerceveMerkezX = sagCerceve.x + (sagCerceve.width / 2);
+            sagCerceveMerkezY = sagCerceve.y + (sagCerceve.height / 2);
+
+            // Çizim stili ayarları (Çizgilerin kutuyla aynı görünmesini sağlamak için)
+            ctx.strokeStyle = '#D2691E'; // Kutu ile aynı renk
+            ctx.lineWidth = 1;          // Kutu ile aynı kalınlık
+            ctx.setLineDash([]);        // Düz çizgi
+            ctx.shadowBlur = 0;         // Gölge olmasın
+
+            // SOL ÇERÇEVE MERKEZ ÇİZGİLERİ
+            ctx.beginPath();
+            // Yatay Çizgi (Kutunun solundan sağına)
+            ctx.moveTo(solCerceve.x, solCerceveMerkezY);
+            ctx.lineTo(solCerceve.x + solCerceve.width, solCerceveMerkezY);
+            // Dikey Çizgi (Kutunun üstünden altına)
+            ctx.moveTo(solCerceveMerkezX, solCerceve.y);
+            ctx.lineTo(solCerceveMerkezX, solCerceve.y + solCerceve.height);
+            ctx.stroke(); // Çizgileri çiz
+
+            // SAĞ ÇERÇEVE MERKEZ ÇİZGİLERİ
+            ctx.beginPath();
+            // Yatay Çizgi (Kutunun solundan sağına)
+            ctx.moveTo(sagCerceve.x, sagCerceveMerkezY);
+            ctx.lineTo(sagCerceve.x + sagCerceve.width, sagCerceveMerkezY);
+            // Dikey Çizgi (Kutunun üstünden altına)
+            ctx.moveTo(sagCerceveMerkezX, sagCerceve.y);
+            ctx.lineTo(sagCerceveMerkezX, sagCerceve.y + sagCerceve.height);
+            ctx.stroke(); // Çizgileri çiz
+
+            // ******************************************************
+            // YENİ EKLENEN KISIM SONU
+            // ******************************************************
+
+            // Gölge efektini sıfırla (eğer başka çizimler varsa temizlenmesi için)
             ctx.shadowBlur = 0;
 
             console.log(`Çerçeveler çizildi: Sol(${solCerceve.x}, ${solCerceve.y}, ${solCerceve.width}, ${solCerceve.height}) Sağ(${sagCerceve.x}, ${sagCerceve.y}, ${sagCerceve.width}, ${sagCerceve.height})`);
+            console.log(`Merkez Koordinatları: Sol Merkez (${solCerceveMerkezX}, ${solCerceveMerkezY}), Sağ Merkez (${sagCerceveMerkezX}, ${sagCerceveMerkezY})`);
         }
-
         // ----------------------------------------------------
         // KALİBRASYON FONKSİYONU
         // ----------------------------------------------------
@@ -831,7 +883,7 @@
             // Tüm tutamaçları göster (sayfa yüklendiğinde veya boyut değiştiğinde)
             if (!isCalibrated) {
                 showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
-                
+
             }
 
             if (leftLineX === 0) {
