@@ -435,7 +435,7 @@
         let dragOffsetY = 0;
 
         // KRİTİK CONSTANT'lar
-        /*
+        /* CSS deki yeri
         .vertical-handle,
         .horizontal-handle,
         .new-vertical-handle {
@@ -663,8 +663,8 @@
             bottomHandle.style.display = 'none';
 
             // R ve L tutamaçlarını göster (güvence olarak)
-            rHandle.style.display = 'block';
-            lHandle.style.display = 'block';
+            rHandle.style.display = 'absolute';
+            lHandle.style.display = 'absolute';
         }
 
 
@@ -897,21 +897,24 @@
                 );
             }
 
-            // Sol dikey çizgi (kırmızı)
-            ctx.strokeStyle = '#ff4444'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#ff4444';
-            ctx.beginPath(); ctx.moveTo(leftLineX, 0); ctx.lineTo(leftLineX, canvas.height); ctx.stroke();
+            if (!isCalibrated) {
+                // Sol dikey çizgi (kırmızı)
+                ctx.strokeStyle = '#ff4444'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#ff4444';
+                ctx.beginPath(); ctx.moveTo(leftLineX, 0); ctx.lineTo(leftLineX, canvas.height); ctx.stroke();
 
-            // Sağ dikey çizgi (mavi)
-            ctx.strokeStyle = '#4444ff'; ctx.shadowColor = '#4444ff';
-            ctx.beginPath(); ctx.moveTo(rightLineX, 0); ctx.lineTo(rightLineX, canvas.height); ctx.stroke();
+                // Sağ dikey çizgi (mavi)
+                ctx.strokeStyle = '#4444ff'; ctx.shadowColor = '#4444ff';
+                ctx.beginPath(); ctx.moveTo(rightLineX, 0); ctx.lineTo(rightLineX, canvas.height); ctx.stroke();
 
-            // Üst yatay çubuk (yeşil)
-            ctx.strokeStyle = '#44ff44'; ctx.shadowColor = '#44ff44';
-            ctx.beginPath(); ctx.moveTo(0, topLineY); ctx.lineTo(canvas.width, topLineY); ctx.stroke();
+                // Üst yatay çubuk (yeşil)
+                ctx.strokeStyle = '#44ff44'; ctx.shadowColor = '#44ff44';
+                ctx.beginPath(); ctx.moveTo(0, topLineY); ctx.lineTo(canvas.width, topLineY); ctx.stroke();
 
-            // Alt yatay çubuk (turuncu)
-            ctx.strokeStyle = '#ffaa44'; ctx.shadowColor = '#ffaa44';
-            ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
+                // Alt yatay çubuk (turuncu)
+                ctx.strokeStyle = '#ffaa44'; ctx.shadowColor = '#ffaa44';
+                ctx.beginPath(); ctx.moveTo(0, bottomLineY); ctx.lineTo(canvas.width, bottomLineY); ctx.stroke();
+            }
+
 
             // Yeni dikey çizgiler (100px uzunluğunda)
             const lineHeight = 100;
