@@ -805,12 +805,12 @@
 
         // Tüm tutamaçları göster
         function showAllHandles() {
-            leftHandle.style.display = 'block';
-            rightHandle.style.display = 'block';
-            topHandle.style.display = 'block';
-            bottomHandle.style.display = 'block';
-            rHandle.style.display = 'block';
-            lHandle.style.display = 'block';
+            leftHandle.style.display = 'absolute;';
+            rightHandle.style.display = 'absolute;';
+            topHandle.style.display = 'absolute;';
+            bottomHandle.style.display = 'absolute;';
+            rHandle.style.display = 'absolute;';
+            lHandle.style.display = 'absolute;';
         }
 
         // ----------------------------------------------------
@@ -831,13 +831,7 @@
             // Tüm tutamaçları göster (sayfa yüklendiğinde veya boyut değiştiğinde)
             if (!isCalibrated) {
                 showAllHandles(); // Eğer showAllHandles fonksiyonunu eklediyseniz
-                // Veya direkt olarak:
-                leftHandle.style.display = 'block';
-                rightHandle.style.display = 'block';
-                topHandle.style.display = 'block';
-                bottomHandle.style.display = 'block';
-                rHandle.style.display = 'block';
-                lHandle.style.display = 'block';
+                
             }
 
             if (leftLineX === 0) {
