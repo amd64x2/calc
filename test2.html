@@ -696,6 +696,34 @@
             document.getElementById('left-pd-result').textContent = leftPDMM.toFixed(2).replace('.', ',') + ' mm';
         }
 
+
+        // ----------------------------------------------------
+        // RESİM EN-BOY ORANI HESAPLAMA
+        // ----------------------------------------------------
+
+        function calculateImageScale() {
+            if (!loadedImage) return;
+
+            const canvasAspect = canvas.width / canvas.height;
+            const imageAspect = loadedImage.width / loadedImage.height;
+
+            if (imageAspect > canvasAspect) {
+                // Resim daha geniş → Canvas genişliğine sığdır
+                imageScale.width = canvas.width;
+                imageScale.height = canvas.width / imageAspect;
+                imageScale.x = 0;
+                imageScale.y = (canvas.height - imageScale.height) / 2;
+            } else {
+                // Resim daha uzun → Canvas yüksekliğine sığdır
+                imageScale.height = canvas.height;
+                imageScale.width = canvas.height * imageAspect;
+                imageScale.x = (canvas.width - imageScale.width) / 2;
+                imageScale.y = 0;
+            }
+        }
+
+
+
         // ----------------------------------------------------
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
         // ----------------------------------------------------
@@ -724,9 +752,14 @@
                 updateFrameWidth();
             }
 
+            // Resim yüklüyse ölçeklemeyi yeniden hesapla
+            if (imageLoaded) {
+                calculateImageScale();
+            }
+
             updateHandles();
             draw();
-            calculateMeasurements(); // Hareket sonrası ölçümleri güncelle
+            calculateMeasurements();
         }
         window.addEventListener('resize', resizeCanvas);
 
@@ -863,36 +896,36 @@
         }
 
         function onMove(e) {
-    if (!dragging) return;
+            if (!dragging) return;
 
-    const touch = e.touches ? e.touches[0] : e;
-    const rect = canvasArea.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = canvasArea.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
 
-    const maxWidth = canvas.width;
-    const maxHeight = canvas.height;
+            const maxWidth = canvas.width;
+            const maxHeight = canvas.height;
 
-    if (dragging === 'left') {
-        leftLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-    } else if (dragging === 'right') {
-        rightLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-    } else if (dragging === 'top') {
-        topLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-    } else if (dragging === 'bottom') {
-        bottomLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-    } else if (dragging === 'r') {
-        rLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-        rLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-    } else if (dragging === 'l') {
-        lLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
-        lLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
-    }
+            if (dragging === 'left') {
+                leftLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+            } else if (dragging === 'right') {
+                rightLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+            } else if (dragging === 'top') {
+                topLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+            } else if (dragging === 'bottom') {
+                bottomLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+            } else if (dragging === 'r') {
+                rLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+                rLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+            } else if (dragging === 'l') {
+                lLineX = Math.max(0, Math.min(x - dragOffsetX, maxWidth));
+                lLineY = Math.max(0, Math.min(y - dragOffsetY, maxHeight));
+            }
 
-    updateHandles();
-    draw();
-    calculateMeasurements(); // Hareket sırasında ölçümleri güncelle
-}
+            updateHandles();
+            draw();
+            calculateMeasurements(); // Hareket sırasında ölçümleri güncelle
+        }
 
         function endDrag() {
             dragging = null;
@@ -953,4 +986,5 @@
         resizeCanvas();
     </script>
 </body>
-</html>
+
+</html> <!-- PD Canavarı HTML Sonu css tarasım yapılacak-->
