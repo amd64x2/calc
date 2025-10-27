@@ -231,18 +231,18 @@
         /* ------------------------------------- */
         /* CANVAS AREA */
         /* ------------------------------------- */
-        #canvas-area {
-            position: fixed;
-            top: 60px;
-            bottom: 150px;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-            order: 3;
-            touch-action: pinch-zoom;
-            /* Canvas'ta SADECE pinch-zoom'a izin ver */
-        }
+       #canvas-area {
+    position: fixed;
+    top: 60px;
+    bottom: 150px;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    order: 3;
+    touch-action: pinch-zoom;
+    transform-origin: center center; /* Merkez noktadan zoom */
+}
 
         #canvas {
             position: absolute;
@@ -1373,80 +1373,81 @@
     // ----------------------------------------------------
 
     // Canvas zoom değişkenleri
-    let canvasScale = 1;
-    let canvasTranslateX = 0;
-    let canvasTranslateY = 0;
-    let isPinching = false;
-    let lastPinchDistance = 0;
+let areaScale = 1;
+let areaTranslateX = 0;
+let areaTranslateY = 0;
+let isPinching = false;
+let lastPinchDistance = 0;
+let pinchStartScale = 1;
 
-    // Pinch zoom için
-    function getPinchDistance(touches) {
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
+// Pinch zoom için
+function getPinchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getPinchCenter(touches) {
+    return {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2
+    };
+}
+
+// Canvas-area touch event handlers
+canvasArea.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+        e.preventDefault();
+        isPinching = true;
+        lastPinchDistance = getPinchDistance(e.touches);
+        pinchStartScale = areaScale;
     }
+}, { passive: false });
 
-    function getPinchCenter(touches) {
-        return {
-            x: (touches[0].clientX + touches[1].clientX) / 2,
-            y: (touches[0].clientY + touches[1].clientY) / 2
-        };
+canvasArea.addEventListener('touchmove', function(e) {
+    if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        
+        const currentDistance = getPinchDistance(e.touches);
+        const scaleDelta = currentDistance / lastPinchDistance;
+        
+        // Zoom limitleri (0.5x - 3x arası)
+        const newScale = Math.max(0.5, Math.min(3, pinchStartScale * scaleDelta));
+        
+        if (newScale !== areaScale) {
+            const center = getPinchCenter(e.touches);
+            const rect = canvasArea.getBoundingClientRect();
+            
+            // Zoom merkezini hesapla (canvas-area'ya göre)
+            const centerX = center.x - rect.left;
+            const centerY = center.y - rect.top;
+            
+            // Yeni translate değerlerini hesapla
+            const scaleChange = newScale / areaScale;
+            areaTranslateX = centerX - (centerX - areaTranslateX) * scaleChange;
+            areaTranslateY = centerY - (centerY - areaTranslateY) * scaleChange;
+            
+            areaScale = newScale;
+            
+            // Tüm canvas-area'yı dönüştür
+            canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
+        }
     }
+}, { passive: false });
 
-    // Canvas touch event handlers
-    canvas.addEventListener('touchstart', function (e) {
-        if (e.touches.length === 2) {
-            e.preventDefault();
-            isPinching = true;
-            lastPinchDistance = getPinchDistance(e.touches);
-        }
-    }, { passive: false });
+canvasArea.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) {
+        isPinching = false;
+    }
+});
 
-    canvas.addEventListener('touchmove', function (e) {
-        if (isPinching && e.touches.length === 2) {
-            e.preventDefault();
-
-            const currentDistance = getPinchDistance(e.touches);
-            const scaleDelta = currentDistance / lastPinchDistance;
-
-            // Zoom limitleri
-            const newScale = Math.max(0.5, Math.min(3, canvasScale * scaleDelta));
-
-            if (newScale !== canvasScale) {
-                const center = getPinchCenter(e.touches);
-                const rect = canvas.getBoundingClientRect();
-
-                // Zoom merkezini hesapla
-                const x = center.x - rect.left;
-                const y = center.y - rect.top;
-
-                // Transform uygula
-                canvasTranslateX += (x - canvasTranslateX) * (1 - scaleDelta);
-                canvasTranslateY += (y - canvasTranslateY) * (1 - scaleDelta);
-
-                canvasScale = newScale;
-
-                // Canvas'ı dönüştür
-                canvas.style.transform = `translate(${canvasTranslateX}px, ${canvasTranslateY}px) scale(${canvasScale})`;
-            }
-
-            lastPinchDistance = currentDistance;
-        }
-    }, { passive: false });
-
-    canvas.addEventListener('touchend', function (e) {
-        if (e.touches.length < 2) {
-            isPinching = false;
-        }
-    });
-
-    // Çift tıklama ile zoom reset
-    canvas.addEventListener('dblclick', function (e) {
-        canvasScale = 1;
-        canvasTranslateX = 0;
-        canvasTranslateY = 0;
-        canvas.style.transform = 'none';
-    });
+// Çift tıklama ile zoom reset
+canvasArea.addEventListener('dblclick', function(e) {
+    areaScale = 1;
+    areaTranslateX = 0;
+    areaTranslateY = 0;
+    canvasArea.style.transform = 'none';
+});
 
 
 
