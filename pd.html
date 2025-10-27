@@ -485,7 +485,6 @@
         function updateFrameWidth() {
             const totalWidth = ekartmanValue * 2 + kopruValue;
             document.getElementById('frameWidth').textContent = `${totalWidth} mm`;
-            document.getElementById('ref-width-display').textContent = totalWidth;
 
             if (isCalibrated) {
                 calibrationMM = totalWidth;
@@ -555,123 +554,11 @@
                     calculateImageScale();
                     draw();
 
-                    document.getElementById('save-button').disabled = false;
-
                     console.log(`Resim yüklendi: ${img.width}x${img.height}`);
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
-        }
-
-        function saveImage() {
-            const username = document.getElementById('username-input').value.trim();
-
-            if (!username) {
-                alert('⚠️ Lütfen kullanıcı adı giriniz!');
-                return;
-            }
-
-            if (!imageLoaded) {
-                alert('⚠️ Lütfen önce fotoğraf çekiniz!');
-                return;
-            }
-
-            if (!isCalibrated) {
-                alert('⚠️ Lütfen önce kalibrasyon yapınız!');
-                return;
-            }
-
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-
-            if (loadedImage) {
-                tempCtx.drawImage(loadedImage, imageScale.x, imageScale.y, imageScale.width, imageScale.height);
-            }
-
-            const lineHeight = 100;
-            tempCtx.strokeStyle = '#ff66aa'; tempCtx.lineWidth = 3; tempCtx.shadowBlur = 15; tempCtx.shadowColor = '#ff66aa';
-            tempCtx.beginPath(); tempCtx.moveTo(rLineX, rLineY - lineHeight); tempCtx.lineTo(rLineX, rLineY); tempCtx.stroke();
-
-            tempCtx.strokeStyle = '#66aaff'; tempCtx.shadowColor = '#66aaff';
-            tempCtx.beginPath(); tempCtx.moveTo(lLineX, lLineY - lineHeight); tempCtx.lineTo(lLineX, lLineY); tempCtx.stroke();
-
-            // Çerçeveleri kaydet
-            const ekartmanMM = parseInt(document.getElementById('ekartmanValue').textContent);
-            const pixelToMM = calibrationMM / calibrationPixels;
-            const ekartmanPixels = ekartmanMM / pixelToMM;
-            const lineOffset = 1.5;
-
-            const solCerceve = {
-                x: leftLineX + lineOffset,
-                y: topLineY + lineOffset,
-                width: ekartmanPixels,
-                height: (bottomLineY - topLineY) - 3
-            };
-
-            const sagCerceve = {
-                x: rightLineX - lineOffset - ekartmanPixels,
-                y: topLineY + lineOffset,
-                width: ekartmanPixels,
-                height: (bottomLineY - topLineY) - 3
-            };
-
-            tempCtx.strokeStyle = '#D2691E';
-            tempCtx.lineWidth = 1;
-            tempCtx.setLineDash([]);
-            tempCtx.shadowBlur = 0;
-
-            tempCtx.strokeRect(solCerceve.x, solCerceve.y, solCerceve.width, solCerceve.height);
-            tempCtx.strokeRect(sagCerceve.x, sagCerceve.y, sagCerceve.width, sagCerceve.height);
-
-            // Merkez noktaları ve çizgiler
-            const solMerkezX = solCerceve.x + (solCerceve.width / 2);
-            const solMerkezY = solCerceve.y + (solCerceve.height / 2);
-            const sagMerkezX = sagCerceve.x + (sagCerceve.width / 2);
-            const sagMerkezY = sagCerceve.y + (sagCerceve.height / 2);
-
-            const circleRadius = 7.5;
-            tempCtx.fillStyle = '#008000';
-            tempCtx.beginPath();
-            tempCtx.arc(solMerkezX, solMerkezY, circleRadius, 0, Math.PI * 2);
-            tempCtx.fill();
-            tempCtx.beginPath();
-            tempCtx.arc(sagMerkezX, sagMerkezY, circleRadius, 0, Math.PI * 2);
-            tempCtx.fill();
-
-            tempCtx.strokeStyle = '#D2691E';
-            tempCtx.beginPath();
-            tempCtx.moveTo(solCerceve.x, solMerkezY);
-            tempCtx.lineTo(solCerceve.x + solCerceve.width, solMerkezY);
-            tempCtx.moveTo(solMerkezX, solCerceve.y);
-            tempCtx.lineTo(solMerkezX, solCerceve.y + solCerceve.height);
-            tempCtx.stroke();
-
-            tempCtx.beginPath();
-            tempCtx.moveTo(sagCerceve.x, sagMerkezY);
-            tempCtx.lineTo(sagCerceve.x + sagCerceve.width, sagMerkezY);
-            tempCtx.moveTo(sagMerkezX, sagCerceve.y);
-            tempCtx.lineTo(sagMerkezX, sagCerceve.y + sagCerceve.height);
-            tempCtx.stroke();
-
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `${username}_${timestamp}.png`;
-
-            tempCanvas.toBlob(function (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                alert(`✅ Resim kaydedildi: ${filename}`);
-            });
         }
 
         // ----------------------------------------------------
@@ -815,10 +702,9 @@
             calibrateBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
 
             hideNonRlHandles();
-            //draw(); // referans çizgilerini gizlemek için yeniden çizdiriyoruz--------------------------------------------------------------------------------------------------
             kutula();
-            calculateMeasurements(); ""
-            draw();// referans çizgilierini kaldırmak için
+            calculateMeasurements();
+            draw();
             console.log(`Kalibrasyon yapıldı: ${calibrationPixels.toFixed(2)}px = ${calibrationMM}mm`);
         }
 
@@ -839,7 +725,7 @@
             // Merkez noktası
             const centerX = width / 2;
             const centerY = height / 2;
-            const pointRadius = 2; //-------------grafik merkezdeki yeşil nokta------------------------------------------------------------------
+            const pointRadius = 2;
 
             // ÖNEMLİ: Piksel değerlerini kullan, mm değil!
             // dx ve dy zaten piksel cinsinden geliyor
@@ -865,7 +751,7 @@
                 scale = 1;
             }
 
-            // Hedef nokta - ÖLÇEKLENMIŞ piksel değerleri
+            // Hedef nokta - ÖLÇEKLENMİŞ piksel değerleri
             const targetX = centerX + (dx * scale);
             const targetY = centerY - (dy * scale); // Y eksenini ters çevir
 
@@ -940,22 +826,6 @@
             ctx.stroke();
             ctx.restore();
         }
-        // Küçük ok başı çizimi
-        function drawArrowHeadSmall(ctx, x, y, size, angleDeg, color) {
-            const angleRad = angleDeg * Math.PI / 180;
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angleRad);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-size, -size / 2);
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-size, size / 2);
-            ctx.stroke();
-            ctx.restore();
-        }
 
         // calculateMeasurements fonksiyonunu güncelle
         function calculateMeasurements() {
@@ -1020,18 +890,6 @@
             drawDistanceGraphic('r-graphic-canvas', rDX, rDY, rDistanceXMM, rDistanceYMM, '#ff66aa');
             drawDistanceGraphic('l-graphic-canvas', lDX, lDY, lDistanceXMM, lDistanceYMM, '#66aaff');
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
         // ----------------------------------------------------
         // CANVAS BOYUTLANDIRMA VE HANDLE FONKSİYONLARI
@@ -1101,11 +959,129 @@
 
 
         // ----------------------------------------------------
-        // OK FONKSİYONLARI - BU FONKSİYONLARI EKLEYİN
+        // CETVEL ÇİZİM FONKSİYONU
         // ----------------------------------------------------
 
+        function drawRuler2piksel(x1, y1, x2, y2) {
+            const offset = 40; // cetveli yukarı kaydır
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const angle = Math.atan2(dy, dx);
+            const uzunlukPX = Math.sqrt(dx * dx + dy * dy);
+
+            // Piksel olarak cetvel çiz
+            ctx.save();
+            ctx.translate(x1, y1);
+            ctx.rotate(angle);
+
+            const tickHeightSmall = 10;
+            const tickHeightMedium = 15;
+            const tickHeightLarge = 25;
+
+            for (let i = 0; i <= uzunlukPX; i += 10) { // her 10 pikselde bir çizgi
+                let tickHeight = tickHeightSmall;
+                if (i % 50 === 0) tickHeight = tickHeightLarge;
+                else if (i % 20 === 0) tickHeight = tickHeightMedium;
+
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, tickHeight);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "rgba(255,255,255,0.8)";
+                ctx.stroke();
+            }
+
+            // Toplam uzunluğu yaz (piksel cinsinden)
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillText(`${Math.round(uzunlukPX)} px`, uzunlukPX / 2, -8);
+
+            ctx.restore();
+        }
+
+
+
+        function drawRuler(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const angle = Math.atan2(dy, dx);
+    const lengthPX = Math.sqrt(dx * dx + dy * dy);
+
+    // DOĞRU ölçüm - kalibrasyon kullan
+    let lengthMM = isCalibrated ? (lengthPX / calibrationPixels) * calibrationMM : 0;
+
+    ctx.save();
+    ctx.translate(x1, y1);
+    ctx.rotate(angle);
+
+    // Cetvel çizgisi - ÖLÇÜLEN MESAFE KADAR ÇİZ
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(lengthPX, 0);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.stroke();
+
+    // MM bazlı cetvel çizimi - PİKSEL/MM ORANINI DOĞRU HESAPLA
+    const pxPerMM = lengthPX / lengthMM;
+    
+    // Cetvelin toplam mm uzunluğu kadar çiz (65.25 mm ise 65.25 mm'lik cetvel)
+    const totalMM = Math.ceil(lengthMM); // 65.25 -> 66 mm'e yuvarla
+    const rulerLengthPX = totalMM * pxPerMM; // Cetvelin piksel uzunluğu
+
+    for (let mm = 0; mm <= totalMM; mm += 1) { // her 1 mm'de bir çizgi
+        const currentPX = mm * pxPerMM;
+        
+        // Çizgi yüksekliğini belirle
+        let tickHeight = 10; // kısa çizgi
+        if (mm % 10 === 0) tickHeight = 25; // 10 mm'de bir uzun çizgi
+        else if (mm % 5 === 0) tickHeight = 15; // 5 mm'de bir orta çizgi
+
+        ctx.beginPath();
+        ctx.moveTo(currentPX, 0);
+        ctx.lineTo(currentPX, tickHeight);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        ctx.stroke();
+
+        // Sayı etiketleri (10 mm'de bir)
+        if (mm % 10 === 0) {
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.font = "bold 12px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText(mm.toString(), currentPX, 28);
+        }
+    }
+
+    // Ölçülen gerçek noktayı işaretle (65.25 mm)
+    const measuredPX = lengthMM * pxPerMM;
+    ctx.beginPath();
+    ctx.moveTo(measuredPX, 0);
+    ctx.lineTo(measuredPX, 15);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,0,0,0.8)";
+    ctx.stroke();
+
+    // DOĞRU mm değeri
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.font = "bold 14px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(`${lengthMM.toFixed(2)} mm`, lengthPX / 2, -8);
+
+    ctx.restore();
+    
+    return lengthMM;
+}
+
+
+
+
         // ----------------------------------------------------
-        // OK FONKSİYONLARI - BU FONKSİYONLARI EKLEYİN
+        // OK FONKSİYONLARI
         // ----------------------------------------------------
 
         function drawArrowHead(ctx, x, y, size, angleDeg, color) {
@@ -1123,6 +1099,7 @@
             ctx.stroke();
             ctx.restore();
         }
+
         function drawDistanceIndicator(pointX, pointY, refX, refY, color, label, pixelToMM, yOffset = 0) {
             const arrowSize = 8;
             const dx = refX - pointX;
@@ -1249,9 +1226,15 @@
 
             ctx.shadowBlur = 0;
 
+            // Kalibrasyon yapıldıysa cetvel çiz
+            if (isCalibrated) {
+                drawRuler(rLineX, rCrossTop, lLineX, lCrossTop, calibrationMM);
+            }
+
+
             // Beyaz daire tutamaçlar
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            const radius = 18;
+            const radius = 4;
             ctx.beginPath(); ctx.arc(leftLineX, topLineY, radius, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(rightLineX, topLineY, radius, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(leftLineX, bottomLineY, radius, 0, Math.PI * 2); ctx.fill();
@@ -1261,8 +1244,6 @@
             if (isCalibrated) {
                 kutula();
             }
-
-            // OKLAR KALDIRILDI - artık footer'da gösteriliyor
         }
 
         // ----------------------------------------------------
@@ -1384,9 +1365,6 @@
         const cameraInput = document.getElementById('camera-input');
         cameraBtn.addEventListener('click', openCamera);
         cameraInput.addEventListener('change', handleImageUpload);
-
-        const saveBtn = document.getElementById('save-button');
-        saveBtn.addEventListener('click', saveImage);
 
         resizeCanvas();
     </script>
