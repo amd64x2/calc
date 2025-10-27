@@ -12,24 +12,22 @@
             padding: 0;
             box-sizing: border-box;
         }
+body {
+    overflow: hidden;
+    background: #1a1a1a;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    position: fixed; /* Ekle */
+    width: 100vw; /* Ekle */
+}
 
-        body {
-            overflow: hidden;
-            /* Kaydırmayı kaldır */
-            background: #1a1a1a;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-        }
-
-        /* ------------------------------------- */
-        /* ANA YAPI STİLLERİ */
-        /* ------------------------------------- */
-        #main-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+#main-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Ekle */
+}
 
         /* ------------------------------------- */
         /* HEADER (Yeni Kontrol Yapısına Uyarlandı) */
@@ -216,14 +214,14 @@
         /* CANVAS AREA */
         /* ------------------------------------- */
         #canvas-area {
-            position: relative;
-            width: 100%;
-            flex: 1;
-            /* Kalan alanı doldur */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-            order: 3;
-        }
+    position: relative;
+    width: 100%;
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    order: 3;
+    min-height: 0; /* ÖNEMLİ: Flex child'ın küçülmesine izin ver */
+}
 
         #canvas {
             position: absolute;
@@ -914,45 +912,46 @@
     // ----------------------------------------------------
 
     function resizeCanvas() {
-        const headerHeight = 60; // Header'ın SABİT yüksekliği
-        const footerHeight = 150; // Footer'ın SABİT yüksekliği
+    const headerHeight = 60; // Header'ın SABİT yüksekliği
+    const footerHeight = 150; // Footer'ın SABİT yüksekliği
 
-        // Footer'ı sabitlemek için stil ayarla
-        const footer = document.getElementById('info-footer');
-        footer.style.height = footerHeight + 'px';
-        footer.style.minHeight = footerHeight + 'px';
-        footer.style.maxHeight = footerHeight + 'px';
+    // Footer'ı sabitlemek için stil ayarla
+    const footer = document.getElementById('info-footer');
+    footer.style.height = footerHeight + 'px';
+    footer.style.minHeight = footerHeight + 'px';
+    footer.style.maxHeight = footerHeight + 'px';
 
-        // Canvas area için yükseklik hesapla
-        const availableHeight = window.innerHeight - headerHeight - footerHeight;
-        canvasArea.style.height = availableHeight + 'px';
+    // Canvas area yüksekliğini hesapla ve ayarla
+    const availableHeight = window.innerHeight - headerHeight - footerHeight;
+    canvasArea.style.height = availableHeight + 'px';
+    canvasArea.style.maxHeight = availableHeight + 'px';
+    canvasArea.style.minHeight = availableHeight + 'px';
 
-        const rect = canvasArea.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
+    const rect = canvasArea.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 
-        if (leftLineX === 0) {
-            leftLineX = canvas.width * 0.25;
-            rightLineX = canvas.width * 0.75;
-            topLineY = canvas.height * 0.3;
-            bottomLineY = canvas.height * 0.7;
-            rLineX = canvas.width * 0.4;
-            rLineY = canvas.height * 0.8;
-            lLineX = canvas.width * 0.6;
-            lLineY = canvas.height * 0.8;
+    if (leftLineX === 0) {
+        leftLineX = canvas.width * 0.25;
+        rightLineX = canvas.width * 0.75;
+        topLineY = canvas.height * 0.3;
+        bottomLineY = canvas.height * 0.7;
+        rLineX = canvas.width * 0.4;
+        rLineY = canvas.height * 0.8;
+        lLineX = canvas.width * 0.6;
+        lLineY = canvas.height * 0.8;
 
-            updateFrameWidth();
-        }
-
-        if (imageLoaded) {
-            calculateImageScale();
-        }
-
-        updateHandles();
-        draw();
-        calculateMeasurements();
+        updateFrameWidth();
     }
 
+    if (imageLoaded) {
+        calculateImageScale();
+    }
+
+    updateHandles();
+    draw();
+    calculateMeasurements();
+}
     // Sayfa yüklendiğinde
     window.addEventListener('load', resizeCanvas);
 
