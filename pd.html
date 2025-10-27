@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Çizgi Kontrol Paneli</title>
     <style>
         /* CSS Sıfırlama ve Temel Ayarlar */
@@ -12,42 +12,31 @@
             padding: 0;
             box-sizing: border-box;
         }
+body {
+    overflow: hidden;
+    background: #1a1a1a;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    position: fixed; /* Ekle */
+    width: 100vw; /* Ekle */
+}
 
-        html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            overflow: hidden;
-            background: #1a1a1a;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            height: 100dvh;
-            width: 100vw;
-            touch-action: none;
-            /* Body'de zoom engelle */
-        }
-
-        #main-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            /* Ekle */
-        }
+#main-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Ekle */
+}
 
         /* ------------------------------------- */
         /* HEADER (Yeni Kontrol Yapısına Uyarlandı) */
         /* ------------------------------------- */
         #info-header {
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: relative;
             width: 100%;
             height: 60px;
+            /* Sabit yükseklik */
             padding: 8px 15px;
             background: rgba(0, 0, 0, 0.9);
             color: #fff;
@@ -55,8 +44,6 @@
             box-shadow: 0 4px 5px rgba(0, 0, 0, 0.5);
             flex-shrink: 0;
             order: 1;
-            touch-action: none;
-            /* Header'da zoom engelle */
         }
 
         /* ------------------------------------- */
@@ -139,10 +126,10 @@
         /* ------------------------------------- */
         /* FOOTER STİLLERİ */
         /* ------------------------------------- */
+        /* ------------------------------------- */
+        /* FOOTER STİLLERİ */
+        /* ------------------------------------- */
         #info-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
             width: 100%;
             height: 150px;
             background: rgba(0, 0, 0, 0.9);
@@ -154,9 +141,7 @@
             box-shadow: 0 -4px 5px rgba(0, 0, 0, 0.5);
             order: 2;
             padding: 10px 15px;
-            z-index: 1000;
-            touch-action: none;
-            /* Footer'da zoom engelle */
+            /* Padding ekle */
         }
 
         #info-footer>div {
@@ -169,27 +154,25 @@
         }
 
         .distance-graphic {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            position: relative;
-            padding: 0;
-            height: 100%;
-            max-height: 130px;
-            /* Maksimum yükseklik ekle */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    position: relative;
+    padding: 0;
+    height: 100%;
+    max-height: 130px; /* Maksimum yükseklik ekle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .distance-graphic canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            max-height: 130px;
-            /* Canvas için de maksimum yükseklik */
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
+.distance-graphic canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 130px; /* Canvas için de maksimum yükseklik */
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
 
         #info-footer h3 {
             margin-bottom: 8px;
@@ -197,14 +180,13 @@
             font-size: 14px;
         }
 
-        #info-footer>div {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1.5fr;
-            gap: 15px;
-            height: 130px;
-            /* 100% yerine sabit değer */
-            max-height: 130px;
-        }
+        #info-footer > div {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr;
+    gap: 15px;
+    height: 130px; /* 100% yerine sabit değer */
+    max-height: 130px;
+}
 
         #info-footer p {
             margin-top: 0px;
@@ -231,17 +213,14 @@
         /* ------------------------------------- */
         /* CANVAS AREA */
         /* ------------------------------------- */
-       #canvas-area {
-    position: fixed;
-    top: 60px;
-    bottom: 150px;
-    left: 0;
+        #canvas-area {
+    position: relative;
     width: 100%;
+    flex: 1;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow: hidden;
     order: 3;
-    touch-action: pinch-zoom;
-    transform-origin: center center; /* Merkez noktadan zoom */
+    min-height: 0; /* ÖNEMLİ: Flex child'ın küçülmesine izin ver */
 }
 
         #canvas {
@@ -250,10 +229,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            touch-action: pinch-zoom;
-            /* Canvas'ta zoom'a izin ver */
-            transform-origin: 0 0;
-            /* Zoom'un başlangıç noktası */
         }
 
         /* ------------------------------------- */
@@ -937,46 +912,46 @@
     // ----------------------------------------------------
 
     function resizeCanvas() {
-        const headerHeight = 60; // Header'ın SABİT yüksekliği
-        const footerHeight = 150; // Footer'ın SABİT yüksekliği
+    const headerHeight = 60; // Header'ın SABİT yüksekliği
+    const footerHeight = 150; // Footer'ın SABİT yüksekliği
 
-        // Footer'ı sabitlemek için stil ayarla
-        const footer = document.getElementById('info-footer');
-        footer.style.height = footerHeight + 'px';
-        footer.style.minHeight = footerHeight + 'px';
-        footer.style.maxHeight = footerHeight + 'px';
+    // Footer'ı sabitlemek için stil ayarla
+    const footer = document.getElementById('info-footer');
+    footer.style.height = footerHeight + 'px';
+    footer.style.minHeight = footerHeight + 'px';
+    footer.style.maxHeight = footerHeight + 'px';
 
-        // Canvas area yüksekliğini hesapla ve ayarla
-        const availableHeight = window.innerHeight - headerHeight - footerHeight;
-        canvasArea.style.height = availableHeight + 'px';
-        canvasArea.style.maxHeight = availableHeight + 'px';
-        canvasArea.style.minHeight = availableHeight + 'px';
+    // Canvas area yüksekliğini hesapla ve ayarla
+    const availableHeight = window.innerHeight - headerHeight - footerHeight;
+    canvasArea.style.height = availableHeight + 'px';
+    canvasArea.style.maxHeight = availableHeight + 'px';
+    canvasArea.style.minHeight = availableHeight + 'px';
 
-        const rect = canvasArea.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
+    const rect = canvasArea.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 
-        if (leftLineX === 0) {
-            leftLineX = canvas.width * 0.25;
-            rightLineX = canvas.width * 0.75;
-            topLineY = canvas.height * 0.3;
-            bottomLineY = canvas.height * 0.7;
-            rLineX = canvas.width * 0.4;
-            rLineY = canvas.height * 0.8;
-            lLineX = canvas.width * 0.6;
-            lLineY = canvas.height * 0.8;
+    if (leftLineX === 0) {
+        leftLineX = canvas.width * 0.25;
+        rightLineX = canvas.width * 0.75;
+        topLineY = canvas.height * 0.3;
+        bottomLineY = canvas.height * 0.7;
+        rLineX = canvas.width * 0.4;
+        rLineY = canvas.height * 0.8;
+        lLineX = canvas.width * 0.6;
+        lLineY = canvas.height * 0.8;
 
-            updateFrameWidth();
-        }
-
-        if (imageLoaded) {
-            calculateImageScale();
-        }
-
-        updateHandles();
-        draw();
-        calculateMeasurements();
+        updateFrameWidth();
     }
+
+    if (imageLoaded) {
+        calculateImageScale();
+    }
+
+    updateHandles();
+    draw();
+    calculateMeasurements();
+}
     // Sayfa yüklendiğinde
     window.addEventListener('load', resizeCanvas);
 
@@ -1371,183 +1346,6 @@
     // ----------------------------------------------------
     // EVENT LISTENERS
     // ----------------------------------------------------
-
-    // Canvas zoom ve pan değişkenleri
-let areaScale = 1;
-let areaTranslateX = 0;
-let areaTranslateY = 0;
-let isPinching = false;
-let isPanning = false;
-let lastPinchDistance = 0;
-let pinchStartScale = 1;
-let panStartX = 0;
-let panStartY = 0;
-let lastTouchX = 0;
-let lastTouchY = 0;
-
-// Pinch zoom için
-function getPinchDistance(touches) {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-function getPinchCenter(touches) {
-    return {
-        x: (touches[0].clientX + touches[1].clientX) / 2,
-        y: (touches[0].clientY + touches[1].clientY) / 2
-    };
-}
-
-// Canvas-area touch event handlers
-canvasArea.addEventListener('touchstart', function(e) {
-    if (e.touches.length === 2) {
-        // İki parmak - Pinch zoom
-        e.preventDefault();
-        isPinching = true;
-        isPanning = false;
-        lastPinchDistance = getPinchDistance(e.touches);
-        pinchStartScale = areaScale;
-    } else if (e.touches.length === 1 && !dragging) {
-        // Tek parmak - Pan (sadece zoom yapılmışsa)
-        if (areaScale > 1) {
-            e.preventDefault();
-            isPanning = true;
-            panStartX = areaTranslateX;
-            panStartY = areaTranslateY;
-            lastTouchX = e.touches[0].clientX;
-            lastTouchY = e.touches[0].clientY;
-        }
-    }
-}, { passive: false });
-
-canvasArea.addEventListener('touchmove', function(e) {
-    if (isPinching && e.touches.length === 2) {
-        // Pinch zoom
-        e.preventDefault();
-        
-        const currentDistance = getPinchDistance(e.touches);
-        const scaleDelta = currentDistance / lastPinchDistance;
-        
-        // Zoom limitleri (0.5x - 3x arası)
-        const newScale = Math.max(0.5, Math.min(3, pinchStartScale * scaleDelta));
-        
-        if (newScale !== areaScale) {
-            const center = getPinchCenter(e.touches);
-            const rect = canvasArea.getBoundingClientRect();
-            
-            // Zoom merkezini hesapla
-            const centerX = center.x - rect.left;
-            const centerY = center.y - rect.top;
-            
-            // Yeni translate değerlerini hesapla
-            const scaleChange = newScale / areaScale;
-            areaTranslateX = centerX - (centerX - areaTranslateX) * scaleChange;
-            areaTranslateY = centerY - (centerY - areaTranslateY) * scaleChange;
-            
-            areaScale = newScale;
-            
-            // Transform uygula
-            canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
-        }
-    } else if (isPanning && e.touches.length === 1 && !dragging) {
-        // Pan (kaydırma)
-        e.preventDefault();
-        
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
-        
-        const deltaX = currentX - lastTouchX;
-        const deltaY = currentY - lastTouchY;
-        
-        areaTranslateX += deltaX;
-        areaTranslateY += deltaY;
-        
-        lastTouchX = currentX;
-        lastTouchY = currentY;
-        
-        // Transform uygula
-        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
-    }
-}, { passive: false });
-
-canvasArea.addEventListener('touchend', function(e) {
-    if (e.touches.length < 2) {
-        isPinching = false;
-    }
-    if (e.touches.length === 0) {
-        isPanning = false;
-    }
-});
-
-canvasArea.addEventListener('touchcancel', function(e) {
-    isPinching = false;
-    isPanning = false;
-});
-
-// Çift tıklama ile zoom reset
-canvasArea.addEventListener('dblclick', function(e) {
-    areaScale = 1;
-    areaTranslateX = 0;
-    areaTranslateY = 0;
-    canvasArea.style.transform = 'none';
-});
-
-// Mouse desteği (desktop için)
-let isMousePanning = false;
-let mouseStartX = 0;
-let mouseStartY = 0;
-
-canvasArea.addEventListener('mousedown', function(e) {
-    if (areaScale > 1 && !dragging && e.button === 0) {
-        isMousePanning = true;
-        mouseStartX = e.clientX;
-        mouseStartY = e.clientY;
-        panStartX = areaTranslateX;
-        panStartY = areaTranslateY;
-        e.preventDefault();
-    }
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (isMousePanning) {
-        const deltaX = e.clientX - mouseStartX;
-        const deltaY = e.clientY - mouseStartY;
-        
-        areaTranslateX = panStartX + deltaX;
-        areaTranslateY = panStartY + deltaY;
-        
-        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
-    }
-});
-
-document.addEventListener('mouseup', function(e) {
-    isMousePanning = false;
-});
-
-// Mouse wheel zoom (desktop için - opsiyonel)
-canvasArea.addEventListener('wheel', function(e) {
-    e.preventDefault();
-    
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.max(0.5, Math.min(3, areaScale * delta));
-    
-    if (newScale !== areaScale) {
-        const rect = canvasArea.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        
-        const scaleChange = newScale / areaScale;
-        areaTranslateX = mouseX - (mouseX - areaTranslateX) * scaleChange;
-        areaTranslateY = mouseY - (mouseY - areaTranslateY) * scaleChange;
-        
-        areaScale = newScale;
-        
-        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
-    }
-}, { passive: false });
-
-
 
     leftHandle.addEventListener('mousedown', (e) => startDrag('left', e));
     leftHandle.addEventListener('touchstart', (e) => startDrag('left', e));
