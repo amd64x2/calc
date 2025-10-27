@@ -1372,13 +1372,18 @@
     // EVENT LISTENERS
     // ----------------------------------------------------
 
-    // Canvas zoom değişkenleri
+    // Canvas zoom ve pan değişkenleri
 let areaScale = 1;
 let areaTranslateX = 0;
 let areaTranslateY = 0;
 let isPinching = false;
+let isPanning = false;
 let lastPinchDistance = 0;
 let pinchStartScale = 1;
+let panStartX = 0;
+let panStartY = 0;
+let lastTouchX = 0;
+let lastTouchY = 0;
 
 // Pinch zoom için
 function getPinchDistance(touches) {
@@ -1397,15 +1402,28 @@ function getPinchCenter(touches) {
 // Canvas-area touch event handlers
 canvasArea.addEventListener('touchstart', function(e) {
     if (e.touches.length === 2) {
+        // İki parmak - Pinch zoom
         e.preventDefault();
         isPinching = true;
+        isPanning = false;
         lastPinchDistance = getPinchDistance(e.touches);
         pinchStartScale = areaScale;
+    } else if (e.touches.length === 1 && !dragging) {
+        // Tek parmak - Pan (sadece zoom yapılmışsa)
+        if (areaScale > 1) {
+            e.preventDefault();
+            isPanning = true;
+            panStartX = areaTranslateX;
+            panStartY = areaTranslateY;
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+        }
     }
 }, { passive: false });
 
 canvasArea.addEventListener('touchmove', function(e) {
     if (isPinching && e.touches.length === 2) {
+        // Pinch zoom
         e.preventDefault();
         
         const currentDistance = getPinchDistance(e.touches);
@@ -1418,7 +1436,7 @@ canvasArea.addEventListener('touchmove', function(e) {
             const center = getPinchCenter(e.touches);
             const rect = canvasArea.getBoundingClientRect();
             
-            // Zoom merkezini hesapla (canvas-area'ya göre)
+            // Zoom merkezini hesapla
             const centerX = center.x - rect.left;
             const centerY = center.y - rect.top;
             
@@ -1429,9 +1447,27 @@ canvasArea.addEventListener('touchmove', function(e) {
             
             areaScale = newScale;
             
-            // Tüm canvas-area'yı dönüştür
+            // Transform uygula
             canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
         }
+    } else if (isPanning && e.touches.length === 1 && !dragging) {
+        // Pan (kaydırma)
+        e.preventDefault();
+        
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        
+        const deltaX = currentX - lastTouchX;
+        const deltaY = currentY - lastTouchY;
+        
+        areaTranslateX += deltaX;
+        areaTranslateY += deltaY;
+        
+        lastTouchX = currentX;
+        lastTouchY = currentY;
+        
+        // Transform uygula
+        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
     }
 }, { passive: false });
 
@@ -1439,6 +1475,14 @@ canvasArea.addEventListener('touchend', function(e) {
     if (e.touches.length < 2) {
         isPinching = false;
     }
+    if (e.touches.length === 0) {
+        isPanning = false;
+    }
+});
+
+canvasArea.addEventListener('touchcancel', function(e) {
+    isPinching = false;
+    isPanning = false;
 });
 
 // Çift tıklama ile zoom reset
@@ -1449,6 +1493,59 @@ canvasArea.addEventListener('dblclick', function(e) {
     canvasArea.style.transform = 'none';
 });
 
+// Mouse desteği (desktop için)
+let isMousePanning = false;
+let mouseStartX = 0;
+let mouseStartY = 0;
+
+canvasArea.addEventListener('mousedown', function(e) {
+    if (areaScale > 1 && !dragging && e.button === 0) {
+        isMousePanning = true;
+        mouseStartX = e.clientX;
+        mouseStartY = e.clientY;
+        panStartX = areaTranslateX;
+        panStartY = areaTranslateY;
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (isMousePanning) {
+        const deltaX = e.clientX - mouseStartX;
+        const deltaY = e.clientY - mouseStartY;
+        
+        areaTranslateX = panStartX + deltaX;
+        areaTranslateY = panStartY + deltaY;
+        
+        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
+    }
+});
+
+document.addEventListener('mouseup', function(e) {
+    isMousePanning = false;
+});
+
+// Mouse wheel zoom (desktop için - opsiyonel)
+canvasArea.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.max(0.5, Math.min(3, areaScale * delta));
+    
+    if (newScale !== areaScale) {
+        const rect = canvasArea.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        const scaleChange = newScale / areaScale;
+        areaTranslateX = mouseX - (mouseX - areaTranslateX) * scaleChange;
+        areaTranslateY = mouseY - (mouseY - areaTranslateY) * scaleChange;
+        
+        areaScale = newScale;
+        
+        canvasArea.style.transform = `translate(${areaTranslateX}px, ${areaTranslateY}px) scale(${areaScale})`;
+    }
+}, { passive: false });
 
 
 
