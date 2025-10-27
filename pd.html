@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Çizgi Kontrol Paneli</title>
     <style>
-        /* CSS Sıfırlama ve Temel Ayarlar */
         * {
             margin: 0;
             padding: 0;
@@ -15,15 +13,12 @@
 
         body {
             overflow: hidden;
-            /* Kaydırmayı kaldır */
             background: #1a1a1a;
             font-family: Arial, sans-serif;
             height: 100vh;
+            width: 100vw;
         }
 
-        /* ------------------------------------- */
-        /* ANA YAPI STİLLERİ */
-        /* ------------------------------------- */
         #main-container {
             width: 100vw;
             height: 100vh;
@@ -31,15 +26,12 @@
             flex-direction: column;
         }
 
-        /* ------------------------------------- */
-        /* HEADER (Yeni Kontrol Yapısına Uyarlandı) */
-        /* ------------------------------------- */
+        /* HEADER - Responsive yükseklik */
         #info-header {
             position: relative;
             width: 100%;
-            height: 60px;
-            /* Sabit yükseklik */
-            padding: 8px 15px;
+            height: clamp(50px, 8vh, 80px);
+            padding: clamp(4px, 1vh, 12px) clamp(8px, 2vw, 20px);
             background: rgba(0, 0, 0, 0.9);
             color: #fff;
             z-index: 1000;
@@ -47,14 +39,10 @@
             flex-shrink: 0;
         }
 
-        /* ------------------------------------- */
-        /* HEADER İÇİ KONTROL GRUPLARI */
-        /* ------------------------------------- */
         .controls-wrapper {
             display: flex;
-            flex-wrap: nowrap;
-            /* Tek satır */
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: clamp(8px, 1.5vw, 15px);
             justify-content: flex-start;
             align-items: center;
             height: 100%;
@@ -65,43 +53,37 @@
             align-items: center;
         }
 
-        .input-group.full-width {
-            width: auto;
-            margin: 0;
-            padding: 0;
-            border: none;
-        }
-
         .input-label {
-            min-width: 60px;
+            min-width: clamp(40px, 8vw, 60px);
             font-weight: normal;
-            margin-right: 5px;
-            font-size: 12px;
+            margin-right: clamp(3px, 0.5vw, 5px);
+            font-size: clamp(10px, 1.5vw, 12px);
             color: #ccc;
+            white-space: nowrap;
         }
 
         .value-control {
             display: flex;
             align-items: center;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2px 5px;
+            border-radius: clamp(15px, 3vw, 20px);
+            padding: clamp(1px, 0.3vh, 2px) clamp(3px, 0.8vw, 5px);
         }
 
         .value-btn {
-            width: 22px;
-            height: 22px;
+            width: clamp(18px, 3vw, 22px);
+            height: clamp(18px, 3vw, 22px);
             border: none;
             border-radius: 50%;
             background: #667eea;
             color: white;
-            font-size: 14px;
+            font-size: clamp(12px, 2vw, 14px);
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 3px;
+            margin: 0 clamp(2px, 0.5vw, 3px);
             transition: background 0.1s;
         }
 
@@ -110,30 +92,28 @@
         }
 
         .value-display {
-            min-width: 30px;
+            min-width: clamp(25px, 4vw, 30px);
             text-align: center;
             font-weight: bold;
-            margin: 0 5px;
-            font-size: 14px;
+            margin: 0 clamp(3px, 0.8vw, 5px);
+            font-size: clamp(12px, 2vw, 14px);
         }
 
         #frameWidth {
-            font-size: 14px;
+            font-size: clamp(12px, 2vw, 14px);
             font-weight: bold;
             color: #44ff44;
-            margin-left: 5px;
+            margin-left: clamp(3px, 0.8vw, 5px);
         }
 
-        /* ------------------------------------- */
-        /* CANVAS AREA */
-        /* ------------------------------------- */
+        /* CANVAS AREA - Responsive */
         #canvas-area {
             position: relative;
             width: 100%;
             flex: 1;
-            /* Kalan alanı doldur */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             overflow: hidden;
+            min-height: 0;
         }
 
         #canvas {
@@ -144,22 +124,20 @@
             height: 100%;
         }
 
-        /* ------------------------------------- */
-        /* TUTACAKLAR (HANDLE'lar) */
-        /* ------------------------------------- */
+        /* HANDLES - Responsive boyutlar */
         .vertical-handle,
         .horizontal-handle,
         .new-vertical-handle {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: clamp(35px, 6vw, 50px);
+            height: clamp(35px, 6vw, 50px);
             border-radius: 50%;
             cursor: grab;
             touch-action: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: clamp(18px, 3vw, 24px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: transform 0.1s;
             z-index: 20;
@@ -185,34 +163,34 @@
 
         #leftHandle {
             background: #ff4444;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
         }
 
         #rightHandle {
             background: #4444ff;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
         }
 
         #topHandle {
             background: #44ff44;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
         }
 
         #bottomHandle {
             background: #ffaa44;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
         }
 
         #rHandle {
             background: #ff66aa;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
             font-weight: bold;
             color: white;
         }
 
         #lHandle {
             background: #66aaff;
-            border: 4px solid #fff;
+            border: clamp(2px, 0.5vw, 4px) solid #fff;
             font-weight: bold;
             color: white;
         }
@@ -221,16 +199,14 @@
             margin-left: auto;
         }
 
-        /* ------------------------------------- */
-        /* BUTONLAR (Header'da) */
-        /* ------------------------------------- */
+        /* BUTTONS - Responsive */
         .header-button {
-            padding: 6px 15px;
-            font-size: 12px;
+            padding: clamp(4px, 0.8vh, 6px) clamp(10px, 2vw, 15px);
+            font-size: clamp(10px, 1.5vw, 12px);
             font-weight: bold;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: clamp(15px, 3vw, 20px);
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.2s ease;
@@ -254,31 +230,62 @@
             transform: translateY(0);
         }
 
-        /* ------------------------------------- */
-        /* FOOTER STİLLERİ */
-        /* ------------------------------------- */
+        /* FOOTER - Responsive yükseklik ve içerik */
         #info-footer {
             width: 100%;
-            height: 150px;
-
+            height: clamp(120px, 20vh, 180px);
             background: rgba(0, 0, 0, 0.9);
             color: #fff;
-            font-size: 12px;
+            font-size: clamp(10px, 1.5vw, 12px);
             line-height: 1.4;
             overflow: hidden;
             flex-shrink: 0;
             box-shadow: 0 -4px 5px rgba(0, 0, 0, 0.5);
+            padding: clamp(5px, 1vh, 10px);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: minmax(100px, 0.8fr) minmax(100px, 1.6fr) minmax(180px, 1.6fr);
+            gap: clamp(8px, 2vw, 15px);
+            height: 100%;
+        }
+
+        /* Mobil için tek kolon */
+        @media (max-width: 640px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: clamp(5px, 1vh, 10px);
+            }
+
+            .controls-wrapper {
+                gap: clamp(5px, 1vw, 10px);
+            }
+
+            .input-group.frame-display-group {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Tablet için 2 kolon */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         .distance-graphic {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            border-radius: clamp(3px, 0.5vw, 4px);
             position: relative;
             padding: 0;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 0;
         }
 
         .distance-graphic canvas {
@@ -286,45 +293,38 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
+            border-radius: clamp(3px, 0.5vw, 4px);
         }
 
-        #info-footer h3 {
-            margin-bottom: 8px;
-            color: #667eea;
-            font-size: 14px;
+        .metrics-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(2px, 0.5vh, 4px);
+            font-size: clamp(10px, 1.5vw, 12px);
+            padding: clamp(3px, 0.8vh, 5px);
         }
 
-        #info-footer>div {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0px;
+        .metric-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: clamp(5px, 1vw, 8px);
         }
 
-        #info-footer p {
-            margin-top: 0px;
-            font-size: 10px;
-            opacity: 0.6;
+        .metric-row strong {
+            min-width: clamp(50px, 10vw, 65px);
+            flex-shrink: 0;
         }
 
-        /* Kullanıcı adı input ve kaydet butonu kaldırıldı */
-        #save-area {
-            display: none;
+        .metric-row span {
+            white-space: nowrap;
         }
 
-        #action-area {
-            display: none;
-        }
-
-
-
-
-
-        .distance-value {
-            text-align: center;
-            margin-top: 0px;
-            font-size: 13px;
-            font-weight: bold;
+        .metric-total {
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: clamp(2px, 0.5vh, 4px);
+            margin-top: clamp(2px, 0.5vh, 4px);
         }
     </style>
 </head>
@@ -376,43 +376,38 @@
             <div id="lHandle" class="new-vertical-handle">L</div>
         </div>
 
-        <!-- Kamera Input (gizli) -->
         <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
 
         <div id="info-footer">
-            <div style="display: grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 15px; height: 100%;">
+            <div class="footer-grid">
 
-
-                <div style="display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #44ff44; min-width: 70px;">Genişlik:</strong>
+                <div class="metrics-column">
+                    <div class="metric-row">
+                        <strong style="color: #44ff44;">Genişlik:</strong>
                         <span id="width-result">0,00 mm</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #ffaa44; min-width: 70px;">Yükseklik:</strong>
+                    <div class="metric-row">
+                        <strong style="color: #ffaa44;">Yükseklik:</strong>
                         <span id="height-result">0,00 mm</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #ff66aa; min-width: 70px;">Sağ PD:</strong>
+                    <div class="metric-row">
+                        <strong style="color: #ff66aa;">Sağ PD:</strong>
                         <span id="right-pd-result">0,00 mm</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #66aaff; min-width: 70px;">Sol PD:</strong>
+                    <div class="metric-row">
+                        <strong style="color: #66aaff;">Sol PD:</strong>
                         <span id="left-pd-result">0,00 mm</span>
                     </div>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 4px; margin-top: 4px;">
-                        <strong style="color: #fff; min-width: 70px;">Toplam PD:</strong>
+                    <div class="metric-row metric-total">
+                        <strong style="color: #fff;">Toplam PD:</strong>
                         <span id="total-pd-result">0,00 mm</span>
                     </div>
                 </div>
 
-                <!-- Orta: R Tutamacı Grafiği -->
                 <div class="distance-graphic">
                     <canvas id="r-graphic-canvas"></canvas>
                 </div>
 
-                <!-- Sağ: L Tutamacı Grafiği -->
                 <div class="distance-graphic">
                     <canvas id="l-graphic-canvas"></canvas>
                 </div>
@@ -421,6 +416,8 @@
         </div>
 
     </div>
+
+
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
