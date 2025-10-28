@@ -12,34 +12,40 @@
             padding: 0;
             box-sizing: border-box;
         }
-body {
-    overflow: hidden;
-    background: #1a1a1a;
-    font-family: Arial, sans-serif;
-    height: 100vh;
-    position: fixed; /* Ekle */
-    width: 100vw; /* Ekle */
-}
 
-/* 4. Main container'ı temizle */
-#main-container {
-    /* flex yapısını kaldır, sadece container olarak kalsın */
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-}
+        body {
+            overflow: hidden;
+            background: #1a1a1a;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            position: fixed;
+            /* Ekle */
+            width: 100vw;
+            /* Ekle */
+        }
+
+        /* 4. Main container'ı temizle */
+        #main-container {
+            /* flex yapısını kaldır, sadece container olarak kalsın */
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
 
         /* ------------------------------------- */
         /* HEADER (Yeni Kontrol Yapısına Uyarlandı) */
         /* ------------------------------------- */
-   /* 2. Header'ı üste yapıştır */
-#info-header {
-    position: fixed;  /* relative yerine */
-    top: 0;
-    left: 0;
-    z-index: 100;  /* Canvas'ın üstünde */
-    background: rgba(0, 0, 0, 0.7);  /* %70 opak */
-}
+        /* 2. Header'ı üste yapıştır */
+        #info-header {
+            position: fixed;
+            /* relative yerine */
+            top: 0;
+            left: 0;
+            z-index: 100;
+            /* Canvas'ın üstünde */
+            background: rgba(0, 0, 0, 0.7);
+            /* %70 opak */
+        }
 
         /* ------------------------------------- */
         /* HEADER İÇİ KONTROL GRUPLARI */
@@ -121,44 +127,47 @@ body {
         /* ------------------------------------- */
         /* FOOTER STİLLERİ */
         /* ------------------------------------- */
-/* 3. Footer'ı alta yapıştır */
-#info-footer {
-    position: fixed;  /* değişti */
-    bottom: 0;
-    left: 0;
-    z-index: 100;  /* Canvas'ın üstünde */
-    background: rgba(0, 0, 0, 0.7);  /* %70 opak */
-}
+        /* 3. Footer'ı alta yapıştır */
+        #info-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            /* ← BU ÖNEMLİ */
+        }
 
-        #info-footer>div {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr 1.5fr;
-            gap: 15px;
-            height: 100%;
-            max-height: 130px;
-            /* İçerik için maksimum yükseklik */
+        /* Footer içindeki tıklanabilir şeyler için */
+        #info-footer>div,
+        #info-footer canvas,
+        #info-footer * {
+            pointer-events: auto;
+            /* ← İçerik tıklanabilir */
         }
 
         .distance-graphic {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    position: relative;
-    padding: 0;
-    height: 100%;
-    max-height: 130px; /* Maksimum yükseklik ekle */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            position: relative;
+            padding: 0;
+            height: 100%;
+            max-height: 130px;
+            /* Maksimum yükseklik ekle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.distance-graphic canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-height: 130px; /* Canvas için de maksimum yükseklik */
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-}
+        .distance-graphic canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            max-height: 130px;
+            /* Canvas için de maksimum yükseklik */
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
 
         #info-footer h3 {
             margin-bottom: 8px;
@@ -166,13 +175,14 @@ body {
             font-size: 14px;
         }
 
-        #info-footer > div {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr 1.5fr;
-    gap: 15px;
-    height: 130px; /* 100% yerine sabit değer */
-    max-height: 130px;
-}
+        #info-footer>div {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.5fr;
+            gap: 15px;
+            height: 130px;
+            /* 100% yerine sabit değer */
+            max-height: 130px;
+        }
 
         #info-footer p {
             margin-top: 0px;
@@ -199,15 +209,17 @@ body {
         /* ------------------------------------- */
         /* CANVAS AREA */
         /* ------------------------------------- */
-/* 1. Canvas'ı full ekran yap */
-#canvas-area {
-    position: fixed;  /* relative yerine */
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1;  /* En altta */
-}
+        /* 1. Canvas'ı full ekran yap */
+        #canvas-area {
+            position: fixed;
+            /* relative yerine */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            /* En altta */
+        }
 
         #canvas {
             position: absolute;
@@ -898,72 +910,90 @@ body {
     // ----------------------------------------------------
 
     function resizeCanvas() {
-    const headerHeight = 60; // Header'ın SABİT yüksekliği
-    const footerHeight = 150; // Footer'ın SABİT yüksekliği
+        const headerHeight = 60; // Header'ın SABİT yüksekliği
+        const footerHeight = 150; // Footer'ın SABİT yüksekliği
 
-    // Footer'ı sabitlemek için stil ayarla
-    const footer = document.getElementById('info-footer');
-    footer.style.height = footerHeight + 'px';
-    footer.style.minHeight = footerHeight + 'px';
-    footer.style.maxHeight = footerHeight + 'px';
+        // Footer'ı sabitlemek için stil ayarla
+        const footer = document.getElementById('info-footer');
+        footer.style.height = footerHeight + 'px';
+        footer.style.minHeight = footerHeight + 'px';
+        footer.style.maxHeight = footerHeight + 'px';
 
-    // Canvas area yüksekliğini hesapla ve ayarla
-    const availableHeight = window.innerHeight - headerHeight - footerHeight;
-    canvasArea.style.height = availableHeight + 'px';
-    canvasArea.style.maxHeight = availableHeight + 'px';
-    canvasArea.style.minHeight = availableHeight + 'px';
+        // Canvas area yüksekliğini hesapla ve ayarla
 
-    const rect = canvasArea.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+        //const availableHeight = window.innerHeight - headerHeight - footerHeight;
+        //canvasArea.style.height = availableHeight + 'px';
+        canvasArea.style.height = window.innerHeight + 'px'; // info ve footer ı çıkarma
 
-    if (leftLineX === 0) {
-        leftLineX = canvas.width * 0.25;
-        rightLineX = canvas.width * 0.75;
-        topLineY = canvas.height * 0.3;
-        bottomLineY = canvas.height * 0.7;
-        rLineX = canvas.width * 0.4;
-        rLineY = canvas.height * 0.8;
-        lLineX = canvas.width * 0.6;
-        lLineY = canvas.height * 0.8;
+        canvasArea.style.maxHeight = window.innerHeight + 'px';
+        canvasArea.style.minHeight = window.innerHeight + 'px';
 
-        updateFrameWidth();
+        const rect = canvasArea.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        // YENİ HAL - Merkeze yakın ve footer'dan uzak:
+        if (leftLineX === 0) {
+            leftLineX = canvas.width * 0.25;
+            rightLineX = canvas.width * 0.75;
+
+            // Header (60px) ve Footer (150px) arasında ortalanmış
+            const usableTop = 60 + 50;           // Header + biraz boşluk
+            const usableBottom = canvas.height - 150 - 50;  // Footer'dan önce
+            const usableHeight = usableBottom - usableTop;
+
+            topLineY = usableTop + (usableHeight * 0.2);     // Üstte %20
+            bottomLineY = usableTop + (usableHeight * 0.6);   // Üstten %60
+
+            rLineX = canvas.width * 0.4;
+            rLineY = usableTop + (usableHeight * 0.7);       // Footer'dan uzak
+            lLineX = canvas.width * 0.6;
+            lLineY = usableTop + (usableHeight * 0.7);       // Footer'dan uzak
+
+            updateFrameWidth();
+        }
+
+        if (imageLoaded) {
+            calculateImageScale();
+        }
+
+        updateHandles();
+        draw();
+        calculateMeasurements();
     }
 
-    if (imageLoaded) {
-        calculateImageScale();
-    }
 
-    updateHandles();
-    draw();
-    calculateMeasurements();
-}
     // Sayfa yüklendiğinde
     window.addEventListener('load', resizeCanvas);
 
     window.addEventListener('resize', resizeCanvas);
 
     function updateHandles() {
-        const canvasActualHeight = canvas.height;
-        const canvasActualWidth = canvas.width;
-
-        const verticalHandleTopY = canvasActualHeight - HANDLE_SIZE - OFFSET;
-        leftHandle.style.left = leftLineX + 'px';
-        rightHandle.style.left = rightLineX + 'px';
-        leftHandle.style.top = verticalHandleTopY + 'px';
-        rightHandle.style.top = verticalHandleTopY + 'px';
-
-        const horizontalHandleLeftX = canvasActualWidth - HANDLE_SIZE - OFFSET;
-        topHandle.style.top = topLineY + 'px';
-        bottomHandle.style.top = bottomLineY + 'px';
-        topHandle.style.left = horizontalHandleLeftX + 'px';
-        bottomHandle.style.left = horizontalHandleLeftX + 'px';
-
-        rHandle.style.left = rLineX + 'px';
-        rHandle.style.top = rLineY + 'px';
-        lHandle.style.left = lLineX + 'px';
-        lHandle.style.top = lLineY + 'px';
-    }
+    const canvasActualHeight = canvas.height;
+    const canvasActualWidth = canvas.width;
+    
+    // ESKİ: const verticalHandleTopY = canvasActualHeight - HANDLE_SIZE - OFFSET;
+    // YENİ: Footer yüksekliğini hesaba kat (150px)
+    const footerHeight = 150;
+    const verticalHandleTopY = canvasActualHeight - footerHeight - HANDLE_SIZE - OFFSET - 20; // 20px ekstra boşluk
+    
+    leftHandle.style.left = leftLineX + 'px';
+    rightHandle.style.left = rightLineX + 'px';
+    leftHandle.style.top = verticalHandleTopY + 'px';
+    rightHandle.style.top = verticalHandleTopY + 'px';
+    
+    const horizontalHandleLeftX = canvasActualWidth - HANDLE_SIZE - OFFSET;
+    topHandle.style.top = topLineY + 'px';
+    bottomHandle.style.top = bottomLineY + 'px';
+    topHandle.style.left = horizontalHandleLeftX + 'px';
+    bottomHandle.style.left = horizontalHandleLeftX + 'px';
+    
+    rHandle.style.left = rLineX + 'px';
+    rHandle.style.top = rLineY + 'px';
+    
+    lHandle.style.left = lLineX + 'px';
+    lHandle.style.top = lLineY + 'px';
+}
 
 
     // ----------------------------------------------------
