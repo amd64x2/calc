@@ -32,24 +32,27 @@
         /* HEADER */
         /* ------------------------------------- */
         #info-header {
-            width: 100%;
-            position: fixed;
-            height: 60px;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-        }
+    width: 100%;
+    position: fixed;
+    height: 60px;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.7);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
 
-        .controls-wrapper {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 15px;
-            justify-content: flex-start;
-            align-items: center;
-            height: 100%;
-            padding: 0 15px;
-        }
+.controls-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    padding: 0 15px;
+    min-width: max-content;
+}
 
         .input-group {
             display: flex;
@@ -119,15 +122,50 @@
         /* FOOTER */
         /* ------------------------------------- */
         #info-footer {
-            width: 100%;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            z-index: 100;
-            background: rgba(0, 0, 0,0.7);
-            pointer-events: none;
-            padding: 10px 15px;
-        }
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0,0.7);
+    pointer-events: none;
+    padding: 10px 15px;
+    transition: transform 0.3s ease;
+}
+
+#info-footer.collapsed {
+    transform: translateY(calc(100% - 50px));
+}
+
+#footer-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: rgba(102, 126, 234, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    z-index: 101;
+    transition: transform 0.3s ease, background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#footer-toggle:hover {
+    background: rgba(118, 75, 162, 0.9);
+    transform: scale(1.1);
+}
+
+#footer-toggle:active {
+    transform: scale(0.95);
+}
 
         #info-footer>div,
         #info-footer canvas,
@@ -582,6 +620,7 @@
             </div>
 
             <div id="info-footer">
+                <button id="footer-toggle" title="Footer Aç/Kapa">▼</button>
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%;">
 
@@ -766,6 +805,7 @@
     let solCerceveMerkezY = 0;
     let sagCerceveMerkezX = 0;
     let sagCerceveMerkezY = 0;
+    let footerCollapsed = false;
 
     // CAM DEĞİŞKENLERİ
     let camEnabled = false;
@@ -2552,6 +2592,24 @@
         link.click();
 
         alert(`✓ ${patientName} için ölçüm kaydedildi!`);
+    });
+
+    // Footer toggle butonu
+    document.getElementById('footer-toggle').addEventListener('click', function() {
+        const footer = document.getElementById('info-footer');
+        const toggleBtn = document.getElementById('footer-toggle');
+        
+        footerCollapsed = !footerCollapsed;
+        
+        if (footerCollapsed) {
+            footer.classList.add('collapsed');
+            toggleBtn.textContent = '▲';
+            toggleBtn.title = 'Footer Aç';
+        } else {
+            footer.classList.remove('collapsed');
+            toggleBtn.textContent = '▼';
+            toggleBtn.title = 'Footer Kapa';
+        }
     });
 
     resizeCanvas();
